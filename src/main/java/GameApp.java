@@ -32,6 +32,6 @@ public abstract class GameApp {
     protected abstract void loop();
 
     protected void tick(float dt) {
-//        activeWorld.tick(dt);
+        activeWorld.tick(dt);
     }
 }

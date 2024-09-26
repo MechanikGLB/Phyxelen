@@ -55,9 +55,10 @@ public class World {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
+        world.startup();
         return world;
     }
+
 
     public static World loadWorldByPath(String path) {
         File config = new File("worlds" + File.separator + path + File.separator + "world.conf");
@@ -66,6 +67,7 @@ public class World {
 
         World world = new World();
         /*TEMP*/ world.defaultSubworldId = "default";
+        world.startup();
         return world;
     }
 
@@ -75,4 +77,21 @@ public class World {
         subworlds.put(subworldId, subworld);
         return subworld;
     };
+
+
+    private void startup() {
+        loadContent();
+    }
+
+
+    private void loadContent() {
+        //temp
+        pixelIds = new PixelDefinition[2];
+        pixelIds[0] = new PixelDefinition();
+        pixelIds[0].colors = new ColorWithAplha[1];
+        pixelIds[0].colors[0] = new ColorWithAplha(0.2f, 0.1f, 0.0f, 1f);
+        pixelIds[1] = new PixelDefinition();
+        pixelIds[1].colors = new ColorWithAplha[1];
+        pixelIds[1].colors[0] = new ColorWithAplha(1.0f, 0.5f, 0.0f, 1f);
+    }
 }
