@@ -11,7 +11,10 @@ import java.util.Objects;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.*;
+//import static org.lwjgl.opengl.GL11.*;
+//import static org.lwjgl.opengl.GL
+import static org.lwjgl.opengl.GL20.*;
+
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
@@ -149,52 +152,71 @@ public class Client extends GameApp {
         //Move to center of the screen
 //            glTranslatef( screenWidth / 2.f, screenHeight / 2.f, 0.f );
 
-        glBegin( GL_QUADS );
+//        glBegin( GL_TRIANGLES );
 //        glDisableClientState(GL_COLOR_ARRAY);
 //        glDisableClientState(GL_NORMAL_ARRAY);
 //        glDisableClientState(GL_INDEX_ARRAY);
-
-        glEnableClientState(GL_VERTEX_ARRAY);
+//        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+//        glDisableClientState(GL_EDGE_FLAG_ARRAY);
+//        GL20.glEnableVertexAttribArray(0);
         int totalCount = activeSubworld.loadedChunks.entrySet().size() * Chunk.area();
-        FloatBuffer coordinates = FloatBuffer.allocate(8);
+//        FloatBuffer coordinates = FloatBuffer.allocate(8);
+        float[] coordinateArray = {0f,0f, 0f,1f, 1f,1f};
+        FloatBuffer coordinateBuffer = FloatBuffer.allocate(coordinateArray.length);
+        coordinateBuffer.put(coordinateArray);
+        glEnableClientState(GL_VERTEX_ARRAY);
+
+        int vertexBuffer = glGenBuffers();
+//        System.out.println(vertexBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+        glBufferData(GL_ARRAY_BUFFER, coordinateArray, GL_STATIC_DRAW);
+
+        glVertexPointer(2, GL_FLOAT, 0, 0);
+//        glVertexAttribPointer();
+
+//        IntBuffer indexBuffer = IntBuffer.allocate(3);
+//        int[] indexArray = {0,1,2};
+//        indexBuffer.put(indexArray);
+//        int elementBuffer = glGenBuffers();
+//        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+//        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexArray, GL_STATIC_DRAW);
 //        FloatBuffer coordinates = FloatBuffer.allocate(totalCount * 8);
 
 
-        for (Map.Entry<VectorI, Chunk> entry : activeSubworld.loadedChunks.entrySet()) {
-            int baseX = entry.getKey().x * Chunk.size();
-            int baseY = entry.getKey().y * Chunk.size();
-            int i = 0;
-            for (int pixel : entry.getValue().pixels) {
-                PixelDefinition pixelDefinition = activeWorld.pixelIds[pixel];
-                drawPixel(baseX + i % Chunk.size(),
-                        baseY + i / Chunk.size(), i,
-                        pixelDefinition, coordinates);
-                i++;
-            }
-        }
-//        PixelDefinition pixelDefinition = activeWorld.pixelIds[1];
-//        glColor3f(pixelDefinition.colors[0].r,
-//                pixelDefinition.colors[0].g,
-//                pixelDefinition.colors[0].b);
-//        coordinates.put(0); coordinates.put(0);
-//        coordinates.put(1); coordinates.put(0);
+//        for (Map.Entry<VectorI, Chunk> entry : activeSubworld.loadedChunks.entrySet()) {
+//            int baseX = entry.getKey().x * Chunk.size();
+//            int baseY = entry.getKey().y * Chunk.size();
+//            int i = 0;
+//            for (int pixel : entry.getValue().pixels) {
+//                PixelDefinition pixelDefinition = activeWorld.pixelIds[pixel];
+//                drawPixel(baseX + i % Chunk.size(),
+//                        baseY + i / Chunk.size(), i,
+//                        pixelDefinition, coordinates);
+//                i++;
+//            }
+//        }
+        PixelDefinition pixelDefinition = activeWorld.pixelIds[1];
+        glColor3f(pixelDefinition.colors[0].r,
+                pixelDefinition.colors[0].g,
+                pixelDefinition.colors[0].b);
+
 //        coordinates.put(0); coordinates.put(1);
 //        System.out.printf("%d  %d\n", totalCount * 8, coordinates.array().length);
 
 //        glDrawArrays(GL_TRIANGLES, 0, totalCount * 6);
-//        System.out.println(Arrays.toString(coordinates.array()));
-//        try {
-//        glVertexPointer(2, GL_FLOAT, 0, coordinates.position());
 
-//        glGetPointer()
-//        glDrawArrays(GL_POINTS, 0, 3);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+//        glDrawBuffer(vertexBuffer);
+//        glDrawElements(GL_TRIANGLES, indexes);
 //        } catch (Exception e) {
 //            System.out.println(glGetError());
 //        }
 
-        glEnd();
-//        glDisableClientState(GL_VERTEX_ARRAY);
+//        glEnd();
+        glDeleteBuffers(vertexBuffer); // TODO: doesn't work
+        glDisableClientState(GL_VERTEX_ARRAY);
 
+//        glDeleteBuffers(elementBuffer);
         glfwSwapBuffers(window); // swap the color buffers
     }
 
@@ -210,7 +232,7 @@ public class Client extends GameApp {
 //        System.out.printf("(%d; %d)\n", x, y);
 //        System.out.printf("(%f;%f)\n", drawX, drawY);
 
-        if (drawX < -1 || drawX > 1 || drawY < -1 || drawY > 1 ) return;
+        if (drawX < -1.02 || drawX > 1 || drawY < -1.02 || drawY > 1 ) return;
         glVertex2f( drawX, drawY );
         glVertex2f( drawX + relativePixelWidth, drawY );
         glVertex2f( drawX + relativePixelWidth, drawY + relativePixelHeight);
