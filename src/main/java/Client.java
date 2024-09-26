@@ -28,6 +28,11 @@ public class Client extends GameApp {
     private short viewScale = 16;
     private float relativePixelWidth = 0.01f;
     private float relativePixelHeight = 0.01f;
+    // Render buffers
+    float[] vertexArray;
+    float[] colorArray;
+    private int vertexBuffer;
+    private int colorBuffer;
 
 
     @Override
@@ -59,7 +64,7 @@ public class Client extends GameApp {
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // the window will be resizable
 
         // Create the window
-        window = glfwCreateWindow(800, 600, "Hello World!", NULL, NULL);
+        window = glfwCreateWindow(800, 600, "Phyxelen", NULL, NULL);
         if ( window == NULL )
             throw new RuntimeException("Failed to create the GLFW window");
 
@@ -88,7 +93,6 @@ public class Client extends GameApp {
 //                    (vidmode.height() - pHeight.get(0)) / 2
 //            );
         } // the stack frame is popped automatically
-        screenSizeUpdated();
         // Make the OpenGL context current
         glfwMakeContextCurrent(window);
         // Enable v-sync
@@ -101,14 +105,25 @@ public class Client extends GameApp {
     @Override
     protected void loop() {
         GL.createCapabilities();
-        GLFWVidMode videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-        if (videoMode != null) {
-//            throw new Exception("No video mode");
-            screenWidth = videoMode.width();
-            screenHeight = videoMode.height();
-        } else {
-            System.err.println("No video mode");
-        };
+
+        int[] widthBuffer = new int[1];
+        int[] heightBuffer = new int[1];
+//        IntBuffer windowSizeBuffer = IntBuffer.allocate(4);
+//        glfwGetWindowSize(window, windowSizeBuffer, windowSizeBuffer);
+        glfwGetWindowSize(window, widthBuffer, heightBuffer);
+//        screenWidth = windowSizeBuffer.get(0);
+//        screenHeight = windowSizeBuffer.get(1);
+        screenWidth = widthBuffer[0];
+        screenHeight = heightBuffer[0];
+        screenSizeUpdated();
+//        GLFWVidMode videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+//        if (videoMode != null) {
+////            throw new Exception("No video mode");
+//            screenWidth = videoMode.width();
+//            screenHeight = videoMode.height();
+//        } else {
+//            System.err.println("No video mode");
+//        };
 
         //Initialize Projection Matrix
         glMatrixMode( GL_PROJECTION );
@@ -117,6 +132,9 @@ public class Client extends GameApp {
         //Initialize Modelview Matrix
         glMatrixMode( GL_MODELVIEW );
         glLoadIdentity();
+
+         vertexBuffer = glGenBuffers();
+        colorBuffer  = glGenBuffers();
 
         long time = System.currentTimeMillis();
         System.out.println("Start");
@@ -160,52 +178,62 @@ public class Client extends GameApp {
 //        glDisableClientState(GL_EDGE_FLAG_ARRAY);
 //        GL20.glEnableVertexAttribArray(0);
         int totalCount = activeSubworld.loadedChunks.entrySet().size() * Chunk.area();
-//        FloatBuffer coordinates = FloatBuffer.allocate(8);
-        float[] coordinateArray = {0f,0f, 0f,1f, 1f,1f};
-        FloatBuffer coordinateBuffer = FloatBuffer.allocate(coordinateArray.length);
-        coordinateBuffer.put(coordinateArray);
+//        int totalCount = 1000;
+//        float[] coordinateArray = new float[totalCount * 8];
+//        float[] colorArray = new float[totalCount * 8*4];
+
+        int I = 0;
+        for (Map.Entry<VectorI, Chunk> entry : activeSubworld.loadedChunks.entrySet()) {
+            int baseX = entry.getKey().x * Chunk.size();
+            int baseY = entry.getKey().y * Chunk.size();
+            int i = 0;
+            for (int pixel : entry.getValue().pixels) {
+                PixelDefinition pixelDefinition = activeWorld.pixelIds[pixel];
+                float drawX = (baseX + i % Chunk.size() - cameraPos.x) * relativePixelWidth;
+                float drawY = (baseY + i / Chunk.size() - cameraPos.y) * relativePixelHeight;
+                i++;
+                if (drawX < (-1 - relativePixelWidth) || drawX > 1 ||
+                        drawY < (-1 - relativePixelHeight) || drawY > 1
+                ) {
+                    continue;
+                }
+//                System.out.printf("%f : %f\n", drawX, drawY);
+                drawPixel(drawX, drawY, I, pixelDefinition);
+                I++;
+            }
+        }
+
+
+//        FloatBuffer coordinateBuffer = FloatBuffer.allocate(coordinateArray.length);
+
+//        PixelDefinition pixelDefinition = activeWorld.pixelIds[1];
+
+//        System.out.println(Arrays.toString(coordinateArray));
+
         glEnableClientState(GL_VERTEX_ARRAY);
-
-        int vertexBuffer = glGenBuffers();
-//        System.out.println(vertexBuffer);
         glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-        glBufferData(GL_ARRAY_BUFFER, coordinateArray, GL_STATIC_DRAW);
-
+        glBufferData(GL_ARRAY_BUFFER, vertexArray, GL_STREAM_DRAW);
         glVertexPointer(2, GL_FLOAT, 0, 0);
+
+        glEnableClientState(GL_COLOR_ARRAY);
+        glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+        glBufferData(GL_ARRAY_BUFFER, colorArray, GL_STREAM_DRAW);
+        glColorPointer(3, GL_FLOAT, 0, 0);
+
 //        glVertexAttribPointer();
 
-//        IntBuffer indexBuffer = IntBuffer.allocate(3);
-//        int[] indexArray = {0,1,2};
-//        indexBuffer.put(indexArray);
-//        int elementBuffer = glGenBuffers();
-//        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
-//        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexArray, GL_STATIC_DRAW);
-//        FloatBuffer coordinates = FloatBuffer.allocate(totalCount * 8);
 
 
-//        for (Map.Entry<VectorI, Chunk> entry : activeSubworld.loadedChunks.entrySet()) {
-//            int baseX = entry.getKey().x * Chunk.size();
-//            int baseY = entry.getKey().y * Chunk.size();
-//            int i = 0;
-//            for (int pixel : entry.getValue().pixels) {
-//                PixelDefinition pixelDefinition = activeWorld.pixelIds[pixel];
-//                drawPixel(baseX + i % Chunk.size(),
-//                        baseY + i / Chunk.size(), i,
-//                        pixelDefinition, coordinates);
-//                i++;
-//            }
-//        }
-        PixelDefinition pixelDefinition = activeWorld.pixelIds[1];
-        glColor3f(pixelDefinition.colors[0].r,
-                pixelDefinition.colors[0].g,
-                pixelDefinition.colors[0].b);
+//        glColor3f(pixelDefinition.colors[0].r,
+//                pixelDefinition.colors[0].g,
+//                pixelDefinition.colors[0].b);
 
 //        coordinates.put(0); coordinates.put(1);
 //        System.out.printf("%d  %d\n", totalCount * 8, coordinates.array().length);
 
-//        glDrawArrays(GL_TRIANGLES, 0, totalCount * 6);
+        glDrawArrays(GL_QUADS, 0, I*4);
 
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+//        glDrawArrays(GL_QUADS, 0, totalCount * 8);
 //        glDrawBuffer(vertexBuffer);
 //        glDrawElements(GL_TRIANGLES, indexes);
 //        } catch (Exception e) {
@@ -213,7 +241,7 @@ public class Client extends GameApp {
 //        }
 
 //        glEnd();
-        glDeleteBuffers(vertexBuffer); // TODO: doesn't work
+//        glDeleteBuffers(vertexBuffer); // TODO: doesn't work
         glDisableClientState(GL_VERTEX_ARRAY);
 
 //        glDeleteBuffers(elementBuffer);
@@ -221,22 +249,34 @@ public class Client extends GameApp {
     }
 
 
-    /// @param x Pixel global X coordinate
-     /// @param y Pixel global X coordinate
-    private void drawPixel(int x, int y, int i, PixelDefinition pixelDefinition, FloatBuffer buffer) {
-        glColor3f(pixelDefinition.colors[0].r,
-                pixelDefinition.colors[0].g,
-                pixelDefinition.colors[0].b);
-        float drawX = (x - cameraPos.x + screenWidth / 2.0f) * relativePixelWidth;
-        float drawY = (y - cameraPos.y + screenHeight / 2.0f) * relativePixelHeight;
+    private void drawPixel(float drawX, float drawY, int i, PixelDefinition pixelDefinition) {
+//        glColor3f(pixelDefinition.colors[0].r,
+//                pixelDefinition.colors[0].g,
+//                pixelDefinition.colors[0].b);
+        int ci = i * 12;
+        colorArray[ci] = pixelDefinition.colors[0].r;
+        colorArray[ci+1] = pixelDefinition.colors[0].g;
+        colorArray[ci+2] = pixelDefinition.colors[0].b;
+
+        colorArray[ci+3] = pixelDefinition.colors[0].r;
+        colorArray[ci+4] = pixelDefinition.colors[0].g;
+        colorArray[ci+5] = pixelDefinition.colors[0].b;
+
+        colorArray[ci+6] = pixelDefinition.colors[0].r;
+        colorArray[ci+7] = pixelDefinition.colors[0].g;
+        colorArray[ci+8] = pixelDefinition.colors[0].b;
+//
+        colorArray[ci+9] = pixelDefinition.colors[0].r;
+        colorArray[ci+10] = pixelDefinition.colors[0].g;
+        colorArray[ci+11] = pixelDefinition.colors[0].b;
 //        System.out.printf("(%d; %d)\n", x, y);
 //        System.out.printf("(%f;%f)\n", drawX, drawY);
 
-        if (drawX < -1.02 || drawX > 1 || drawY < -1.02 || drawY > 1 ) return;
-        glVertex2f( drawX, drawY );
-        glVertex2f( drawX + relativePixelWidth, drawY );
-        glVertex2f( drawX + relativePixelWidth, drawY + relativePixelHeight);
-        glVertex2f( drawX, drawY + relativePixelHeight);
+//        if (drawX < -1.02 || drawX > 1 || drawY < -1.02 || drawY > 1 ) return;
+//        glVertex2f( drawX, drawY );
+//        glVertex2f( drawX + relativePixelWidth, drawY );
+//        glVertex2f( drawX + relativePixelWidth, drawY + relativePixelHeight);
+//        glVertex2f( drawX, drawY + relativePixelHeight);
 
 //        buffer.put(0); buffer.put(0);
 //        buffer.put(1); buffer.put(0);
@@ -246,6 +286,11 @@ public class Client extends GameApp {
 //        buffer.put(drawX + relativePixelWidth); buffer.put(drawY );
 //        buffer.put(drawX + relativePixelWidth); buffer.put(drawY + relativePixelHeight);
 //        buffer.put(drawX); buffer.put(drawY + relativePixelHeight);
+        i *= 8;
+        vertexArray[i] = drawX;                         vertexArray[i+1] = drawY;
+        vertexArray[i+2] = drawX + relativePixelWidth;  vertexArray[i+3] = drawY;
+        vertexArray[i+4] = drawX + relativePixelWidth;  vertexArray[i+5] = drawY + relativePixelHeight;
+        vertexArray[i+6] = drawX;                       vertexArray[i+7] = drawY + relativePixelHeight;
     }
 
 
@@ -253,6 +298,14 @@ public class Client extends GameApp {
         relativePixelWidth = viewScale / (float)screenWidth;
         relativePixelHeight = viewScale / (float)screenHeight;
 
+//        int worldPixelCount = activeSubworld.loadedChunks.entrySet().size() * Chunk.area();
+        int worldPixelCount = (int)(screenWidth / viewScale + 2)*4 * (int)(screenHeight / viewScale + 2);
+        vertexArray = new float[worldPixelCount * 8];
+        colorArray = new float[worldPixelCount * 8 * 3];
+        glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+        glBufferData(GL_ARRAY_BUFFER, vertexArray, GL_STREAM_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+        glBufferData(GL_ARRAY_BUFFER, colorArray, GL_STREAM_DRAW);
 //        if (screenWidth > screenHeight) {
 //            relativePixelSize = viewScale / (float)screenWidth;
 //        } else {
