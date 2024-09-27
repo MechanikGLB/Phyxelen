@@ -185,6 +185,11 @@ public class Client extends GameApp {
                 viewScale += 1;
                 screenSizeUpdated();
             }
+
+            if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) != 0) {
+                setPixelAtCursorPosition(1);
+            } else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_2) != 0)
+                setPixelAtCursorPosition(0);
             counter++;
         }
     }
@@ -301,6 +306,20 @@ public class Client extends GameApp {
     }
 
 
+    int screenXToWorld(int x) {
+        x -= screenWidth / 2;
+        if (x < 0) x -= viewScale;
+        return (int)cameraPos.x + x / viewScale;
+    }
+
+
+    int screenYToWorld(int y) {
+        y = screenHeight / 2 - y;
+        if (y < 0) y -= viewScale;
+        return (int)cameraPos.y + y / viewScale;
+    }
+
+
     private void updateChunks() {
         if (activeSubworld == null) return;
         int width = screenWidth / (viewScale * Chunk.size());
@@ -316,5 +335,15 @@ public class Client extends GameApp {
                 }
             }
         }
+    }
+
+
+    void setPixelAtCursorPosition(int pixel) {
+        double[] x = new double[1];
+        double[] y = new double[1];
+        glfwGetCursorPos(window, x, y);
+        activeSubworld.setPixel(
+                screenXToWorld((int)x[0]),
+                screenYToWorld((int)y[0]), pixel);
     }
 }
