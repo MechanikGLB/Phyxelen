@@ -4,6 +4,8 @@ import java.util.Hashtable;
 import java.io.*;
 
 public class Subworld {
+    static int notLoadedPixel = 0x80000000;
+
     World world = null;
     WorldGenerator generator;
     Hashtable<VectorI, Chunk> loadedChunks = new Hashtable<>();
@@ -44,5 +46,36 @@ public class Subworld {
     void unloadChunk(VectorI indexes) {
         // TODO: write to file
         loadedChunks.remove(indexes);
+    }
+
+
+    /// Sets `pixel` at absolute `x` and `y`
+    void setPixel(int x, int y, int pixel) {
+        assert world.pixelIds.length >= pixel;
+        // Correcting negative chunks
+        if (x < 0) x -= Chunk.size();
+        if (y < 0) y -= Chunk.size();
+
+        Chunk chunk = loadedChunks.get(new VectorI((x) / Chunk.size(), (y) / Chunk.size()));
+        if (chunk == null) return; // TODO: decide what to do in this case
+
+        x %= Chunk.size();
+        y %= Chunk.size();
+
+        // Correcting coordinates in negative chunks
+        if (x < 0) x += Chunk.size();
+        if (y < 0) y += Chunk.size();
+        chunk.setPixel(x, y, pixel);
+    }
+
+
+    int getPixel(int x, int y) {
+        Chunk chunk = loadedChunks.get(new VectorI(x / Chunk.size(), y / Chunk.size()));
+        if (chunk == null) return notLoadedPixel;
+        x %= Chunk.size();
+        y %= Chunk.size();
+        if (x < 0) x = Chunk.size() - x;
+        if (y < 0) y = Chunk.size() - y;
+        return chunk.getPixel(x, y);
     }
 }
