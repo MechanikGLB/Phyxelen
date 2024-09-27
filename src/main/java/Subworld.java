@@ -52,11 +52,11 @@ public class Subworld {
     /// Sets `pixel` at absolute `x` and `y`
     void setPixel(int x, int y, int pixel) {
         assert world.pixelIds.length >= pixel;
-        // Correcting negative chunks
-        if (x < 0) x -= Chunk.size();
-        if (y < 0) y -= Chunk.size();
 
-        Chunk chunk = loadedChunks.get(new VectorI((x) / Chunk.size(), (y) / Chunk.size()));
+        Chunk chunk = loadedChunks.get(new VectorI(
+                x >= 0 ? x / Chunk.size() : (x+1) / Chunk.size() - 1,
+                y >= 0 ? y / Chunk.size() : (y+1) / Chunk.size() - 1));
+
         if (chunk == null) return; // TODO: decide what to do in this case
 
         x %= Chunk.size();
@@ -70,10 +70,13 @@ public class Subworld {
 
 
     int getPixel(int x, int y) {
-        Chunk chunk = loadedChunks.get(new VectorI(x / Chunk.size(), y / Chunk.size()));
+        Chunk chunk = loadedChunks.get(new VectorI(
+                x >= 0 ? x / Chunk.size() : (x+1) / Chunk.size() - 1,
+                y >= 0 ? y / Chunk.size() : (y+1) / Chunk.size() - 1));
         if (chunk == null) return notLoadedPixel;
         x %= Chunk.size();
         y %= Chunk.size();
+        // Correcting coordinates in negative chunks
         if (x < 0) x = Chunk.size() - x;
         if (y < 0) y = Chunk.size() - y;
         return chunk.getPixel(x, y);
