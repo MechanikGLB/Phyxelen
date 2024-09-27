@@ -11,16 +11,16 @@ public class WorldGenerator {
         int baseY = Chunk.size() * indexes.y;
         chunk.pixels = new int[Chunk.area()];
         int i = 0;
-        for (int x = 0; x < Chunk.size(); x++)
-        for (int y = 0; y < Chunk.size(); y++) {
-//            if (startY + y < Math.sin((startX + x) / 10.0)) {
-                if (Math.sin((baseX + x) * 0.3f) - Math.cos((baseY + y)*0.3f) > 0) {
-                chunk.pixels[i] = 1;
-            } else {
-                chunk.pixels[i] = 0;
-            }
-            i++;
-        }
+        for (int y = 0; y < Chunk.size(); y++)
+            for (int x = 0; x < Chunk.size(); x++) {
+                if (baseY + y + Math.sin((baseX + x)*0.1)*5 < 0) {
+//                if (Math.sqrt(Math.pow(baseX + x, 2) + Math.pow(baseY + y, 2)) < 40) {
+                    chunk.pixels[i] = 1;
+                } else {
+                    chunk.pixels[i] = 0;
+                }
+        i++;
+    }
         return chunk;
     }
 }
