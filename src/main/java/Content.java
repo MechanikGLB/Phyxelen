@@ -13,8 +13,7 @@ import org.snakeyaml.engine.v2.api.LoadSettings;
 
 enum ModuleType {
     Mod,
-    Game,
-    ModPack
+    Game
 }
 
 

@@ -52,8 +52,7 @@ public abstract class GameApp {
         for (Path path : Arrays.asList(
                 Path.of("worlds"),
                 Path.of("games"),
-                Path.of("mods"),
-                Path.of("modpacks")
+                Path.of("mods")
         )) {
             chechFolder(path);
         }
