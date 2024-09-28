@@ -21,15 +21,14 @@ public class Subworld {
 
 
     public void tick(float dt) {
-        for (Chunk chunk : loadedChunks.values()) {
-            int x = 0;
-            int y = 0;
+        for (var chunk : loadedChunks.entrySet()) {
+            int x = chunk.getKey().x * Chunk.size();
+            int y = chunk.getKey().y * Chunk.size();
             // TODO: integrate Pixel physics
-//            for (int i = 0; i < chunk.length; i++) {
-//                PixelDefinition pixelDef = world.pixelIds[chunk[i]];
-//                PowderPhys(int x, int y);
-//            }
-
+            for (int i = 0; i < Chunk.area(); i++) {
+                PixelDefinition pixelDef = world.pixelIds[chunk.getValue().pixels[i]];
+                PowderPhys(x + i % Chunk.size(), y + i / Chunk.size());
+            }
         }
     }
 
@@ -107,8 +106,8 @@ public class Subworld {
         x %= Chunk.size();
         y %= Chunk.size();
         // Correcting coordinates in negative chunks
-        if (x < 0) x = Chunk.size() - x;
-        if (y < 0) y = Chunk.size() - y;
+        if (x < 0) x += Chunk.size();
+        if (y < 0) y += Chunk.size();
         return chunk.getPixel(x, y);
     }
 }
