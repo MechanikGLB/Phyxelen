@@ -36,6 +36,8 @@ public class Client extends GameApp {
     private int vertexBuffer;
     private int colorBuffer;
 
+    /*Temp?*/private int paintingPixel = 1;
+
 
     @Override
     public void run() {
@@ -185,9 +187,13 @@ public class Client extends GameApp {
                 viewScale += 1;
                 screenSizeUpdated();
             }
+            for (int i = 0; i < 10; i++)
+                if (glfwGetKey(window, GLFW_KEY_0 + i) != 0)
+                    paintingPixel = i;
+
 
             if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) != 0) {
-                setPixelAtCursorPosition(1);
+                setPixelAtCursorPosition(paintingPixel);
             } else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_2) != 0)
                 setPixelAtCursorPosition(0);
 
