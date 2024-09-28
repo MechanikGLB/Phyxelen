@@ -24,13 +24,43 @@ public class Subworld {
         for (Chunk chunk : loadedChunks.values()) {
             int x = 0;
             int y = 0;
-            // TODO: Pixel physics
+            // TODO: integrate Pixel physics
 //            for (int i = 0; i < chunk.length; i++) {
 //                PixelDefinition pixelDef = world.pixelIds[chunk[i]];
-//
+//                PowderPhys(int x, int y);
 //            }
+
         }
     }
+
+    public void PowderPhys(int x, int y) {
+        int PixelBuf = getPixel(x, y);
+        int PixelUnder = getPixel(x, y - 1);
+        int PixelUnderLeft = getPixel(x - 1, y - 1);
+        int PixelUnderRight = getPixel(x + 1, y - 1);
+
+        if (PixelUnder == 0) {
+            setPixel(x, y - 1, PixelBuf);
+            setPixel(x, y, 0);
+        }
+        else if (PixelUnderLeft == 0 || PixelUnderRight == 0) {
+            if ((getPixel(x - 1, y - 1) == 0) == (getPixel(x - 1, y + 1) == 0)){
+                //тут рандом прописать
+            }
+            else {
+                if (PixelUnderLeft == 0){
+                    setPixel(x - 1, y - 1, PixelBuf);
+                    setPixel(x, y, 0);
+                }
+                else{
+                    setPixel(x + 1, y - 1, PixelBuf);
+                    setPixel(x, y, 0);
+                }
+            }
+        }
+    }// TODO: physics for another materials
+
+
 
 
     void loadChunk(VectorI indexes) {

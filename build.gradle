@@ -5,7 +5,7 @@ plugins {
 group = 'org.example'
 version = '1.0-SNAPSHOT'
 project.ext.lwjglVersion = "3.3.4"
-project.ext.lwjglNatives = "natives-linux"
+project.ext.lwjglNatives = "natives-windows"
 
 repositories {
     mavenCentral()
