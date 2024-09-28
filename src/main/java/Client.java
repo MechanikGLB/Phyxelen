@@ -20,7 +20,8 @@ public class Client extends GameApp {
     protected long window;
     private int screenWidth = 800;
     private int screenHeight = 600;
-    float maxFps = 25;
+    float maxFps = 30;
+    float maxTps = 5;
 
     private VectorF cameraPos = new VectorF(0, 0);
     /// Length of world pixel side in real screen pixels
@@ -133,16 +134,15 @@ public class Client extends GameApp {
          vertexBuffer = glGenBuffers();
         colorBuffer  = glGenBuffers();
 
-        long time = System.currentTimeMillis();
-        long lastFrameTime = 0;
+        long lastCycleStartTime = System.currentTimeMillis();
+        long lastTickTime = 0;
 
         System.out.println("Start");
         while ( !glfwWindowShouldClose(window) ) {
-            long newTime = System.currentTimeMillis();
-            if ((newTime - time) < (1000.0f/maxFps))
-                continue;
-            float dt = (newTime - time) / 1000.0f;
-            time = newTime;
+            long cycleStartTime = System.currentTimeMillis();
+
+            float dt = (cycleStartTime - lastCycleStartTime) / 1000.0f;
+            lastCycleStartTime = cycleStartTime;
             tick(dt);
 //            lastFrameTime = newTime;
 
@@ -177,7 +177,7 @@ public class Client extends GameApp {
                 cameraPos.x += cameraSpeed / viewScale * dt;
 
             // Scaling is not ready!
-            if (glfwGetKey(window, GLFW_KEY_MINUS) != 0) {
+            if (glfwGetKey(window, GLFW_KEY_MINUS) != 0 && viewScale > 1) {
                 viewScale -= 1;
                 screenSizeUpdated();
             }
@@ -190,7 +190,14 @@ public class Client extends GameApp {
                 setPixelAtCursorPosition(1);
             } else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_2) != 0)
                 setPixelAtCursorPosition(0);
+
             counter++;
+            if (dt < (1000.0f/maxFps))
+                try {
+                    Thread.sleep((long)(1000.0f / maxFps - dt));
+                } catch (InterruptedException e) {
+                    continue;
+                }
         }
     }
 
@@ -249,7 +256,7 @@ public class Client extends GameApp {
 //                pixelDefinition.colors[0].g,
 //                pixelDefinition.colors[0].b);
         int ci = i * 12;
-        colorArray[ci] = pixelDefinition.colors[0].r;
+        colorArray[ci] = pixelDefinition.colors[0].r;// + ci * 0.00001f;
         colorArray[ci+1] = pixelDefinition.colors[0].g;
         colorArray[ci+2] = pixelDefinition.colors[0].b;
 
