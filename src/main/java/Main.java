@@ -2,7 +2,11 @@
 
 public class Main {
 
-    public static GameApp game;
+    private static GameApp game;
+
+    public static GameApp getGame() {
+        return game;
+    }
 
     public static void main(String[] args) {
         game = new Client();

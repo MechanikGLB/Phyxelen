@@ -1,0 +1,3 @@
+default_subworld: default
+modules:
+  - test

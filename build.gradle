@@ -1,19 +1,21 @@
 plugins {
     id 'java'
+    id 'application'
 }
 
-group = 'org.example'
+group = 'org.phyxelen'
 version = '1.0-SNAPSHOT'
 project.ext.lwjglVersion = "3.3.4"
 project.ext.lwjglNatives = "natives-linux"
+project.ext.lwjglNatives = "natives-windows"
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
+//    testImplementation platform('org.junit:junit-bom:5.10.0')
+//    testImplementation 'org.junit.jupiter:junit-jupiter'
 
     implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
 
@@ -29,6 +31,13 @@ dependencies {
     runtimeOnly "org.lwjgl:lwjgl-openal::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
+
+//    implementation platform("org.snakeyaml:snakeyaml-engine:$lwjglVersion")
+    implementation "org.snakeyaml:snakeyaml-engine:2.8"
+}
+
+application {
+    mainClass = 'org.phyxelen.main.Main'
 }
 
 test {

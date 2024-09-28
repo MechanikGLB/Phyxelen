@@ -1,21 +1,28 @@
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.io.*;
 import java.util.List;
+import java.util.Map;
+
+import org.snakeyaml.engine.v2.api.Dump;
+import org.snakeyaml.engine.v2.api.DumpSettings;
+import org.snakeyaml.engine.v2.api.Load;
+import org.snakeyaml.engine.v2.api.LoadSettings;
 
 public class World {
     String name; /// World displayed name
     String path; /// World folder name
 
-    Hashtable<String, Subworld> subworlds;
+    HashMap<String, Subworld> subworlds;
     String defaultSubworldId;
+    private String[] modules;
     // Array for mapping int to PixelDefinition
     PixelDefinition[] pixelIds;
 
     public World() {
-        subworlds = new Hashtable<>();
+        subworlds = new HashMap<>();
 //        for (int i = 0; i < subworlds.length; i++)
 //            subworlds[i] = new Subworld(this);
     }
@@ -28,10 +35,12 @@ public class World {
     }
 
 
-    public static World createWorld(String name) {
+    public static World createWorld(String worldName, String gameName) {
+        var gameConfig = Main.getGame().content.getGameConfig(gameName);
+
         List<Character> forbiddenChars = Arrays.asList('/','\\',':','*','?','"','<','>','|');
         StringBuilder path = new StringBuilder();
-        for (char ch : name.toCharArray()) {
+        for (char ch : worldName.toCharArray()) {
             if (forbiddenChars.contains(ch))
                 path.append('_');
             else
@@ -39,18 +48,24 @@ public class World {
         }
 
         World world = new World();
-        /*TEMP*/ world.defaultSubworldId = "default";
+        world.defaultSubworldId = (String) gameConfig.get("default_subworld");
+        if (world.defaultSubworldId == null)
+            world.defaultSubworldId = "default";
         world.path = path.toString();
-        world.name = name;
+        world.name = worldName;
 
-        File config = new File("worlds" + File.separator + world.path + File.separator + "world.conf");
-        // TODO: write config
+        File config = new File("worlds" + File.separator + world.path + File.separator + "world.yaml");
+
+        Dump yamlDump = new Dump(
+                DumpSettings.builder().build()
+        );
+
         try {
-//            Files.createDirectory(Path.of("worlds", world.path));
             Files.createDirectories(Path.of("worlds", world.path, "subworlds"));
+//            Files.createDirectory(Path.of("worlds", world.path));
             config.createNewFile();
             PrintWriter writer = new PrintWriter(config);
-            writer.println("default_subworld = default");
+            writer.println(yamlDump.dumpToString(Map.of("default_subworld", world.defaultSubworldId)));
             writer.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -61,14 +76,27 @@ public class World {
 
 
     public static World loadWorldByPath(String path) {
-        File config = new File("worlds" + File.separator + path + File.separator + "world.conf");
-        if (!config.exists() || config.isDirectory())
-            throw new RuntimeException("No world \"" + path + "\"");
-
+        File config = new File("worlds" + File.separator + path + File.separator + "world.yaml");
+//        if (!config.exists() || config.isDirectory())
         World world = new World();
-        /*TEMP*/ world.defaultSubworldId = "default";
-        world.startup();
-        return world;
+
+        Load yamlLoad = new Load(LoadSettings.builder().build());
+        try {
+            var configTable = (HashMap<String, Object>) yamlLoad.loadFromReader(new FileReader(config));
+            world.defaultSubworldId = (String) configTable.getOrDefault("default_subworld", "default");
+
+            List<String> moduleList = (List<String>) configTable.get("modules");
+            String[] moduleArray = new String[moduleList.size()];
+            moduleList.toArray(moduleArray);
+            world.modules = moduleArray;
+
+            world.startup();
+            return world;
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException("No world \"" + path + "\"");
+        } catch (ClassCastException e ) {
+            throw new RuntimeException("Config file for " + path + " has wrong structure: " + e.toString());
+        }
     }
 
 
@@ -85,13 +113,18 @@ public class World {
 
 
     private void loadContent() {
+        assert modules.length > 0;
+        Content content = Main.getGame().content;
+        content.loadModules(modules);
         //temp
-        pixelIds = new PixelDefinition[2];
+        pixelIds = new PixelDefinition[content.pixelDefinitions.size() + 1];
         pixelIds[0] = new PixelDefinition();
         pixelIds[0].colors = new ColorWithAplha[1];
         pixelIds[0].colors[0] = new ColorWithAplha(0.2f, 0.1f, 0.0f, 1f);
-        pixelIds[1] = new PixelDefinition();
-        pixelIds[1].colors = new ColorWithAplha[1];
-        pixelIds[1].colors[0] = new ColorWithAplha(1.0f, 0.5f, 0.0f, 1f);
+        int i = 1;
+        for (var definition : content.pixelDefinitions.values()) {
+            pixelIds[i] = definition;
+            i++;
+        }
     }
 }

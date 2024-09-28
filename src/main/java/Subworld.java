@@ -35,7 +35,7 @@ public class Subworld {
 
     void loadChunk(VectorI indexes) {
         if (loadedChunks.containsKey(indexes)) return;
-        if (Main.game.gameState == GameApp.GameState.Server) return; // TODO: multiplayer, require chunk via net
+        if (Main.getGame().gameState == GameApp.GameState.Server) return; // TODO: multiplayer, require chunk via net
 
         //if () {} // TODO: load from file. True if found
 

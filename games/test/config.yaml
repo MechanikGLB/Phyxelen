@@ -1,0 +1,13 @@
+materials:
+  stone:
+    type: solid
+    color: "#333333ff"
+  sand:
+    type: powder
+    colors: ["#EAD54FFF", "#F2DD59FF", "#CCBB51FF"]
+  water:
+    type: liquid
+    color: "#506CD388"
+  steam:
+    type: gas
+    color: "#8A8ACE44"
