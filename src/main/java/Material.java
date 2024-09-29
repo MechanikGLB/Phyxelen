@@ -23,8 +23,10 @@ class MaterialBurnRule {
 }
 
 
-public class Material {
+public abstract class Material {
     ColorWithAplha[] colors;
     Hashtable<String, MaterialInteraction> interactions;
     Hashtable<Integer, MaterialInteraction> interactionsById;
+
+    abstract void resolvePhysics(Subworld subworld, int x, int y);
 }

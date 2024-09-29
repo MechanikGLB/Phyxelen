@@ -63,7 +63,15 @@ public class Content {
                 if (materials != null) {
                     var materialTable = (HashMap<String, HashMap<String, Object>>) materials;
                     for (var material : materialTable.entrySet()) {
-                        Material materialDefinition = new Material();
+                        Material materialDefinition;
+                        String type = (String) material.getValue().get("type");
+                        switch (type.toLowerCase()) {
+                            case "solid" -> materialDefinition = new MaterialSolid();
+                            case "powder" -> materialDefinition = new MaterialPowder();
+                            case "liquid" -> materialDefinition = new MaterialLiquid();
+                            case "gas" -> materialDefinition = new MaterialGas();
+                            default -> {continue;}
+                        }
                         if (material.getValue().get("color") != null) {
                             ColorWithAplha[] colors = new ColorWithAplha[1];
                             colors[0] = new ColorWithAplha(((String) material.getValue().get("color")));

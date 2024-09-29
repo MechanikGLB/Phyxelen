@@ -1,12 +1,15 @@
 import java.util.Hashtable;
 //import java.
 import java.io.*;
+import java.util.Random;
+import java.util.random.RandomGenerator;
 
 public class Subworld {
     static int notLoadedPixel = 0x80000000;
 
     World world = null;
     WorldGenerator generator;
+    Random random = new Random();
     Hashtable<VectorI, Chunk> loadedChunks = new Hashtable<>();
     File saveFile;
 
@@ -25,40 +28,11 @@ public class Subworld {
             int y = chunk.getKey().y * Chunk.size();
             // TODO: integrate Pixel physics
             for (int i = 0; i < Chunk.area(); i++) {
-                Material pixelDef = world.pixelIds[chunk.getValue().pixels[i]];
-                PowderPhys(x + i % Chunk.size(), y + i / Chunk.size());
+                Material material = world.pixelIds[chunk.getValue().pixels[i]];
+                material.resolvePhysics(this, x + i % Chunk.size(), y + i / Chunk.size());
             }
         }
     }
-
-    public void PowderPhys(int x, int y) {
-        int PixelBuf = getPixel(x, y);
-        int PixelUnder = getPixel(x, y - 1);
-        int PixelUnderLeft = getPixel(x - 1, y - 1);
-        int PixelUnderRight = getPixel(x + 1, y - 1);
-
-        if (PixelUnder == 0) {
-            setPixel(x, y - 1, PixelBuf);
-            setPixel(x, y, 0);
-        }
-        else if (PixelUnderLeft == 0 || PixelUnderRight == 0) {
-            if ((getPixel(x - 1, y - 1) == 0) == (getPixel(x - 1, y + 1) == 0)){
-                //тут рандом прописать
-            }
-            else {
-                if (PixelUnderLeft == 0){
-                    setPixel(x - 1, y - 1, PixelBuf);
-                    setPixel(x, y, 0);
-                }
-                else{
-                    setPixel(x + 1, y - 1, PixelBuf);
-                    setPixel(x, y, 0);
-                }
-            }
-        }
-    }// TODO: physics for another materials
-
-
 
 
     void loadChunk(VectorI indexes) {
