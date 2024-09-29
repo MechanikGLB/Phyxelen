@@ -6,8 +6,15 @@ plugins {
 group = 'org.phyxelen'
 version = '1.0-SNAPSHOT'
 project.ext.lwjglVersion = "3.3.4"
-project.ext.lwjglNatives = "natives-linux"
-project.ext.lwjglNatives = "natives-windows"
+
+import org.apache.tools.ant.taskdefs.condition.Os;
+if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+    project.ext.lwjglNatives = "natives-windows"
+} else if (Os.isFamily(Os.FAMILY_MAC)) {
+
+} else if (Os.isFamily(Os.FAMILY_UNIX)) {
+    project.ext.lwjglNatives = "natives-linux"
+}
 
 repositories {
     mavenCentral()
