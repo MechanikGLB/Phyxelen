@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.Reader;
 import java.util.*;
 
 import org.snakeyaml.engine.v2.api.Load;
@@ -18,7 +17,7 @@ enum ModuleType {
 
 
 public class Content {
-    HashMap<String, PixelDefinition> pixelDefinitions = new HashMap<>();
+    HashMap<String, Material> pixelDefinitions = new HashMap<>();
     private final Load yaml = new Load(LoadSettings.builder().build());
 
 
@@ -64,7 +63,7 @@ public class Content {
                 if (materials != null) {
                     var materialTable = (HashMap<String, HashMap<String, Object>>) materials;
                     for (var material : materialTable.entrySet()) {
-                        PixelDefinition materialDefinition = new PixelDefinition();
+                        Material materialDefinition = new Material();
                         if (material.getValue().get("color") != null) {
                             ColorWithAplha[] colors = new ColorWithAplha[1];
                             colors[0] = new ColorWithAplha(((String) material.getValue().get("color")));

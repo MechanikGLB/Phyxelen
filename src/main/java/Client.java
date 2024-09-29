@@ -223,7 +223,7 @@ public class Client extends GameApp {
             int baseY = entry.getKey().y * Chunk.size();
             int i = 0;
             for (int pixel : entry.getValue().pixels) {
-                PixelDefinition pixelDefinition = activeWorld.pixelIds[pixel];
+                Material material = activeWorld.pixelIds[pixel];
                 float drawX = (baseX + i % Chunk.size() - cameraPos.x) * relativePixelWidth * 2;
                 float drawY = (baseY + i / Chunk.size() - cameraPos.y) * relativePixelHeight * 2;
                 i++;
@@ -232,7 +232,7 @@ public class Client extends GameApp {
                 ) {
                     continue;
                 }
-                drawPixel(drawX, drawY, I, pixelDefinition);
+                drawPixel(drawX, drawY, I, material);
                 I++;
             }
         }
@@ -257,26 +257,26 @@ public class Client extends GameApp {
     }
 
 
-    private void drawPixel(float drawX, float drawY, int i, PixelDefinition pixelDefinition) {
+    private void drawPixel(float drawX, float drawY, int i, Material material) {
 //        glColor3f(pixelDefinition.colors[0].r,
 //                pixelDefinition.colors[0].g,
 //                pixelDefinition.colors[0].b);
         int ci = i * 12;
-        colorArray[ci] = pixelDefinition.colors[0].r;// + ci * 0.00001f;
-        colorArray[ci+1] = pixelDefinition.colors[0].g;
-        colorArray[ci+2] = pixelDefinition.colors[0].b;
+        colorArray[ci] = material.colors[0].r;// + ci * 0.00001f;
+        colorArray[ci+1] = material.colors[0].g;
+        colorArray[ci+2] = material.colors[0].b;
 
-        colorArray[ci+3] = pixelDefinition.colors[0].r;
-        colorArray[ci+4] = pixelDefinition.colors[0].g;
-        colorArray[ci+5] = pixelDefinition.colors[0].b;
+        colorArray[ci+3] = material.colors[0].r;
+        colorArray[ci+4] = material.colors[0].g;
+        colorArray[ci+5] = material.colors[0].b;
 
-        colorArray[ci+6] = pixelDefinition.colors[0].r;
-        colorArray[ci+7] = pixelDefinition.colors[0].g;
-        colorArray[ci+8] = pixelDefinition.colors[0].b;
+        colorArray[ci+6] = material.colors[0].r;
+        colorArray[ci+7] = material.colors[0].g;
+        colorArray[ci+8] = material.colors[0].b;
 //
-        colorArray[ci+9] = pixelDefinition.colors[0].r;
-        colorArray[ci+10] = pixelDefinition.colors[0].g;
-        colorArray[ci+11] = pixelDefinition.colors[0].b;
+        colorArray[ci+9] = material.colors[0].r;
+        colorArray[ci+10] = material.colors[0].g;
+        colorArray[ci+11] = material.colors[0].b;
 
         i *= 8;
         vertexArray[i] = drawX;

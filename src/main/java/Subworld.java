@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.util.Hashtable;
 //import java.
 import java.io.*;
@@ -26,7 +25,7 @@ public class Subworld {
             int y = chunk.getKey().y * Chunk.size();
             // TODO: integrate Pixel physics
             for (int i = 0; i < Chunk.area(); i++) {
-                PixelDefinition pixelDef = world.pixelIds[chunk.getValue().pixels[i]];
+                Material pixelDef = world.pixelIds[chunk.getValue().pixels[i]];
                 PowderPhys(x + i % Chunk.size(), y + i / Chunk.size());
             }
         }

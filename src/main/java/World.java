@@ -19,7 +19,7 @@ public class World {
     String defaultSubworldId;
     private String[] modules;
     // Array for mapping int to PixelDefinition
-    PixelDefinition[] pixelIds;
+    Material[] pixelIds;
 
     public World() {
         subworlds = new HashMap<>();
@@ -117,8 +117,8 @@ public class World {
         Content content = Main.getGame().content;
         content.loadModules(modules);
         //temp
-        pixelIds = new PixelDefinition[content.pixelDefinitions.size() + 1];
-        pixelIds[0] = new PixelDefinition();
+        pixelIds = new Material[content.pixelDefinitions.size() + 1];
+        pixelIds[0] = new Material();
         pixelIds[0].colors = new ColorWithAplha[1];
         pixelIds[0].colors[0] = new ColorWithAplha(0.2f, 0.1f, 0.0f, 1f);
         int i = 1;
