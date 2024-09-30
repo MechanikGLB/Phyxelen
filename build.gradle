@@ -3,7 +3,7 @@ plugins {
     id 'application'
 }
 
-group = 'org.phyxelen'
+group = 'phyxelen'
 version = '1.0-SNAPSHOT'
 project.ext.lwjglVersion = "3.3.4"
 
@@ -44,7 +44,7 @@ dependencies {
 }
 
 application {
-    mainClass = 'org.phyxelen.main.Main'
+    mainClass = 'Main'
 }
 
 test {
