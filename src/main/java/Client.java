@@ -223,7 +223,7 @@ public class Client extends GameApp {
             int baseY = entry.getKey().y * Chunk.size();
             int i = 0;
             for (int pixel : entry.getValue().pixels) {
-                Material material = activeWorld.pixelIds[pixel];
+                Material material = activeWorld.pixelIds[Pixels.getId(pixel)];
                 float drawX = (baseX + i % Chunk.size() - cameraPos.x) * relativePixelWidth * 2;
                 float drawY = (baseY + i / Chunk.size() - cameraPos.y) * relativePixelHeight * 2;
                 i++;
@@ -232,7 +232,8 @@ public class Client extends GameApp {
                 ) {
                     continue;
                 }
-                drawPixel(drawX, drawY, I, material);
+                int colorId = Pixels.getColor(pixel);
+                drawPixel(drawX, drawY, I, material, colorId);
                 I++;
             }
         }
@@ -257,26 +258,27 @@ public class Client extends GameApp {
     }
 
 
-    private void drawPixel(float drawX, float drawY, int i, Material material) {
+    private void drawPixel(float drawX, float drawY, int i, Material material, int colorId) {
 //        glColor3f(pixelDefinition.colors[0].r,
 //                pixelDefinition.colors[0].g,
 //                pixelDefinition.colors[0].b);
+
         int ci = i * 12;
-        colorArray[ci] = material.colors[0].r;// + ci * 0.00001f;
-        colorArray[ci+1] = material.colors[0].g;
-        colorArray[ci+2] = material.colors[0].b;
+        colorArray[ci] = material.colors[colorId].r;// + ci * 0.00001f;
+        colorArray[ci+1] = material.colors[colorId].g;
+        colorArray[ci+2] = material.colors[colorId].b;
 
-        colorArray[ci+3] = material.colors[0].r;
-        colorArray[ci+4] = material.colors[0].g;
-        colorArray[ci+5] = material.colors[0].b;
+        colorArray[ci+3] = material.colors[colorId].r;
+        colorArray[ci+4] = material.colors[colorId].g;
+        colorArray[ci+5] = material.colors[colorId].b;
 
-        colorArray[ci+6] = material.colors[0].r;
-        colorArray[ci+7] = material.colors[0].g;
-        colorArray[ci+8] = material.colors[0].b;
+        colorArray[ci+6] = material.colors[colorId].r;
+        colorArray[ci+7] = material.colors[colorId].g;
+        colorArray[ci+8] = material.colors[colorId].b;
 //
-        colorArray[ci+9] = material.colors[0].r;
-        colorArray[ci+10] = material.colors[0].g;
-        colorArray[ci+11] = material.colors[0].b;
+        colorArray[ci+9] = material.colors[colorId].r;
+        colorArray[ci+10] = material.colors[colorId].g;
+        colorArray[ci+11] = material.colors[colorId].b;
 
         i *= 8;
         vertexArray[i] = drawX;
@@ -357,6 +359,6 @@ public class Client extends GameApp {
         glfwGetCursorPos(window, x, y);
         activeSubworld.setPixel(
                 screenXToWorld((int)x[0]),
-                screenYToWorld((int)y[0]), pixel);
+                screenYToWorld((int)y[0]), Pixels.getPixelWithRandomColor(pixel));
     }
 }

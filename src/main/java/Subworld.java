@@ -5,8 +5,6 @@ import java.util.Random;
 import java.util.random.RandomGenerator;
 
 public class Subworld {
-    static int notLoadedPixel = 0x80000000;
-
     World world = null;
     WorldGenerator generator;
     Random random = new Random();
@@ -28,7 +26,7 @@ public class Subworld {
             int y = chunk.getKey().y * Chunk.size();
             // TODO: integrate Pixel physics
             for (int i = 0; i < Chunk.area(); i++) {
-                Material material = world.pixelIds[chunk.getValue().pixels[i]];
+                Material material = world.pixelIds[Pixels.getId(chunk.getValue().pixels[i])];
                 material.resolvePhysics(this, x + i % Chunk.size(), y + i / Chunk.size());
             }
         }
@@ -75,7 +73,7 @@ public class Subworld {
         Chunk chunk = loadedChunks.get(new VectorI(
                 x >= 0 ? x / Chunk.size() : (x+1) / Chunk.size() - 1,
                 y >= 0 ? y / Chunk.size() : (y+1) / Chunk.size() - 1));
-        if (chunk == null) return notLoadedPixel;
+        if (chunk == null) return Pixels.notLoadedPixel;
         x %= Chunk.size();
         y %= Chunk.size();
         // Correcting coordinates in negative chunks
