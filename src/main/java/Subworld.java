@@ -1,14 +1,15 @@
+import java.util.ArrayList;
 import java.util.Hashtable;
 //import java.
 import java.io.*;
 import java.util.Random;
-import java.util.random.RandomGenerator;
 
 public class Subworld {
     World world = null;
     WorldGenerator generator;
     Random random = new Random();
-    Hashtable<VectorI, Chunk> loadedChunks = new Hashtable<>();
+    Hashtable<VectorI, Chunk> activeChunks = new Hashtable<>();
+    Hashtable<VectorI, Chunk> passiveChunks = new Hashtable<>();
     File saveFile;
 
 
@@ -21,7 +22,7 @@ public class Subworld {
 
 
     public void tick(float dt) {
-        for (var chunk : loadedChunks.entrySet()) {
+        for (var chunk : activeChunks.entrySet()) {
             int x = chunk.getKey().x * Chunk.size();
             int y = chunk.getKey().y * Chunk.size();
             // TODO: integrate Pixel physics
@@ -34,18 +35,49 @@ public class Subworld {
 
 
     void loadChunk(VectorI indexes) {
-        if (loadedChunks.containsKey(indexes)) return;
+        if (activeChunks.containsKey(indexes)) return;
         if (Main.getGame().gameState == GameApp.GameState.Server) return; // TODO: multiplayer, require chunk via net
 
         //if () {} // TODO: load from file. True if found
 
-        loadedChunks.put(indexes, generator.generateChunk(indexes));
+        activeChunks.put(indexes, generator.generateChunk(indexes));
     }
 
 
     void unloadChunk(VectorI indexes) {
         // TODO: write to file
-        loadedChunks.remove(indexes);
+        activeChunks.remove(indexes);
+    }
+
+
+    void updateChunksForUser(int centerX, int centerY, int width, int height) {
+        ArrayList<VectorI> toDeactivate = new ArrayList<>();
+        for (var active : activeChunks.entrySet()) {
+            if (active.getKey().x < centerX - width ||
+                active.getKey().x > centerX + width ||
+                active.getKey().y < centerX - height ||
+                active.getKey().y > centerX + height
+            ) {
+                passiveChunks.put(active.getKey(), active.getValue());
+                toDeactivate.add(active.getKey());
+            }
+        }
+        for (var key : toDeactivate)
+            activeChunks.remove(key);
+
+        for (int x = -width; x <= width; x++) {
+            for (int y = -height; y <= height; y++) {
+                VectorI indexes = new VectorI(x + centerX, y + centerY);
+                Chunk passive = passiveChunks.get(indexes);
+                if (passive != null) {
+                    activeChunks.put(indexes, passive);
+                    passiveChunks.remove(indexes);
+                }
+                else if (!activeChunks.containsKey(indexes)) {
+                    loadChunk(indexes);
+                }
+            }
+        }
     }
 
 
@@ -53,7 +85,7 @@ public class Subworld {
     void setPixel(int x, int y, int pixel) {
         assert world.pixelIds.length >= pixel;
 
-        Chunk chunk = loadedChunks.get(new VectorI(
+        Chunk chunk = activeChunks.get(new VectorI(
                 x >= 0 ? x / Chunk.size() : (x+1) / Chunk.size() - 1,
                 y >= 0 ? y / Chunk.size() : (y+1) / Chunk.size() - 1));
 
@@ -70,7 +102,7 @@ public class Subworld {
 
 
     int getPixel(int x, int y) {
-        Chunk chunk = loadedChunks.get(new VectorI(
+        Chunk chunk = activeChunks.get(new VectorI(
                 x >= 0 ? x / Chunk.size() : (x+1) / Chunk.size() - 1,
                 y >= 0 ? y / Chunk.size() : (y+1) / Chunk.size() - 1));
         if (chunk == null) return Pixels.notLoadedPixel;

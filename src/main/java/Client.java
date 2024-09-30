@@ -218,7 +218,7 @@ public class Client extends GameApp {
 //            glTranslatef( screenWidth / 2.f, screenHeight / 2.f, 0.f );
 
         int I = 0;
-        for (Map.Entry<VectorI, Chunk> entry : activeSubworld.loadedChunks.entrySet()) {
+        for (Map.Entry<VectorI, Chunk> entry : activeSubworld.activeChunks.entrySet()) {
             int baseX = entry.getKey().x * Chunk.size();
             int baseY = entry.getKey().y * Chunk.size();
             int i = 0;
@@ -339,17 +339,8 @@ public class Client extends GameApp {
         if (activeSubworld == null) return;
         int width = screenWidth / (viewScale * Chunk.size());
         int height = screenHeight / (viewScale * Chunk.size());
-
-        for (int x = -width; x <= width; x++) {
-            for (int y = -height; y <= height; y++) {
-                VectorI indexes = new VectorI(
-                        x + ((int)cameraPos.x / Chunk.size()),
-                        y + ((int)cameraPos.y / Chunk.size()));
-                if (!activeSubworld.loadedChunks.containsKey(indexes)) {
-                    activeSubworld.loadChunk(indexes);
-                }
-            }
-        }
+        activeSubworld.updateChunksForUser(
+                (int)cameraPos.x  / Chunk.size(), (int)cameraPos.y  / Chunk.size(), width, height);
     }
 
 
