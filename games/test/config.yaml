@@ -1,13 +1,16 @@
 materials:
   stone:
     type: solid
-    color: "#333333ff"
+    color: "#333333FF"
+  s1:
+    type: powder
+    color: "#E0D4DF2F"
   sand:
     type: powder
-    colors: ["#EAD54FFF", "#F2DD59FF", "#CCBB51FF"]
+    colors: ["#EAD54FFF", "#EED957FF", "#F2DD59FF", "#F6E15DFF"]
   water:
     type: liquid
-    color: "#506CD388"
+    colors: ["#4669C988", "#506CD388", "#5470D788"]
   steam:
     type: gas
     color: "#8A8ACE44"
