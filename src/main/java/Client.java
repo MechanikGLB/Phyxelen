@@ -1,5 +1,7 @@
 import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.glfw.GLFWFramebufferSizeCallback;
 import org.lwjgl.glfw.GLFWVidMode;
+import org.lwjgl.glfw.GLFWWindowRefreshCallback;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 
@@ -14,20 +16,21 @@ import static org.lwjgl.opengl.GL20.*;
 
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
+import static org.lwjgl.system.MemoryUtil.memAddress;
 
 
 public class Client extends GameApp {
+
+    private GLFWFramebufferSizeCallback fsCallback;
     protected long window;
-    private int screenWidth = 800;
-    private int screenHeight = 600;
+    private int screenWidth = 600;
+    private int screenHeight = 400;
     float maxFps = 30;
     float maxTps = 5;
 
     private VectorF cameraPos = new VectorF(0, 0);
     /// Length of world pixel side in real screen pixels
     private short viewScale = 8;
-    /// Free camera movement speed in screen pixels per second
-    private short cameraSpeed = 150;
     private float relativePixelWidth = 0.01f;
     private float relativePixelHeight = 0.01f;
     // Render buffers
@@ -68,25 +71,39 @@ public class Client extends GameApp {
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // the window will be resizable
 
         // Create the window
-        window = glfwCreateWindow(800, 600, "Phyxelen", NULL, NULL);
+        window = glfwCreateWindow(screenWidth, screenHeight, "Phyxelen", NULL, NULL);
         if ( window == NULL )
             throw new RuntimeException("Failed to create the GLFW window");
-
+        glfwSetWindowSizeLimits(window, 300, 300, GLFW_DONT_CARE, GLFW_DONT_CARE); //the window size limits
         glfwSetKeyCallback(window, (window, key, scancode, action, mods) -> {
             if ( key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE )
                 glfwSetWindowShouldClose(window, true); // We will detect this in the rendering loop
             if (action != GLFW_PRESS) return;
-
         });
+
+        glfwSetFramebufferSizeCallback(window, fsCallback = new GLFWFramebufferSizeCallback() {
+            public void invoke(long window, int w, int h) {
+                if (w > 0 && h > 0) {
+                    screenWidth = w;
+                    screenHeight = h;
+                }
+            }
+        });
+
 
         // Get the thread stack and push a new frame
         try ( MemoryStack stack = stackPush() ) {
-            IntBuffer pWidth = stack.mallocInt(1); // int*
-            IntBuffer pHeight = stack.mallocInt(1); // int*
+     //       IntBuffer pWidth = stack.mallocInt(1); // int*
+   //         IntBuffer pHeight = stack.mallocInt(1); // int*
 
             // Get the window size passed to glfwCreateWindow
-            glfwGetWindowSize(window, pWidth, pHeight);
-
+ //           glfwGetWindowSize(window, pWidth, pHeight);
+            /*
+            IntBuffer framebufferSize = stack.mallocInt(2);
+            nglfwGetFramebufferSize(window, memAddress(framebufferSize), memAddress(framebufferSize) + 4);
+            screenWidth = framebufferSize.get(0);
+            screenHeight = framebufferSize.get(1);
+*/
             // Get the resolution of the primary monitor
             GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 
@@ -98,9 +115,9 @@ public class Client extends GameApp {
 //            );
         } // the stack frame is popped automatically
         // Make the OpenGL context current
-        glfwMakeContextCurrent(window);
+        //glfwMakeContextCurrent(window);
         // Enable v-sync
-        glfwSwapInterval(1);
+//        glfwSwapInterval(1);
         // Make the window visible
         glfwShowWindow(window);
     }
@@ -108,6 +125,7 @@ public class Client extends GameApp {
 
     @Override
     protected void loop() {
+        glfwMakeContextCurrent(window);
         GL.createCapabilities();
 
         int[] widthBuffer = new int[1];
@@ -118,7 +136,7 @@ public class Client extends GameApp {
         int[] heightBuffer2 = new int[1];
 //        GLFWVidMode videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 //        if (videoMode != null) {
-////            throw new Exception("No video mode");
+//            throw new Exception("No video mode");
 //            screenWidth = videoMode.width();
 //            screenHeight = videoMode.height();
 //        } else {
@@ -133,7 +151,7 @@ public class Client extends GameApp {
         glMatrixMode( GL_MODELVIEW );
         glLoadIdentity();
 
-         vertexBuffer = glGenBuffers();
+        vertexBuffer = glGenBuffers();
         colorBuffer  = glGenBuffers();
 
         long lastCycleStartTime = System.currentTimeMillis();
@@ -142,12 +160,11 @@ public class Client extends GameApp {
         System.out.println("Start");
         while ( !glfwWindowShouldClose(window) ) {
             long cycleStartTime = System.currentTimeMillis();
-
+            glViewport(0, 0, screenWidth, screenHeight);
             float dt = (cycleStartTime - lastCycleStartTime) / 1000.0f;
             lastCycleStartTime = cycleStartTime;
             tick(dt);
 //            lastFrameTime = newTime;
-
             glfwGetWindowSize(window, widthBuffer2, heightBuffer2);
             if (widthBuffer[0] != widthBuffer2[0] || heightBuffer[0] != heightBuffer2[0]) {
                 widthBuffer[0] = widthBuffer2[0];
@@ -158,12 +175,12 @@ public class Client extends GameApp {
             if (counter % 32 == 0) {
                 updateChunks();
             }
-
             draw();
 
             glfwPollEvents();
 
-            cameraSpeed = (short) (200 + 400 * glfwGetKey(window, GLFW_KEY_LEFT_SHIFT));
+            /// Free camera movement speed in screen pixels per second
+            short cameraSpeed = (short) (200 + 400 * glfwGetKey(window, GLFW_KEY_LEFT_SHIFT));
 
             if (glfwGetKey(window, GLFW_KEY_UP) != 0 ||
                     glfwGetKey(window, GLFW_KEY_W) != 0)
@@ -309,9 +326,11 @@ public class Client extends GameApp {
 
 
     void updateScreenSize(int[] width, int[] height) {
-        screenWidth = width[0];
-        screenHeight = height[0];
+
+//        screenWidth = width[0];
+//        screenHeight = height[0];
 //        glfwSetWindowSize(window, screenWidth, screenHeight);
+//        System.out.println("screenresized");
 //        glfw
         screenSizeUpdated();
     }
