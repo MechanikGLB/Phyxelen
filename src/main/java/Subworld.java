@@ -10,6 +10,8 @@ public class Subworld {
     Random random = new Random();
     Hashtable<VectorI, Chunk> activeChunks = new Hashtable<>();
     Hashtable<VectorI, Chunk> passiveChunks = new Hashtable<>();
+    ArrayList<Entity> entities = new ArrayList<>();
+    ArrayList<Entity> entitiesToRemove = new ArrayList<>();
     File saveFile;
 
 
@@ -31,6 +33,11 @@ public class Subworld {
                 material.resolvePhysics(this, x + i % Chunk.size(), y + i / Chunk.size());
             }
         }
+        for (Entity entity : entities)
+            entity.tick(dt);
+
+        entities.removeAll(entitiesToRemove);
+        entitiesToRemove.clear();
     }
 
 
@@ -112,5 +119,10 @@ public class Subworld {
         if (x < 0) x += Chunk.size();
         if (y < 0) y += Chunk.size();
         return chunk.getPixel(x, y);
+    }
+
+
+    void removeEntity(Entity entity) {
+        entitiesToRemove.add(entity);
     }
 }

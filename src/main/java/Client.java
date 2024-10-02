@@ -197,6 +197,10 @@ public class Client extends GameApp {
             } else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_2) != 0)
                 setPixelAtCursorPosition(0);
 
+            if (glfwGetKey(window, GLFW_KEY_E) != 0) {
+                jetPixelAtCursorPosition();
+            }
+
             counter++;
             if (dt < (1000.0f/maxFps))
                 try {
@@ -224,11 +228,11 @@ public class Client extends GameApp {
             int i = 0;
             for (int pixel : entry.getValue().pixels) {
                 Material material = activeWorld.pixelIds[Pixels.getId(pixel)];
-                float drawX = (baseX + i % Chunk.size() - cameraPos.x) * relativePixelWidth * 2;
-                float drawY = (baseY + i / Chunk.size() - cameraPos.y) * relativePixelHeight * 2;
+                float drawX = (baseX + i % Chunk.size() - cameraPos.x) * relativePixelWidth;
+                float drawY = (baseY + i / Chunk.size() - cameraPos.y) * relativePixelHeight;
                 i++;
-                if (drawX < (-1 - (relativePixelWidth * 2)) || drawX > 1 ||
-                        drawY < (-1 - (relativePixelHeight * 2)) || drawY > 1
+                if (drawX < (-1 - (relativePixelWidth)) || drawX > 1 ||
+                        drawY < (-1 - (relativePixelHeight)) || drawY > 1
                 ) {
                     continue;
                 }
@@ -237,7 +241,19 @@ public class Client extends GameApp {
                 I++;
             }
         }
-
+        for (Entity entity : activeSubworld.entities) {
+            if (entity instanceof PixelEntity) {
+                Material material =
+                        activeWorld.pixelIds[Pixels.getId(((PixelEntity) entity).pixel)];
+                int colorId = Pixels.getColor(((PixelEntity) entity).pixel);
+                drawPixel(
+                        (entity.x - cameraPos.x) * relativePixelWidth,
+                        (entity.y - cameraPos.y) * relativePixelHeight,
+                        I, material, colorId
+                );
+                I++;
+            }
+        }
 
         glEnableClientState(GL_VERTEX_ARRAY);
         glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
@@ -283,12 +299,12 @@ public class Client extends GameApp {
         i *= 8;
         vertexArray[i] = drawX;
         vertexArray[i+1] = drawY;
-        vertexArray[i+2] = drawX + relativePixelWidth * 2;
+        vertexArray[i+2] = drawX + relativePixelWidth;
         vertexArray[i+3] = drawY;
-        vertexArray[i+4] = drawX + relativePixelWidth * 2;
-        vertexArray[i+5] = drawY + relativePixelHeight * 2;
+        vertexArray[i+4] = drawX + relativePixelWidth;
+        vertexArray[i+5] = drawY + relativePixelHeight;
         vertexArray[i+6] = drawX;
-        vertexArray[i+7] = drawY + relativePixelHeight * 2;
+        vertexArray[i+7] = drawY + relativePixelHeight;
     }
 
 
@@ -302,8 +318,8 @@ public class Client extends GameApp {
 
 
     void screenSizeUpdated() {
-        relativePixelWidth = viewScale / (float)screenWidth;
-        relativePixelHeight = viewScale / (float)screenHeight;
+        relativePixelWidth = viewScale / (float)screenWidth * 2;
+        relativePixelHeight = viewScale / (float)screenHeight * 2;
 
 //        int worldPixelCount = activeSubworld.loadedChunks.entrySet().size() * Chunk.area();
         int worldPixelCount = (int)(screenWidth / viewScale + 2) * (int)(screenHeight / viewScale + 2);
@@ -351,5 +367,18 @@ public class Client extends GameApp {
         activeSubworld.setPixel(
                 screenXToWorld((int)x[0]),
                 screenYToWorld((int)y[0]), Pixels.getPixelWithRandomColor(pixel));
+    }
+    void jetPixelAtCursorPosition() {
+        double[] x = new double[1];
+        double[] y = new double[1];
+        glfwGetCursorPos(window, x, y);
+        int pixel = activeSubworld.getPixel(screenXToWorld((int)x[0]), screenYToWorld((int)y[0]));
+        if (pixel != 0) {
+            activeSubworld.setPixel(screenXToWorld((int)x[0]), screenYToWorld((int)y[0]), 0);
+            activeSubworld.entities.add(new PixelEntity(
+                    screenXToWorld((int)x[0]), screenYToWorld((int)y[0]), activeSubworld, pixel,
+                    activeSubworld.random.nextFloat(-10f,10f),100,0,-9.8f
+            ));
+        }
     }
 }
