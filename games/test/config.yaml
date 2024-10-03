@@ -1,10 +1,7 @@
 materials:
   stone:
     type: solid
-    color: "#333333FF"
-  s1:
-    type: powder
-    color: "#E0D4DF2F"
+    colors: ["#444444FF", "#555555FF"]
   sand:
     type: powder
     colors: ["#EAD54FFF", "#EED957FF", "#F2DD59FF", "#F6E15DFF"]
@@ -14,3 +11,9 @@ materials:
   steam:
     type: gas
     color: "#8A8ACE44"
+  colors:
+    type: powder
+    colors: ["#CC2222FF", "#22CC22FF", "#2222CCFF", "#CCCC22FF", "#CC22CCFF", "#22CCCCFF"]
+  chess:
+    type: powder
+    colors: ["#000000FF", "#FFFFFFFF"]

@@ -27,7 +27,6 @@ public class Subworld {
         for (var chunk : activeChunks.entrySet()) {
             int x = chunk.getKey().x * Chunk.size();
             int y = chunk.getKey().y * Chunk.size();
-            // TODO: integrate Pixel physics
             for (int i = 0; i < Chunk.area(); i++) {
                 Material material = world.pixelIds[Pixels.getId(chunk.getValue().pixels[i])];
                 material.resolvePhysics(this, x + i % Chunk.size(), y + i / Chunk.size());
