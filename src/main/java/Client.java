@@ -25,6 +25,7 @@ public class Client extends GameApp {
     private short cameraSpeed = 150;
 
     /*Temp?*/private int paintingPixel = 1;
+    /*Temp?*/private int paintingSize = 0;
 
 
     @Override
@@ -129,10 +130,14 @@ public class Client extends GameApp {
                 viewScale += 1;
                 renderer.screenSizeUpdated();
             }
+
             for (int i = 0; i < 10; i++)
                 if (glfwGetKey(window, GLFW_KEY_0 + i) != 0)
                     paintingPixel = i;
-
+            if (glfwGetKey(window, GLFW_KEY_LEFT_BRACKET) != 0 && paintingSize > 1)
+                paintingSize -= 1;
+            if (glfwGetKey(window, GLFW_KEY_RIGHT_BRACKET) != 0)
+                paintingSize += 1;
 
             if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) != 0) {
                 setPixelAtCursorPosition(paintingPixel);
@@ -183,9 +188,13 @@ public class Client extends GameApp {
         double[] x = new double[1];
         double[] y = new double[1];
         glfwGetCursorPos(window, x, y);
-        activeSubworld.setPixel(
-                screenXToWorld((int) x[0]),
-                screenYToWorld((int) y[0]), Pixels.getPixelWithRandomColor(pixel));
+        for (int dx = -paintingSize/2; dx <= paintingSize/2; dx++) {
+            for (int dy = -paintingSize/2; dy <= paintingSize/2; dy++) {
+                activeSubworld.setPixel(
+                        screenXToWorld((int) x[0]) + dx,
+                        screenYToWorld((int) y[0]) + dy, Pixels.getPixelWithRandomColor(pixel));
+            }
+        }
     }
 
     void jetPixelAtCursorPosition() {
