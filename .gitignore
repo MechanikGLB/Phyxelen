@@ -5,10 +5,7 @@ build/
 !**/src/test/**/build/
 
 ### IntelliJ IDEA ###
-.idea/modules.xml
-.idea/jarRepositories.xml
-.idea/compiler.xml
-.idea/libraries/
+.idea/
 *.iws
 *.iml
 *.ipr
@@ -28,6 +25,7 @@ bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
 
+
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
@@ -36,7 +34,9 @@ bin/
 /.nb-gradle/
 
 ### VS Code ###
-.vscode/
-
-### Mac OS ###
-.DS_Store
+.vscode/**/build/
+!src/**/build/
+gradle-app.setting
+!gradle-wrapper.jar
+!gradle-wrapper.properties
+.gradletasknamecache
