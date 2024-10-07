@@ -32,6 +32,8 @@ public class Subworld {
                 material.resolvePhysics(this, x + i % Chunk.size(), y + i / Chunk.size());
             }
         }
+        for (var chunk : activeChunks.entrySet())
+            chunk.getValue().swapBuffer();
         for (Entity entity : entities)
             entity.tick(dt);
 
