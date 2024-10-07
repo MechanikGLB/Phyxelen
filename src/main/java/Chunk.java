@@ -6,13 +6,19 @@ public class Chunk {
     static short size() {return size;}
     static int area() {return size * size;}
 
+    static int toRelative(int coordinate) {
+        coordinate %= Chunk.size();
+        if (coordinate < 0)
+            return coordinate + Chunk.size();
+        else return coordinate;
+    }
 
-    void setPixel(int x, int y, int pixel) {
+    public void setPixel(int x, int y, int pixel) {
         assert x < size && y < size;
         pixels[x + y * size] = pixel;
     }
 
-    int getPixel(int x, int y) {
+    public int getPixel(int x, int y) {
         assert x < size && y < size;
         return pixels[x + y * size];
     }

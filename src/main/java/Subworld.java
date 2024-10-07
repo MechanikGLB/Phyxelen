@@ -87,37 +87,28 @@ public class Subworld {
     }
 
 
+    public Chunk getChunkHavingPixel(int x, int y) {
+        return activeChunks.get(new VectorI(
+                x >= 0 ? x / Chunk.size() : (x+1) / Chunk.size() - 1,
+                y >= 0 ? y / Chunk.size() : (y+1) / Chunk.size() - 1));
+    }
+
+
     /// Sets `pixel` at absolute `x` and `y`
     void setPixel(int x, int y, int pixel) {
         assert world.pixelIds.length >= pixel;
 
-        Chunk chunk = activeChunks.get(new VectorI(
-                x >= 0 ? x / Chunk.size() : (x+1) / Chunk.size() - 1,
-                y >= 0 ? y / Chunk.size() : (y+1) / Chunk.size() - 1));
-
+        Chunk chunk = getChunkHavingPixel(x, y);
         if (chunk == null) return; // TODO: decide what to do in this case
 
-        x %= Chunk.size();
-        y %= Chunk.size();
-
-        // Correcting coordinates in negative chunks
-        if (x < 0) x += Chunk.size();
-        if (y < 0) y += Chunk.size();
-        chunk.setPixel(x, y, pixel);
+        chunk.setPixel(Chunk.toRelative(x), Chunk.toRelative(y), pixel);
     }
 
 
     int getPixel(int x, int y) {
-        Chunk chunk = activeChunks.get(new VectorI(
-                x >= 0 ? x / Chunk.size() : (x+1) / Chunk.size() - 1,
-                y >= 0 ? y / Chunk.size() : (y+1) / Chunk.size() - 1));
+        Chunk chunk = getChunkHavingPixel(x, y);
         if (chunk == null) return Pixels.notLoadedPixel;
-        x %= Chunk.size();
-        y %= Chunk.size();
-        // Correcting coordinates in negative chunks
-        if (x < 0) x += Chunk.size();
-        if (y < 0) y += Chunk.size();
-        return chunk.getPixel(x, y);
+        return chunk.getPixel(Chunk.toRelative(x), Chunk.toRelative(y));
     }
 
 
