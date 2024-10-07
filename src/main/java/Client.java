@@ -190,7 +190,7 @@ public class Client extends GameApp {
         glfwGetCursorPos(window, x, y);
         for (int dx = -paintingSize/2; dx <= paintingSize/2; dx++) {
             for (int dy = -paintingSize/2; dy <= paintingSize/2; dy++) {
-                activeSubworld.setPixel(
+                activeSubworld.presetPixel(
                         screenXToWorld((int) x[0]) + dx,
                         screenYToWorld((int) y[0]) + dy, Pixels.getPixelWithRandomColor(pixel));
             }
@@ -201,7 +201,7 @@ public class Client extends GameApp {
         double[] x = new double[1];
         double[] y = new double[1];
         glfwGetCursorPos(window, x, y);
-        int pixel = activeSubworld.getPixel(screenXToWorld((int) x[0]), screenYToWorld((int) y[0]));
+        int pixel = activeSubworld.getPixel(screenXToWorld((int) x[0]), screenYToWorld((int) y[0]), 0);
         if (pixel != 0) {
             activeSubworld.setPixel(screenXToWorld((int) x[0]), screenYToWorld((int) y[0]), 0);
             activeSubworld.entities.add(new PixelEntity(
@@ -217,7 +217,8 @@ public class Client extends GameApp {
         glfwGetCursorPos(window, x, y);
         for (int dx = -4; dx <= 4; dx++) {
             for (int dy = -4; dy <= 4; dy++) {
-                int pixel = activeSubworld.getPixel(screenXToWorld((int) x[0]) + dx, screenYToWorld((int) y[0]) + dy);
+                int pixel = activeSubworld.getPixel(
+                        screenXToWorld((int) x[0]) + dx, screenYToWorld((int) y[0]) + dy, 0);
                 if (pixel != 0) {
                     activeSubworld.setPixel(screenXToWorld((int) x[0]) + dx, screenYToWorld((int) y[0]) + dy, 0);
                     activeSubworld.entities.add(new PixelEntity(

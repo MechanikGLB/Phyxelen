@@ -17,7 +17,7 @@ public class WorldGenerator {
             for (int x = 0; x < Chunk.size(); x++) {
                 if (baseY + y + Math.sin((baseX + x)*0.5)*50 < 0) {
 //                if (Math.sqrt(Math.pow(baseX + x, 2) + Math.pow(baseY + y, 2)) < 40) {
-                    chunk.presetPixel(x, y, Pixels.getPixelWithRandomColor(1));
+                    chunk.setPixel(x, y, Pixels.getPixelWithRandomColor(1));
                 } else {
                     chunk.pixels[i] = 0;
                 }

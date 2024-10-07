@@ -1,11 +1,11 @@
 public class MaterialGas extends Material {
-    void resolvePhysics(Subworld sw, int x, int y) {
-        int pixelBuf = sw.getPixel(x, y);
-        int pixelAbove = sw.getPixel(x, y + 1);
-        int pixelAboveLeft = sw.getPixel(x - 1, y + 1);
-        int pixelAboveRight = sw.getPixel(x + 1, y + 1);
-        int pixelLeft = sw.getPixel(x - 1, y);
-        int pixelRight = sw.getPixel(x + 1, y);
+    void resolvePhysics(Subworld sw, int x, int y, int interactionDepth) {
+        int pixelBuf = sw.getPixel(x, y, interactionDepth);
+        int pixelAbove = sw.getPixel(x, y + 1, interactionDepth);
+        int pixelAboveLeft = sw.getPixel(x - 1, y + 1, interactionDepth);
+        int pixelAboveRight = sw.getPixel(x + 1, y + 1, interactionDepth);
+        int pixelLeft = sw.getPixel(x - 1, y, interactionDepth);
+        int pixelRight = sw.getPixel(x + 1, y, interactionDepth);
 
         if (pixelAbove == 0) {
             sw.setPixel(x, y + 1, pixelBuf);

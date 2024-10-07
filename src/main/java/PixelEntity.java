@@ -25,7 +25,7 @@ public class PixelEntity extends Entity {
     void tick(float dt) {
         float newX = x + velocityX * dt;
         float newY = y + velocityY * dt;
-        if (subworld.getPixel(Math.round(newX), Math.round(newY)) != 0) {
+        if (subworld.getPixel(Math.round(newX), Math.round(newY), 0) != 0) {
             subworld.setPixel(Math.round(x), Math.round(y), pixel);
             subworld.removeEntity(this);
             return;

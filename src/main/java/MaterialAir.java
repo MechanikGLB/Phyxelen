@@ -1,3 +1,3 @@
 public class MaterialAir extends Material {
-    void resolvePhysics(Subworld subworld, int x, int y) { };
+    void resolvePhysics(Subworld subworld, int x, int y, int interactionDepth) { };
 }
