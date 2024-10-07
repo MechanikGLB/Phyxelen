@@ -63,33 +63,53 @@ public class Content {
                 if (materials != null) {
                     var materialTable = (HashMap<String, HashMap<String, Object>>) materials;
                     for (var material : materialTable.entrySet()) {
-                        Material materialDefinition;
-                        String type = (String) material.getValue().get("type");
-                        switch (type.toLowerCase()) {
-                            case "solid" -> materialDefinition = new MaterialSolid();
-                            case "powder" -> materialDefinition = new MaterialPowder();
-                            case "liquid" -> materialDefinition = new MaterialLiquid();
-                            case "gas" -> materialDefinition = new MaterialGas();
-                            default -> {continue;}
-                        }
-                        if (material.getValue().get("color") != null) {
-                            ColorWithAplha[] colors = new ColorWithAplha[1];
-                            colors[0] = new ColorWithAplha(((String) material.getValue().get("color")));
-                            materialDefinition.colors = colors;
-                        } else if (material.getValue().get("colors") != null) {
-                            var colorStrings = (List<String>) material.getValue().get("colors");
-                            ColorWithAplha[] colors = new ColorWithAplha[colorStrings.size()];
-                            for (int i = 0; i < colors.length; i++) {
-                                colors[i] = new ColorWithAplha(colorStrings.get(i));
-                            }
-                            materialDefinition.colors = colors;
-                        }
+                        Material materialDefinition = parseMaterialType(material);
+                        if (materialDefinition == null)
+                            continue;
+                        parseMaterialColors(material, materialDefinition);
+                        parseMaterialDensity(material, materialDefinition);
                         pixelDefinitions.put(material.getKey(), materialDefinition);
                     }
                 }
             } catch (ClassCastException e) {
                 throw new RuntimeException("Module " + moduleName + " has wrong structure");
             }
+        }
+    }
+
+    Material parseMaterialType(Map.Entry<String, HashMap<String, Object>> materialTable) {
+        String type = (String) materialTable.getValue().get("type");
+        switch (type.toLowerCase()) {
+            case "solid" -> { return new MaterialSolid(); }
+            case "powder" -> { return new MaterialPowder(); }
+            case "liquid" -> { return new MaterialLiquid(); }
+            case "gas" -> { return new MaterialGas(); }
+            default -> { return null; }
+        }
+    }
+
+    void parseMaterialColors(Map.Entry<String, HashMap<String, Object>> materialTable, Material definition) {
+        Object colorObject = materialTable.getValue().get("color");
+        if (colorObject != null) {
+            ColorWithAplha[] colors = new ColorWithAplha[1];
+            colors[0] = new ColorWithAplha(((String) colorObject));
+            definition.colors = colors;
+        } else if (materialTable.getValue().get("colors") != null) {
+            var colorStrings = (List<String>) materialTable.getValue().get("colors");
+            ColorWithAplha[] colors = new ColorWithAplha[colorStrings.size()];
+            for (int i = 0; i < colors.length; i++) {
+                colors[i] = new ColorWithAplha(colorStrings.get(i));
+            }
+            definition.colors = colors;
+        }
+    }
+
+    void parseMaterialDensity(Map.Entry<String, HashMap<String, Object>> materialTable, Material definition) {
+        Object densityObject = materialTable.getValue().get("density");
+        if (densityObject != null) {
+            definition.density = (Double) densityObject;
+        } else {
+            definition.density = 0.02f;
         }
     }
 //    void updateModuleList()

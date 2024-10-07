@@ -122,14 +122,9 @@ public class Subworld {
     }
 
 
-    int getPixel(int x, int y, int interactionDepth) {
+    int getPixel(int x, int y) {
         Chunk chunk = getChunkHavingPixel(x, y);
         if (chunk == null) return Pixels.notLoadedPixel;
-        int pixel = chunk.getPixel(Chunk.toRelative(x), Chunk.toRelative(y));
-        if (!getPixelPhysicSolved(x, y) && interactionDepth < 0) {
-            Material material = world.pixelIds[Pixels.getId(pixel)];
-            material.resolvePhysics(this, x, y, interactionDepth + 1);
-        }
         return chunk.getPixel(Chunk.toRelative(x), Chunk.toRelative(y));
     }
 
@@ -139,6 +134,12 @@ public class Subworld {
         if (chunk == null) return true;
         return chunk.getPixelPhysicSolved(Chunk.toRelative(x), Chunk.toRelative(y));
     }
+
+
+    Material getMaterial(int pixel) {
+        return world.pixelIds[Pixels.getId(pixel)];
+    }
+//    Material getMaterial(int x, int y)
 
 
     void removeEntity(Entity entity) {

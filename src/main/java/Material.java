@@ -27,6 +27,7 @@ public abstract class Material {
     ColorWithAplha[] colors;
     Hashtable<String, MaterialInteraction> interactions;
     Hashtable<Integer, MaterialInteraction> interactionsById;
+    double density = 0.02f;
 
     abstract void resolvePhysics(Subworld subworld, int x, int y, int interactionDepth);
 }

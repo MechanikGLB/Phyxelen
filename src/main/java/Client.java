@@ -1,6 +1,7 @@
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Objects;
 
@@ -201,7 +202,7 @@ public class Client extends GameApp {
         double[] x = new double[1];
         double[] y = new double[1];
         glfwGetCursorPos(window, x, y);
-        int pixel = activeSubworld.getPixel(screenXToWorld((int) x[0]), screenYToWorld((int) y[0]), 0);
+        int pixel = activeSubworld.getPixel(screenXToWorld((int) x[0]), screenYToWorld((int) y[0]));
         if (pixel != 0) {
             activeSubworld.setPixel(screenXToWorld((int) x[0]), screenYToWorld((int) y[0]), 0);
             activeSubworld.entities.add(new PixelEntity(
@@ -218,7 +219,7 @@ public class Client extends GameApp {
         for (int dx = -4; dx <= 4; dx++) {
             for (int dy = -4; dy <= 4; dy++) {
                 int pixel = activeSubworld.getPixel(
-                        screenXToWorld((int) x[0]) + dx, screenYToWorld((int) y[0]) + dy, 0);
+                        screenXToWorld((int) x[0]) + dx, screenYToWorld((int) y[0]) + dy);
                 if (pixel != 0) {
                     activeSubworld.setPixel(screenXToWorld((int) x[0]) + dx, screenYToWorld((int) y[0]) + dy, 0);
                     activeSubworld.entities.add(new PixelEntity(
@@ -260,7 +261,7 @@ public class Client extends GameApp {
             screenWidth = width[0];
             screenHeight = height[0];
             screenSizeUpdated();
-        };
+        }
 
 
         public void draw() {

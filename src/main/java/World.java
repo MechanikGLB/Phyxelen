@@ -121,6 +121,7 @@ public class World {
         pixelIds[0] = new MaterialAir();
         pixelIds[0].colors = new ColorWithAplha[1];
         pixelIds[0].colors[0] = new ColorWithAplha(0.2f, 0.1f, 0.0f, 1f);
+        pixelIds[0].density = 0.01f;
         int i = 1;
         for (var definition : content.pixelDefinitions.values()) {
             pixelIds[i] = definition;

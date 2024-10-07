@@ -1,19 +1,25 @@
 materials:
   stone:
+    density: 10.0
     type: solid
     colors: ["#444444FF", "#555555FF"]
   sand:
     type: powder
+    density: 5.0
     colors: ["#EAD54FFF", "#EED957FF", "#F2DD59FF", "#F6E15DFF"]
   water:
+    density: 1.0
     type: liquid
     colors: ["#4669C988", "#506CD388", "#5470D788"]
   steam:
+    density: 0.2
     type: gas
     color: "#8A8ACE44"
   colors:
+    density: 2.0
     type: powder
     colors: ["#CC2222FF", "#22CC22FF", "#2222CCFF", "#CCCC22FF", "#CC22CCFF", "#22CCCCFF"]
   chess:
+    density: 6.0
     type: powder
     colors: ["#000000FF", "#FFFFFFFF"]
