@@ -1,5 +1,5 @@
 public class MaterialPowder extends Material {
-    void resolvePhysics(Subworld sw, int x, int y, int interactionDepth) {
+    void resolvePhysics(Subworld sw, int x, int y) {
         int pixelSelf = sw.getPixel(x, y);
         Material materialSelf = sw.getMaterial(pixelSelf);
         int pixelUnder = sw.getPixel(x, y - 1);

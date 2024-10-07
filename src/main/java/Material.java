@@ -29,5 +29,5 @@ public abstract class Material {
     Hashtable<Integer, MaterialInteraction> interactionsById;
     double density = 0.02f;
 
-    abstract void resolvePhysics(Subworld subworld, int x, int y, int interactionDepth);
+    abstract void resolvePhysics(Subworld subworld, int x, int y);
 }

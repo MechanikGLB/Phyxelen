@@ -1,5 +1,5 @@
 public class MaterialGas extends Material {
-    void resolvePhysics(Subworld sw, int x, int y, int interactionDepth) {
+    void resolvePhysics(Subworld sw, int x, int y) {
         int pixelBuf = sw.getPixel(x, y);
         int pixelAbove = sw.getPixel(x, y + 1);
 

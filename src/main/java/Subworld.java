@@ -31,7 +31,7 @@ public class Subworld {
                 if (getPixelPhysicSolved(x + i % Chunk.size(), y + i / Chunk.size()))
                     continue;
                 Material material = world.pixelIds[Pixels.getId(chunk.getValue().pixels[i])];
-                material.resolvePhysics(this, x + i % Chunk.size(), y + i / Chunk.size(), 0);
+                material.resolvePhysics(this, x + i % Chunk.size(), y + i / Chunk.size());
             }
         }
         for (var chunk : activeChunks.entrySet())

@@ -1,5 +1,5 @@
 public class MaterialLiquid extends Material {
-    void resolvePhysics(Subworld sw, int x, int y, int interactionDepth) {
+    void resolvePhysics(Subworld sw, int x, int y) {
         int pixelBuf = sw.getPixel(x, y);
         int pixelUnder = sw.getPixel(x, y - 1);
         int pixelUnderLeft = sw.getPixel(x - 1, y - 1);
