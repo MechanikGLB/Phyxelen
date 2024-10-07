@@ -216,15 +216,16 @@ public class Client extends GameApp {
         double[] x = new double[1];
         double[] y = new double[1];
         glfwGetCursorPos(window, x, y);
-        for (int dx = -4; dx <= 4; dx++) {
-            for (int dy = -4; dy <= 4; dy++) {
+        for (int dx = -paintingSize/2; dx <= paintingSize/2; dx++) {
+            for (int dy = -paintingSize/2; dy <= paintingSize/2; dy++) {
                 int pixel = activeSubworld.getPixel(
                         screenXToWorld((int) x[0]) + dx, screenYToWorld((int) y[0]) + dy);
                 if (pixel != 0) {
                     activeSubworld.setPixel(screenXToWorld((int) x[0]) + dx, screenYToWorld((int) y[0]) + dy, 0);
+                    double angle = activeSubworld.random.nextDouble(-Math.PI / 3, Math.PI / 3);
                     activeSubworld.entities.add(new PixelEntity(
                             screenXToWorld((int) x[0]) + dx, screenYToWorld((int) y[0]) + dy, activeSubworld, pixel,
-                            activeSubworld.random.nextFloat(-50f, 50f), 120,
+                            (float)Math.sin(angle) * 100.f, (float)Math.cos(angle) * 100.f,
                             0, -9.8f
                     ));
                 }
@@ -244,6 +245,10 @@ public class Client extends GameApp {
         float[] colorArray;
         private int vertexBuffer;
         private int colorBuffer;
+        float[] movingPixelVertexArray;
+        float[] movingPixelColorArray;
+        private int movingPixelVertexBuffer;
+        private int movingPixelColorBuffer;
 
 
         Renderer(Client client) {
@@ -254,6 +259,8 @@ public class Client extends GameApp {
         void init() {
             vertexBuffer = glGenBuffers();
             colorBuffer = glGenBuffers();
+            movingPixelVertexBuffer = glGenBuffers();
+            movingPixelColorBuffer = glGenBuffers();
 
             int[] width = new int[1];
             int[] height = new int[1];
@@ -269,6 +276,7 @@ public class Client extends GameApp {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 
             int worldPixelCount = 0;
+            int movingPixelCount = 0;
             for (Map.Entry<VectorI, Chunk> entry : activeSubworld.activeChunks.entrySet()) {
                 int baseX = entry.getKey().x * Chunk.size();
                 int baseY = entry.getKey().y * Chunk.size();
@@ -284,7 +292,7 @@ public class Client extends GameApp {
                         continue;
                     }
                     int colorId = Pixels.getColor(pixel);
-                    drawPixel(drawX, drawY, worldPixelCount, material, colorId);
+                    drawPixel(drawX, drawY, worldPixelCount, material, colorId, vertexArray, colorArray);
                     worldPixelCount++;
                 }
             }
@@ -296,9 +304,10 @@ public class Client extends GameApp {
                     drawPixel(
                             (entity.x - cameraPos.x) * relativePixelWidth,
                             (entity.y - cameraPos.y) * relativePixelHeight,
-                            worldPixelCount, material, colorId
+                            movingPixelCount, material, colorId,
+                            movingPixelVertexArray, movingPixelColorArray
                     );
-                    worldPixelCount++;
+                    movingPixelCount++;
                 }
             }
 
@@ -312,8 +321,22 @@ public class Client extends GameApp {
             glBufferData(GL_ARRAY_BUFFER, colorArray, GL_STREAM_DRAW);
             glColorPointer(3, GL_FLOAT, 0, 0);
 
-
             glDrawArrays(GL_QUADS, 0, worldPixelCount * 4);
+
+//            glDisableClientState(GL_VERTEX_ARRAY);
+//            glDisableClientState(GL_COLOR_ARRAY);
+
+            glEnableClientState(GL_VERTEX_ARRAY);
+            glBindBuffer(GL_ARRAY_BUFFER, movingPixelVertexBuffer);
+            glBufferData(GL_ARRAY_BUFFER, movingPixelVertexArray, GL_STREAM_DRAW);
+            glVertexPointer(2, GL_FLOAT, 0, 0);
+
+            glEnableClientState(GL_COLOR_ARRAY);
+            glBindBuffer(GL_ARRAY_BUFFER, movingPixelColorBuffer);
+            glBufferData(GL_ARRAY_BUFFER, movingPixelColorArray, GL_STREAM_DRAW);
+            glColorPointer(3, GL_FLOAT, 0, 0);
+
+            glDrawArrays(GL_QUADS, 0, movingPixelCount * 4);
 
             glDisableClientState(GL_VERTEX_ARRAY);
 
@@ -321,7 +344,9 @@ public class Client extends GameApp {
         }
 
 
-        private void drawPixel(float drawX, float drawY, int i, Material material, int colorId) {
+        private void drawPixel(float drawX, float drawY, int i, Material material, int colorId,
+                float[] vertexArray, float[] colorArray
+        ) {
             int ci = i * 12;
             colorArray[ci] = material.colors[colorId].r;
             colorArray[ci + 1] = material.colors[colorId].g;
@@ -359,6 +384,8 @@ public class Client extends GameApp {
             int worldPixelCount = (int) (screenWidth / viewScale + 2) * (int) (screenHeight / viewScale + 2);
             vertexArray = new float[worldPixelCount * 8];
             colorArray = new float[worldPixelCount * 8 * 3];
+            movingPixelVertexArray = new float[worldPixelCount * 4];
+            movingPixelColorArray = new float[worldPixelCount * 4 * 3];
             glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
             glBufferData(GL_ARRAY_BUFFER, vertexArray, GL_STREAM_DRAW);
             glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
