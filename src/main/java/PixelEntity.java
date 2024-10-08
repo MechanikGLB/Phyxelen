@@ -1,16 +1,16 @@
 public class PixelEntity extends Entity {
-    int pixel = 0;
+    Pixel pixel;
     float velocityX = 0;
     float velocityY = 0;
     float accelerationX = 0;
     float accelerationY = 0;
 
-    public PixelEntity(float x, float y, Subworld subworld, int pixel) {
+    public PixelEntity(float x, float y, Subworld subworld, Pixel pixel) {
         super(x, y, subworld);
         this.pixel = pixel;
     }
     public PixelEntity(
-            float x, float y, Subworld subworld, int pixel,
+            float x, float y, Subworld subworld, Pixel pixel,
             float velocityX, float velocityY,
             float accelerationX, float accelerationY) {
         super(x, y, subworld);
@@ -25,8 +25,11 @@ public class PixelEntity extends Entity {
     void tick(float dt) {
         float newX = x + velocityX * dt;
         float newY = y + velocityY * dt;
-        if (subworld.getPixel(Math.round(newX), Math.round(newY)) != 0) {
-            subworld.setPixel(Math.round(x), Math.round(y), pixel);
+        if (!(subworld.getPixel(Math.round(newX), Math.round(newY)).material instanceof MaterialAir)) {
+            pixel.x = Math.round(x);
+            pixel.y = Math.round(y);
+//            pixel.material =
+            subworld.setPixel(pixel);
             subworld.removeEntity(this);
             return;
         }

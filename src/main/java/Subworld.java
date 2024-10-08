@@ -19,23 +19,25 @@ public class Subworld {
         this.world = world;
 
         saveFile = new File(world.path + File.separator + "subworlds" + File.separator + subworldId);
-        /*TEMP*/ generator = new WorldGenerator();
+        /*TEMP*/ generator = new WorldGenerator(this);
     }
 
 
     public void tick(float dt) {
-        for (var chunk : activeChunks.entrySet()) {
-            int x = chunk.getKey().x * Chunk.size();
-            int y = chunk.getKey().y * Chunk.size();
-            for (int i = 0; i < Chunk.area(); i++) {
-                if (getPixelPhysicSolved(x + i % Chunk.size(), y + i / Chunk.size()))
-                    continue;
-                Material material = world.pixelIds[Pixels.getId(chunk.getValue().pixels[i])];
-                material.resolvePhysics(this, x + i % Chunk.size(), y + i / Chunk.size());
+        for (var chunk : activeChunks.values()) {
+            if (chunk.solved) continue;
+            chunk.solved = true;
+            for (Pixel pixel : chunk.pixels) {
+                if (pixel.solved)
+                    chunk.solved = false;
+                pixel.solvePhysic();
             }
         }
-        for (var chunk : activeChunks.entrySet())
-            chunk.getValue().swapBuffer();
+        for (var chunk : activeChunks.values())
+            for (Pixel pixel : chunk.pixels)
+                pixel.solved = false;
+//        for (var chunk : activeChunks.entrySet())
+//            chunk.getValue().swapBuffer();
         for (Entity entity : entities)
             entity.tick(dt);
 
@@ -54,8 +56,8 @@ public class Subworld {
         if (Main.getGame().gameState == GameApp.GameState.Server) return; // TODO: multiplayer, require chunk via net
 
         //if () {} // TODO: load from file. True if found
-
-        activeChunks.put(indexes, generator.generateChunk(indexes));
+        Chunk chunk = generator.generateChunk(indexes);
+        activeChunks.put(indexes, chunk);
     }
 
 
@@ -103,42 +105,56 @@ public class Subworld {
     }
 
 
-    /// Sets `pixel` at absolute `x` and `y`
-    void setPixel(int x, int y, int pixel) {
-        assert world.pixelIds.length >= pixel;
+    void setPixel(Pixel pixel) {
+//        assert world.pixelIds.length >= pixel;
 
-        Chunk chunk = getChunkHavingPixel(x, y);
+        Chunk chunk = getChunkHavingPixel(pixel.x, pixel.y);
         if (chunk == null) return; // TODO: decide what to do in this case
 
-        chunk.setPixel(Chunk.toRelative(x), Chunk.toRelative(y), pixel);
+        chunk.setPixel(pixel);
     }
 
 
-    void presetPixel(int x, int y, int pixel) {
-        assert world.pixelIds.length >= pixel;
-        Chunk chunk = getChunkHavingPixel(x, y);
+    void presetPixel(Pixel pixel) {
+//        assert world.pixelIds.length >= pixel.material.id;
+        Chunk chunk = getChunkHavingPixel(pixel.x, pixel.y);
         if (chunk == null) return;
-        chunk.presetPixel(Chunk.toRelative(x), Chunk.toRelative(y), pixel);
+        chunk.presetPixel(pixel);
     }
 
 
-    int getPixel(int x, int y) {
+    void swapPixels(Pixel pixel1, Pixel pixel2) {
+        int xBuffer = pixel1.x;
+        int yBuffer = pixel1.y;
+        pixel1.x = pixel2.x;
+        pixel1.y = pixel2.y;
+        pixel2.x = xBuffer;
+        pixel2.y = yBuffer;
+        setPixel(pixel1);
+        setPixel(pixel2);
+    }
+
+
+    Pixel getPixel(int x, int y) {
         Chunk chunk = getChunkHavingPixel(x, y);
-        if (chunk == null) return Pixels.notLoadedPixel;
-        return chunk.getPixel(Chunk.toRelative(x), Chunk.toRelative(y));
+        if (chunk == null) return null;
+        Pixel pixel = chunk.getPixel(x, y);
+        if (!pixel.solved)
+            pixel.solvePhysic();
+        return chunk.getPixel(x, y);
     }
 
 
-    boolean getPixelPhysicSolved(int x, int y) {
-        Chunk chunk = getChunkHavingPixel(x, y);
-        if (chunk == null) return true;
-        return chunk.getPixelPhysicSolved(Chunk.toRelative(x), Chunk.toRelative(y));
-    }
+//    boolean getPixelPhysicSolved(int x, int y) {
+//        Chunk chunk = getChunkHavingPixel(x, y);
+//        if (chunk == null) return true;
+//        return chunk.getPixelPhysicSolved(Chunk.toRelative(x), Chunk.toRelative(y));
+//    }
 
 
-    Material getMaterial(int pixel) {
-        return world.pixelIds[Pixels.getId(pixel)];
-    }
+//    Material getMaterial(int pixel) {
+//        return world.pixelIds[Pixels.getId(pixel)];
+//    }
 //    Material getMaterial(int x, int y)
 
 

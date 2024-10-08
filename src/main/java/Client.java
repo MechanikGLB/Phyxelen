@@ -17,6 +17,8 @@ public class Client extends GameApp {
     private Renderer renderer = new Renderer(this);
 
     float maxFps = 30;
+    // Frame delta time;
+    float fdt;
     float maxTps = 5;
 
     private VectorF cameraPos = new VectorF(0, 0);
@@ -94,9 +96,9 @@ public class Client extends GameApp {
         while (!glfwWindowShouldClose(window)) {
             long cycleStartTime = System.currentTimeMillis();
 
-            float dt = (cycleStartTime - lastCycleStartTime) / 1000.0f;
+            fdt = (cycleStartTime - lastCycleStartTime) / 1000.0f;
             lastCycleStartTime = cycleStartTime;
-            tick(dt);
+            tick(fdt);
 //            lastFrameTime = newTime;
 
             if (counter % 32 == 0) {
@@ -111,16 +113,16 @@ public class Client extends GameApp {
 
             if (glfwGetKey(window, GLFW_KEY_UP) != 0 ||
                     glfwGetKey(window, GLFW_KEY_W) != 0)
-                cameraPos.y += cameraSpeed / viewScale * dt;
+                cameraPos.y += cameraSpeed / viewScale * fdt;
             if (glfwGetKey(window, GLFW_KEY_DOWN) != 0 ||
                     glfwGetKey(window, GLFW_KEY_S) != 0)
-                cameraPos.y -= cameraSpeed / viewScale * dt;
+                cameraPos.y -= cameraSpeed / viewScale * fdt;
             if (glfwGetKey(window, GLFW_KEY_LEFT) != 0 ||
                     glfwGetKey(window, GLFW_KEY_A) != 0)
-                cameraPos.x -= cameraSpeed / viewScale * dt;
+                cameraPos.x -= cameraSpeed / viewScale * fdt;
             if (glfwGetKey(window, GLFW_KEY_RIGHT) != 0 ||
                     glfwGetKey(window, GLFW_KEY_D) != 0)
-                cameraPos.x += cameraSpeed / viewScale * dt;
+                cameraPos.x += cameraSpeed / viewScale * fdt;
 
             // Scaling is not ready!
             if (glfwGetKey(window, GLFW_KEY_MINUS) != 0 && viewScale > 1) {
@@ -152,9 +154,9 @@ public class Client extends GameApp {
 
 
             counter++;
-            if (dt < (1000.0f / maxFps))
+            if (fdt < (1000.0f / maxFps))
                 try {
-                    Thread.sleep((long) (1000.0f / maxFps - dt));
+                    Thread.sleep((long) (1000.0f / maxFps - fdt));
                 } catch (InterruptedException e) {
                     continue;
                 }
@@ -192,8 +194,8 @@ public class Client extends GameApp {
         for (int dx = -paintingSize/2; dx <= paintingSize/2; dx++) {
             for (int dy = -paintingSize/2; dy <= paintingSize/2; dy++) {
                 activeSubworld.presetPixel(
-                        screenXToWorld((int) x[0]) + dx,
-                        screenYToWorld((int) y[0]) + dy, Pixels.getPixelWithRandomColor(pixel));
+                        new Pixel(Pixels.getPixelWithRandomColor(pixel), null,
+                                screenXToWorld((int) x[0]) + dx, screenYToWorld((int) y[0]) + dy));
             }
         }
     }
@@ -202,14 +204,14 @@ public class Client extends GameApp {
         double[] x = new double[1];
         double[] y = new double[1];
         glfwGetCursorPos(window, x, y);
-        int pixel = activeSubworld.getPixel(screenXToWorld((int) x[0]), screenYToWorld((int) y[0]));
-        if (pixel != 0) {
-            activeSubworld.setPixel(screenXToWorld((int) x[0]), screenYToWorld((int) y[0]), 0);
-            activeSubworld.entities.add(new PixelEntity(
-                    screenXToWorld((int) x[0]), screenYToWorld((int) y[0]), activeSubworld, pixel,
-                    activeSubworld.random.nextFloat(-20f, 20f), 100, 0, -9.8f
-            ));
-        }
+//        int pixel = activeSubworld.getPixel(screenXToWorld((int) x[0]), screenYToWorld((int) y[0]));
+//        if (pixel != 0) {
+//            activeSubworld.setPixel(screenXToWorld((int) x[0]), screenYToWorld((int) y[0]), 0);
+//            activeSubworld.entities.add(new PixelEntity(
+//                    screenXToWorld((int) x[0]), screenYToWorld((int) y[0]), activeSubworld, pixel,
+//                    activeSubworld.random.nextFloat(-20f, 20f), 100, 0, -9.8f
+//            ));
+//        }
     }
 
     void jetPixelsAtCursorPosition() {
@@ -217,11 +219,13 @@ public class Client extends GameApp {
         double[] y = new double[1];
         glfwGetCursorPos(window, x, y);
         for (int dx = -paintingSize/2; dx <= paintingSize/2; dx++) {
-            for (int dy = -paintingSize/2; dy <= paintingSize/2; dy++) {
-                int pixel = activeSubworld.getPixel(
+            for (int dy = paintingSize/2; dy > -paintingSize/2; dy--) {
+                Pixel pixel = activeSubworld.getPixel(
                         screenXToWorld((int) x[0]) + dx, screenYToWorld((int) y[0]) + dy);
-                if (pixel != 0) {
-                    activeSubworld.setPixel(screenXToWorld((int) x[0]) + dx, screenYToWorld((int) y[0]) + dy, 0);
+                if (!(pixel.material instanceof MaterialAir) ) {
+                    activeSubworld.setPixel(
+                            new Pixel(0, null,
+                                    screenXToWorld((int) x[0]) + dx, screenYToWorld((int) y[0]) + dy));
                     double angle = activeSubworld.random.nextDouble(-Math.PI / 3, Math.PI / 3);
                     activeSubworld.entities.add(new PixelEntity(
                             screenXToWorld((int) x[0]) + dx, screenYToWorld((int) y[0]) + dy, activeSubworld, pixel,
@@ -281,8 +285,8 @@ public class Client extends GameApp {
                 int baseX = entry.getKey().x * Chunk.size();
                 int baseY = entry.getKey().y * Chunk.size();
                 int i = 0;
-                for (int pixel : entry.getValue().pixels) {
-                    Material material = activeWorld.pixelIds[Pixels.getId(pixel)];
+                for (Pixel pixel : entry.getValue().pixels) {
+                    Material material = pixel.material;
                     float drawX = (baseX + i % Chunk.size() - cameraPos.x) * relativePixelWidth;
                     float drawY = (baseY + i / Chunk.size() - cameraPos.y) * relativePixelHeight;
                     i++;
@@ -291,7 +295,7 @@ public class Client extends GameApp {
                     ) {
                         continue;
                     }
-                    int colorId = Pixels.getColor(pixel);
+                    byte colorId = pixel.color;
                     drawPixel(drawX, drawY, worldPixelCount, material, colorId, vertexArray, colorArray);
                     worldPixelCount++;
                 }
@@ -299,8 +303,8 @@ public class Client extends GameApp {
             for (Entity entity : activeSubworld.entities) {
                 if (entity instanceof PixelEntity) {
                     Material material =
-                            activeWorld.pixelIds[Pixels.getId(((PixelEntity) entity).pixel)];
-                    int colorId = Pixels.getColor(((PixelEntity) entity).pixel);
+                            ((PixelEntity) entity).pixel.material;
+                    int colorId = Pixels.getColor(((PixelEntity) entity).pixel.color);
                     drawPixel(
                             (entity.x - cameraPos.x) * relativePixelWidth,
                             (entity.y - cameraPos.y) * relativePixelHeight,
@@ -339,6 +343,14 @@ public class Client extends GameApp {
             glDrawArrays(GL_QUADS, 0, movingPixelCount * 4);
 
             glDisableClientState(GL_VERTEX_ARRAY);
+
+            glColor3f(1f, 1f, 0f);
+            glBegin(GL_QUADS);
+            glVertex2f(-0.99f, 0.99f);
+            glVertex2f(-0.99f, 0.98f);
+            glVertex2f(-0.99f + 0.0012f * 60f/fdt, 0.98f);
+            glVertex2f(-0.99f + 0.0012f * 60f/fdt, 0.99f);
+            glEnd();
 
             glfwSwapBuffers(window);
         }
