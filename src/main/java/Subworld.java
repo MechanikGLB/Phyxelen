@@ -8,6 +8,7 @@ public class Subworld {
     World world = null;
     WorldGenerator generator;
     Random random = new Random();
+    byte counter = 0;
     Hashtable<VectorI, Chunk> activeChunks = new Hashtable<>();
     Hashtable<VectorI, Chunk> passiveChunks = new Hashtable<>();
     ArrayList<Entity> entities = new ArrayList<>();
@@ -25,8 +26,8 @@ public class Subworld {
 
     public void tick(float dt) {
         for (var chunk : activeChunks.values()) {
-            if (chunk.solved) continue;
-            chunk.solved = true;
+//            if (chunk.solved) continue;
+//            chunk.solved = true;
             for (Pixel pixel : chunk.pixels) {
                 if (pixel.solved)
                     chunk.solved = false;
@@ -43,6 +44,7 @@ public class Subworld {
 
         entities.removeAll(entitiesToRemove);
         entitiesToRemove.clear();
+        counter++;
     }
 
 
