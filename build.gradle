@@ -16,6 +16,10 @@ if (Os.isFamily(Os.FAMILY_WINDOWS)) {
     project.ext.lwjglNatives = "natives-linux"
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+}
+
 repositories {
     mavenCentral()
 }
