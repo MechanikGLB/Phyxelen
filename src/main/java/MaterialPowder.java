@@ -1,28 +1,38 @@
 public class MaterialPowder extends Material {
-    void resolvePhysics(Subworld sw, int x, int y) {
-        int pixelSelf = sw.getPixel(x, y);
-        Material materialSelf = sw.getMaterial(pixelSelf);
-        int pixelUnder = sw.getPixel(x, y - 1);
-        Material materialUnder = sw.getMaterial(pixelUnder);
-        if (pixelUnder != Pixels.notLoadedPixel && sw.getMaterial(pixelUnder).density < materialSelf.density) {
-            sw.setPixel(x, y - 1, pixelSelf);
-            sw.setPixel(x, y, pixelUnder);
+    void solvePhysic(Subworld sw, Pixel pixel) {
+        Pixel pixelUnder = sw.getPixel(pixel.x, pixel.y - 1);
+        if (pixelUnder == null)
+            return;
+        if (pixelUnder.material.density < pixel.material.density) {
+            pixel.y -= 1;
+            sw.setPixel(pixel);
+            pixelUnder.y += 1;
+            sw.setPixel(pixelUnder);
+//            sw.swapPixels(pixel, pixelUnder);
         } else {
-            int pixelUnderLeft = sw.getPixel(x - 1, y - 1);
+            Pixel pixelUnderLeft = sw.getPixel(pixel.x - 1, pixel.y - 1);
             boolean canMoveLeft =
-                    (pixelUnderLeft != Pixels.notLoadedPixel &&
-                            sw.getMaterial(pixelUnderLeft).density < materialSelf.density);
-            int pixelUnderRight = sw.getPixel(x + 1, y - 1);
+                    (pixelUnderLeft != null &&
+                            pixelUnderLeft.material.density < pixel.material.density);
+            Pixel pixelUnderRight = sw.getPixel(pixel.x + 1, pixel.y - 1);
             boolean canMoveRight =
-                    (pixelUnderRight != Pixels.notLoadedPixel &&
-                            sw.getMaterial(pixelUnderRight).density < materialSelf.density);
+                    (pixelUnderRight != null &&
+                            pixelUnderRight.material.density < pixel.material.density);
             if (canMoveLeft || canMoveRight) {
                 if (canMoveLeft && (!canMoveRight || sw.random.nextBoolean())) {
-                    sw.setPixel(x - 1, y - 1, pixelSelf);
-                    sw.setPixel(x, y, pixelUnderLeft);
+                    pixel.x -= 1;
+                    pixel.y -= 1;
+                    pixelUnderLeft.x += 1;
+                    pixelUnderLeft.y += 1;
+                    sw.setPixel(pixel);
+                    sw.setPixel(pixelUnderLeft);
                 } else {
-                    sw.setPixel(x + 1, y - 1, pixelSelf);
-                    sw.setPixel(x, y, pixelUnderRight);
+                    pixel.x += 1;
+                    pixel.y -= 1;
+                    pixelUnderRight.x -= 1;
+                    pixelUnderRight.y += 1;
+                    sw.setPixel(pixel);
+                    sw.setPixel(pixelUnderRight);
                 }
             }
         }

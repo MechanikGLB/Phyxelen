@@ -12,7 +12,7 @@ materials:
     type: liquid
     colors: ["#4669C988", "#506CD388", "#5470D788"]
   steam:
-    density: 0.2
+    density: 0.009
     type: gas
     color: "#8A8ACE44"
   colors:

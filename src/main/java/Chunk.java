@@ -2,14 +2,18 @@ import java.util.Arrays;
 
 public class Chunk {
     private static short size = 32;
-    int[] pixels;
+    Subworld subworld;
+    Pixel[] pixels;
 //    int[] pixelBuffer;
-    boolean[] pixelPhysicSolved;
+//    boolean[] pixelPhysicSolved;
 
-    public Chunk() {
-        pixels = new int[area()];
+    public Chunk(Subworld subworld) {
+        this.subworld = subworld;
+        pixels = new Pixel[area()];
+        for (int i = 0; i < area(); i++)
+            pixels[i] = new Pixel(0, this, i % size, i / size);
 //        pixelBuffer = new int[area()];
-        pixelPhysicSolved = new boolean[area()];
+//        pixelPhysicSolved = new boolean[area()];
     }
 
     /// Chunk side size in pixels
@@ -23,34 +27,38 @@ public class Chunk {
         else return coordinate;
     }
 
-    public void setPixel(int x, int y, int pixel) {
-        assert x < size && y < size;
-        pixels[x + y * size] = pixel;
-//        if (pixel != 0)
-        pixelPhysicSolved[x + y * size] = true;
+    public void setPixel(Pixel pixel) {
+//        assert pixel.x < size && pixel.y < size;
+        pixels[toRelative(pixel.x) + toRelative(pixel.y) * size] = pixel;
+//        if (!(pixel.material instanceof MaterialAir))
+            pixel.solved = true;
+//        pixelPhysicSolved[x + y * size] = true;
 //            pixels[x + y * size] = pixel;
+        pixel.chunk = this;
     }
 
-    public void presetPixel(int x, int y, int pixel) {
-        assert x < size && y < size;
-        pixels[x + y * size] = pixel;
+    public void presetPixel(Pixel pixel) {
+//        assert pixel.x < size && pixel.y < size;
+        pixels[toRelative(pixel.x) + toRelative(pixel.y) * size] = pixel;
+        pixel.chunk = this;
 //        pixelBuffer[x + y * size] = pixel;
     }
 
-    public int getPixel(int x, int y) {
+    public Pixel getPixel(int x, int y) {
         assert x < size && y < size;
 //        if (pixelBuffer[x + y * size] != 0)
 //            return pixelBuffer[x + y * size];
-        return pixels[x + y * size];
+        return pixels[toRelative(x) + toRelative(y) * size];
     }
 
-    public boolean getPixelPhysicSolved(int x, int y) {
-        assert x < size && y < size;
-        return pixelPhysicSolved[x + y * size];
-    }
+//    public boolean getPixelPhysicSolved(int x, int y) {
+//        assert x < size && y < size;
+//        return pixelPhysicSolved[x + y * size];
+//    }
 
     void swapBuffer() {
 //        pixels = pixelBuffer.clone();
-        Arrays.fill(pixelPhysicSolved, false);
+        // TODO set not solved?
+//        Arrays.fill(pixelPhysicSolved, false);
     }
 }
