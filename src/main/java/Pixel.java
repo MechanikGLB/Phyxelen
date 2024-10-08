@@ -4,7 +4,7 @@ public class Pixel {
     Chunk chunk;
     int x;
     int y;
-    boolean solved;
+    boolean solved = false;
 
     public Pixel(Material material, byte color, Chunk chunk, int x, int y) {
         this.material = material;

@@ -25,7 +25,11 @@ public class Subworld {
 
     public void tick(float dt) {
         for (var chunk : activeChunks.values()) {
+            if (chunk.solved) continue;
+            chunk.solved = true;
             for (Pixel pixel : chunk.pixels) {
+                if (pixel.solved)
+                    chunk.solved = false;
                 pixel.solvePhysic();
             }
         }
@@ -52,8 +56,8 @@ public class Subworld {
         if (Main.getGame().gameState == GameApp.GameState.Server) return; // TODO: multiplayer, require chunk via net
 
         //if () {} // TODO: load from file. True if found
-
-        activeChunks.put(indexes, generator.generateChunk(indexes));
+        Chunk chunk = generator.generateChunk(indexes);
+        activeChunks.put(indexes, chunk);
     }
 
 

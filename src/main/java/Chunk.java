@@ -4,6 +4,7 @@ public class Chunk {
     private static short size = 32;
     Subworld subworld;
     Pixel[] pixels;
+    boolean solved = false;
 //    int[] pixelBuffer;
 //    boolean[] pixelPhysicSolved;
 
@@ -29,6 +30,7 @@ public class Chunk {
 
     public void setPixel(Pixel pixel) {
 //        assert pixel.x < size && pixel.y < size;
+        solved = false;
         pixels[toRelative(pixel.x) + toRelative(pixel.y) * size] = pixel;
 //        if (!(pixel.material instanceof MaterialAir))
             pixel.solved = true;
@@ -39,6 +41,7 @@ public class Chunk {
 
     public void presetPixel(Pixel pixel) {
 //        assert pixel.x < size && pixel.y < size;
+        solved = false;
         pixels[toRelative(pixel.x) + toRelative(pixel.y) * size] = pixel;
         pixel.chunk = this;
 //        pixelBuffer[x + y * size] = pixel;
