@@ -17,9 +17,11 @@ public class Client extends GameApp {
     private Renderer renderer = new Renderer(this);
 
     float maxFps = 30;
-    // Frame delta time;
+    /// Frame delta time;
     float fdt;
-    float maxTps = 5;
+    float maxTps = 20;
+    /// Tick delta time
+    float dt;
 
     private VectorF cameraPos = new VectorF(0, 0);
     /// Length of world pixel side in real screen pixels
@@ -98,7 +100,11 @@ public class Client extends GameApp {
 
             fdt = (cycleStartTime - lastCycleStartTime) / 1000.0f;
             lastCycleStartTime = cycleStartTime;
-            tick(fdt);
+            dt = (cycleStartTime - lastTickTime) / 1000f;
+            if (dt >= 1.0f / maxTps) {
+                lastTickTime = cycleStartTime;
+                tick(dt);
+            }
 //            lastFrameTime = newTime;
 
             if (counter % 32 == 0) {
@@ -249,6 +255,7 @@ public class Client extends GameApp {
         float[] colorArray;
         private int vertexBuffer;
         private int colorBuffer;
+        private int indexBuffer;
         float[] movingPixelVertexArray;
         float[] movingPixelColorArray;
         private int movingPixelVertexBuffer;
@@ -263,6 +270,7 @@ public class Client extends GameApp {
         void init() {
             vertexBuffer = glGenBuffers();
             colorBuffer = glGenBuffers();
+            indexBuffer = glGenBuffers();
             movingPixelVertexBuffer = glGenBuffers();
             movingPixelColorBuffer = glGenBuffers();
 
@@ -317,6 +325,7 @@ public class Client extends GameApp {
 
             glEnableClientState(GL_VERTEX_ARRAY);
             glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+
             glBufferData(GL_ARRAY_BUFFER, vertexArray, GL_STREAM_DRAW);
             glVertexPointer(2, GL_FLOAT, 0, 0);
 
@@ -330,19 +339,19 @@ public class Client extends GameApp {
 //            glDisableClientState(GL_VERTEX_ARRAY);
 //            glDisableClientState(GL_COLOR_ARRAY);
 
-            glEnableClientState(GL_VERTEX_ARRAY);
-            glBindBuffer(GL_ARRAY_BUFFER, movingPixelVertexBuffer);
-            glBufferData(GL_ARRAY_BUFFER, movingPixelVertexArray, GL_STREAM_DRAW);
-            glVertexPointer(2, GL_FLOAT, 0, 0);
+//            glEnableClientState(GL_VERTEX_ARRAY);
+//            glBindBuffer(GL_ARRAY_BUFFER, movingPixelVertexBuffer);
+//            glBufferData(GL_ARRAY_BUFFER, movingPixelVertexArray, GL_STREAM_DRAW);
+//            glVertexPointer(2, GL_FLOAT, 0, 0);
 
-            glEnableClientState(GL_COLOR_ARRAY);
-            glBindBuffer(GL_ARRAY_BUFFER, movingPixelColorBuffer);
-            glBufferData(GL_ARRAY_BUFFER, movingPixelColorArray, GL_STREAM_DRAW);
-            glColorPointer(3, GL_FLOAT, 0, 0);
+//            glEnableClientState(GL_COLOR_ARRAY);
+//            glBindBuffer(GL_ARRAY_BUFFER, movingPixelColorBuffer);
+//            glBufferData(GL_ARRAY_BUFFER, movingPixelColorArray, GL_STREAM_DRAW);
+//            glColorPointer(3, GL_FLOAT, 0, 0);
 
-            glDrawArrays(GL_QUADS, 0, movingPixelCount * 4);
+//            glDrawArrays(GL_QUADS, 0, movingPixelCount * 4);
 
-            glDisableClientState(GL_VERTEX_ARRAY);
+//            glDisableClientState(GL_VERTEX_ARRAY);
 
             glColor3f(1f, 1f, 0f);
             glBegin(GL_QUADS);
@@ -398,10 +407,14 @@ public class Client extends GameApp {
             colorArray = new float[worldPixelCount * 8 * 3];
             movingPixelVertexArray = new float[worldPixelCount * 4];
             movingPixelColorArray = new float[worldPixelCount * 4 * 3];
+//            glEnableClientState(GL_VERTEX_ARRAY);
             glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
             glBufferData(GL_ARRAY_BUFFER, vertexArray, GL_STREAM_DRAW);
+//            glEnableClientState(GL_COLOR_ARRAY);
             glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
             glBufferData(GL_ARRAY_BUFFER, colorArray, GL_STREAM_DRAW);
+
+//            glBindAttribLocation();
         }
     }
 }
