@@ -31,27 +31,15 @@ public class Subworld {
         GameApp.Profiler.startProfile("tick", (byte)0, (byte)100, (byte)100);
 //        Thread[] threads = new Thread[activeChunks.size()];
 //        activeChunks.values().toArray(threads);
-        int i = 0;
-        for (var chunk : activeChunks.values()) {
-//            if (chunk.solved) continue;
-//            chunk.solved = true;
-//            threads[i] = new Thread(() -> {
-                for (Pixel pixel : chunk.pixels) {
-                    if (pixel.solved)
-                        chunk.solved = false;
-                    pixel.solvePhysic();
-                }
-//                Thread.yield();
-//            });
-//            threads[i].start();
-            i++;
-        }
+        for (var chunk : activeChunks.values())
+            chunk.tick();
 //        for (Thread thread : threads)
 //            try {
 //                thread.join();
 //            } catch (InterruptedException e) {
 //                throw new RuntimeException(e);
 //            }
+
         for (var chunk : activeChunks.values())
             for (Pixel pixel : chunk.pixels)
                 pixel.solved = false;
@@ -164,6 +152,7 @@ public class Subworld {
         Pixel pixel = chunk.getPixel(x, y);
         if (!pixel.solved)
             pixel.solvePhysic();
+//        return new Pixel(0, chunk, 0, 0);
         return chunk.getPixel(x, y);
     }
 

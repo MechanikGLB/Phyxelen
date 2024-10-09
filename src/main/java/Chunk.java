@@ -1,20 +1,22 @@
 import java.util.Arrays;
 
 public class Chunk {
+    /// Width (and height) of chunk in world pixels. Always same for all chunks during session
     private static short size = 32;
+    /// Owning subworld
     Subworld subworld;
+    // Index within `chunks` array of subworld
+    int yIndex = 0;
+    /// World pixels of this chunk
     Pixel[] pixels;
+    /// Is physic has been solved for this chunk. If yes, it will be skipped. Not used now
     boolean solved = false;
-//    int[] pixelBuffer;
-//    boolean[] pixelPhysicSolved;
 
     public Chunk(Subworld subworld) {
         this.subworld = subworld;
         pixels = new Pixel[area()];
         for (int i = 0; i < area(); i++)
             pixels[i] = new Pixel(0, this, i % size, i / size);
-//        pixelBuffer = new int[area()];
-//        pixelPhysicSolved = new boolean[area()];
     }
 
     /// Chunk side size in pixels
@@ -48,16 +50,22 @@ public class Chunk {
     }
 
     public Pixel getPixel(int x, int y) {
-        assert x < size && y < size;
+//        assert x < size && y < size;
 //        if (pixelBuffer[x + y * size] != 0)
 //            return pixelBuffer[x + y * size];
         return pixels[toRelative(x) + toRelative(y) * size];
     }
 
-//    public boolean getPixelPhysicSolved(int x, int y) {
-//        assert x < size && y < size;
-//        return pixelPhysicSolved[x + y * size];
-//    }
+    public void tick() {
+        if (solved && (Main.getGame().counter + yIndex) % 8 != 0) return;
+        solved = true;
+//            threads[i] = new Thread(() -> {
+        for (Pixel pixel : pixels) {
+//            if (pixel.solved)
+//                solved = false;
+            pixel.solvePhysic();
+        }
+    }
 
     void swapBuffer() {
 //        pixels = pixelBuffer.clone();
