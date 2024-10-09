@@ -99,13 +99,21 @@ public class Client extends GameApp {
             long cycleStartTime = System.currentTimeMillis();
 
             fdt = (cycleStartTime - lastCycleStartTime) / 1000.0f;
+            if (fdt < (1.0f / maxFps)) {
+                try {
+                    Thread.sleep((long) ((1.0f / maxFps - fdt) * 1000.0f));
+                } catch (InterruptedException e) {
+                    continue;
+                }
+                continue;
+            }
             lastCycleStartTime = cycleStartTime;
             dt = (cycleStartTime - lastTickTime) / 1000f;
             if (dt >= 1.0f / maxTps) {
                 lastTickTime = cycleStartTime;
                 tick(dt);
             }
-//            lastFrameTime = newTime;
+//            System.out.println(dt);
 
             if (counter % 32 == 0) {
                 updateChunks();
@@ -160,12 +168,7 @@ public class Client extends GameApp {
 
 
             counter++;
-            if (fdt < (1000.0f / maxFps))
-                try {
-                    Thread.sleep((long) (1000.0f / maxFps - fdt));
-                } catch (InterruptedException e) {
-                    continue;
-                }
+
         }
     }
 
@@ -353,14 +356,23 @@ public class Client extends GameApp {
 
 //            glDisableClientState(GL_VERTEX_ARRAY);
 
+            // Frame rate bar
+            float frameRate = 1f / fdt;
+//            System.out.println(frameRate);
             glColor3f(1f, 1f, 0f);
             glBegin(GL_QUADS);
             glVertex2f(-0.99f, 0.99f);
             glVertex2f(-0.99f, 0.98f);
-            glVertex2f(-0.99f + 0.0012f * 60f/fdt, 0.98f);
-            glVertex2f(-0.99f + 0.0012f * 60f/fdt, 0.99f);
+            glVertex2f(-0.99f + 0.01f * frameRate, 0.98f);
+            glVertex2f(-0.99f + 0.01f * frameRate, 0.99f);
+            glColor3f(0f, 1f, 0f);
             glEnd();
-
+            glBegin(GL_LINES);
+            glVertex2f(-0.99f + 0.59f, 0.99f);
+            glVertex2f(-0.99f + 0.59f, 0.98f);
+            glVertex2f(-0.99f + 0.295f, 0.98f);
+            glVertex2f(-0.99f + 0.295f, 0.99f);
+            glEnd();
             glfwSwapBuffers(window);
         }
 
@@ -410,6 +422,7 @@ public class Client extends GameApp {
 //            glEnableClientState(GL_VERTEX_ARRAY);
             glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
             glBufferData(GL_ARRAY_BUFFER, vertexArray, GL_STREAM_DRAW);
+
 //            glEnableClientState(GL_COLOR_ARRAY);
             glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
             glBufferData(GL_ARRAY_BUFFER, colorArray, GL_STREAM_DRAW);
