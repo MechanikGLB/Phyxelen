@@ -25,6 +25,7 @@ public class Subworld {
 
 
     public void tick(float dt) {
+        GameApp.Profiler.startProfile("tick", (byte)0, (byte)100, (byte)100);
         for (var chunk : activeChunks.values()) {
 //            if (chunk.solved) continue;
 //            chunk.solved = true;
@@ -45,6 +46,7 @@ public class Subworld {
         entities.removeAll(entitiesToRemove);
         entitiesToRemove.clear();
         counter++;
+        GameApp.Profiler.endProfile("tick");
     }
 
 

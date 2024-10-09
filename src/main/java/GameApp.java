@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.HashMap;
 
 public abstract class GameApp {
     public enum GameState {
@@ -17,6 +18,7 @@ public abstract class GameApp {
     protected Subworld activeSubworld;
     /// Counter is used for making some computations more rare
     protected short counter = 0;
+
 
 
     public GameState getGameState() {return gameState;}
@@ -55,6 +57,41 @@ public abstract class GameApp {
                 Path.of("mods")
         )) {
             chechFolder(path);
+        }
+    }
+
+
+    static class Profiler {
+        static class ProfilerEntry {
+            long value;
+            byte r;
+            byte g;
+            byte b;
+
+            public ProfilerEntry(long value, byte r, byte g, byte b) {
+                this.value = value;
+                this.r = r;
+                this.g = g;
+                this.b = b;
+            }
+        }
+
+        static HashMap<String, ProfilerEntry> entries = new HashMap<>();
+
+//        static void profile(String entryName, long startTime) {
+//            long endTime = System.currentTimeMillis();
+//            entries.put(entryName, (endTime - startTime) / 100f);
+//        }
+
+        static void startProfile(String entryName, byte r, byte g, byte b) {
+            long startTime = System.currentTimeMillis();
+            entries.put(entryName, new ProfilerEntry(startTime, r,g,b));
+        }
+
+        static void endProfile(String entryName) {
+            var entry = entries.get(entryName);
+            entry.value = System.currentTimeMillis() - entry.value;
+//            entries.put(entryName, entry);
         }
     }
 }

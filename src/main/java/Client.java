@@ -358,16 +358,23 @@ public class Client extends GameApp {
 
             // Frame rate bar
             float frameRate = 1f / fdt;
-//            System.out.println(frameRate);
             glColor3f(1f, 1f, 0f);
-            glBegin(GL_QUADS);
-            glVertex2f(-0.99f, 0.99f);
-            glVertex2f(-0.99f, 0.98f);
-            glVertex2f(-0.99f + 0.01f * frameRate, 0.98f);
-            glVertex2f(-0.99f + 0.01f * frameRate, 0.99f);
-            glColor3f(0f, 1f, 0f);
-            glEnd();
             glBegin(GL_LINES);
+            glVertex2f(-0.99f, 0.99f);
+            glVertex2f(-0.99f + 0.01f * frameRate, 0.99f);
+            // Frame time bar
+            glVertex2f(-0.99f, 0.98f);
+            glVertex2f(-0.99f + 10.0f * fdt, 0.98f);
+            // Profiler bars
+            int i = 2;
+            for (var entry : Profiler.entries.entrySet()) {
+                glColor3b(entry.getValue().r, entry.getValue().g, entry.getValue().b);
+                glVertex2f(-0.99f, 0.99f - 0.01f * i);
+                glVertex2f(-0.99f + entry.getValue().value / 100f, 0.99f - 0.01f * i);
+                i++;
+            }
+            glColor3f(0f, 1f, 0f);
+            // Marks
             glVertex2f(-0.99f + 0.59f, 0.99f);
             glVertex2f(-0.99f + 0.59f, 0.98f);
             glVertex2f(-0.99f + 0.295f, 0.98f);
