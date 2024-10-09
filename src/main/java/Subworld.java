@@ -3,15 +3,18 @@ import java.util.Hashtable;
 //import java.
 import java.io.*;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Subworld {
     World world = null;
     WorldGenerator generator;
     Random random = new Random();
     byte counter = 0;
-    Hashtable<VectorI, Chunk> activeChunks = new Hashtable<>();
+    ConcurrentHashMap<VectorI, Chunk> activeChunks = new ConcurrentHashMap<>();
     Hashtable<VectorI, Chunk> passiveChunks = new Hashtable<>();
     ArrayList<Entity> entities = new ArrayList<>();
+//    Concu
+
     ArrayList<Entity> entitiesToRemove = new ArrayList<>();
     File saveFile;
 
@@ -26,15 +29,29 @@ public class Subworld {
 
     public void tick(float dt) {
         GameApp.Profiler.startProfile("tick", (byte)0, (byte)100, (byte)100);
+//        Thread[] threads = new Thread[activeChunks.size()];
+//        activeChunks.values().toArray(threads);
+        int i = 0;
         for (var chunk : activeChunks.values()) {
 //            if (chunk.solved) continue;
 //            chunk.solved = true;
-            for (Pixel pixel : chunk.pixels) {
-                if (pixel.solved)
-                    chunk.solved = false;
-                pixel.solvePhysic();
-            }
+//            threads[i] = new Thread(() -> {
+                for (Pixel pixel : chunk.pixels) {
+                    if (pixel.solved)
+                        chunk.solved = false;
+                    pixel.solvePhysic();
+                }
+//                Thread.yield();
+//            });
+//            threads[i].start();
+            i++;
         }
+//        for (Thread thread : threads)
+//            try {
+//                thread.join();
+//            } catch (InterruptedException e) {
+//                throw new RuntimeException(e);
+//            }
         for (var chunk : activeChunks.values())
             for (Pixel pixel : chunk.pixels)
                 pixel.solved = false;
@@ -112,10 +129,12 @@ public class Subworld {
     void setPixel(Pixel pixel) {
 //        assert world.pixelIds.length >= pixel;
 
+//        Main.getGame().logicSemaphore.tryAcquire();
         Chunk chunk = getChunkHavingPixel(pixel.x, pixel.y);
         if (chunk == null) return; // TODO: decide what to do in this case
 
         chunk.setPixel(pixel);
+//        Main.getGame().logicSemaphore.release();
     }
 
 

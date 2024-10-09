@@ -4,6 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.concurrent.Semaphore;
 
 public abstract class GameApp {
     public enum GameState {
@@ -18,6 +19,9 @@ public abstract class GameApp {
     protected Subworld activeSubworld;
     /// Counter is used for making some computations more rare
     protected short counter = 0;
+
+    Thread logicThread;
+    Semaphore logicSemaphore = new Semaphore(0);
 
 
 
@@ -63,13 +67,14 @@ public abstract class GameApp {
 
     static class Profiler {
         static class ProfilerEntry {
-            long value;
+            long value = 0;
+            long startTime;
             byte r;
             byte g;
             byte b;
 
             public ProfilerEntry(long value, byte r, byte g, byte b) {
-                this.value = value;
+                this.startTime = value;
                 this.r = r;
                 this.g = g;
                 this.b = b;
@@ -85,12 +90,17 @@ public abstract class GameApp {
 
         static void startProfile(String entryName, byte r, byte g, byte b) {
             long startTime = System.currentTimeMillis();
-            entries.put(entryName, new ProfilerEntry(startTime, r,g,b));
+            var entry = entries.get(entryName);
+            if (entry == null)
+                entries.put(entryName, new ProfilerEntry(startTime, r,g,b));
+            else
+                entry.startTime = startTime;
+
         }
 
         static void endProfile(String entryName) {
             var entry = entries.get(entryName);
-            entry.value = System.currentTimeMillis() - entry.value;
+            entry.value = System.currentTimeMillis() - entry.startTime;
 //            entries.put(entryName, entry);
         }
     }

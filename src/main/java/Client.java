@@ -4,6 +4,7 @@ import org.lwjgl.opengl.GL;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.Semaphore;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
@@ -93,7 +94,26 @@ public class Client extends GameApp {
     @Override
     protected void loop() {
         long lastCycleStartTime = System.currentTimeMillis();
-        long lastTickTime = 0;
+
+        logicThread = new Thread(() -> {
+            long lastTickTime = System.currentTimeMillis();
+            while (!glfwWindowShouldClose(window)) {
+                long cycleStartTime = System.currentTimeMillis();
+                dt = (cycleStartTime - lastTickTime) / 1000f;
+                if (dt < (1.0f / maxTps)) {
+                    try {
+                        Thread.sleep((long) ((1.0f / maxTps - dt) * 1000.0f));
+                    } catch (InterruptedException e) {
+                        continue;
+                    }
+                    continue;
+                }
+                lastTickTime = cycleStartTime;
+                tick(dt);
+            }
+            Thread.yield();
+        });
+        logicThread.start();
 
         while (!glfwWindowShouldClose(window)) {
             long cycleStartTime = System.currentTimeMillis();
@@ -108,16 +128,11 @@ public class Client extends GameApp {
                 continue;
             }
             lastCycleStartTime = cycleStartTime;
-            dt = (cycleStartTime - lastTickTime) / 1000f;
-            if (dt >= 1.0f / maxTps) {
-                lastTickTime = cycleStartTime;
-                tick(dt);
-            }
-//            System.out.println(dt);
 
             if (counter % 32 == 0) {
                 updateChunks();
             }
+//            System.out.println(dt);
 
             renderer.draw();
 
@@ -166,9 +181,12 @@ public class Client extends GameApp {
             if (glfwGetKey(window, GLFW_KEY_SPACE) != 0)
                 jetPixelsAtCursorPosition();
 
-
             counter++;
-
+        }
+        try {
+            logicThread.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
