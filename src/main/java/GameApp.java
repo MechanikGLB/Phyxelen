@@ -14,9 +14,9 @@ public abstract class GameApp {
         Client
     }
     protected GameState gameState;
-    protected Content content = new Content();
-    protected World activeWorld;
-    protected Subworld activeSubworld;
+    protected static Content content = new Content();
+    protected static World activeWorld;
+    protected static Subworld activeSubworld;
     /// Counter is used for making some computations more rare
     protected short counter = 0;
 

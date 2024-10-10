@@ -5,7 +5,7 @@ public class Pixels {
     static Random random = new Random();
 
     static int getPixelWithRandomColor(int pixelId) {
-        int colorCount = Main.getGame().activeWorld.pixelIds[pixelId].colors.length;
+        int colorCount = GameApp.activeWorld.pixelIds[pixelId].colors.length;
         return make(pixelId, Math.abs(random.nextInt()) % colorCount);
     }
 

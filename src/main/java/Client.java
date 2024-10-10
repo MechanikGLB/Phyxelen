@@ -217,12 +217,13 @@ public class Client extends GameApp {
     void setPixelAtCursorPosition(int pixel) {
         double[] x = new double[1];
         double[] y = new double[1];
+        Material material = activeWorld.pixelIds[pixel];
         glfwGetCursorPos(window, x, y);
         for (int dx = -paintingSize/2; dx <= paintingSize/2; dx++) {
             for (int dy = -paintingSize/2; dy <= paintingSize/2; dy++) {
                 activeSubworld.presetPixel(
-                        new Pixel(Pixels.getPixelWithRandomColor(pixel), null,
-                                screenXToWorld((int) x[0]) + dx, screenYToWorld((int) y[0]) + dy));
+                        screenXToWorld((int) x[0]) + dx, screenYToWorld((int) y[0]) + dy,
+                        material, (byte) activeSubworld.random.nextInt(material.colors.length));
             }
         }
     }
@@ -249,13 +250,13 @@ public class Client extends GameApp {
             for (int dy = paintingSize/2; dy > -paintingSize/2; dy--) {
                 Pixel pixel = activeSubworld.getPixel(
                         screenXToWorld((int) x[0]) + dx, screenYToWorld((int) y[0]) + dy);
-                if (!(pixel.material instanceof MaterialAir) ) {
-                    activeSubworld.setPixel(
-                            new Pixel(0, null,
-                                    screenXToWorld((int) x[0]) + dx, screenYToWorld((int) y[0]) + dy));
+                Material material = pixel.chunk.materials[pixel.i];
+                if (!(material instanceof MaterialAir) ) {
+                    pixel.chunk.setPixel(pixel.i, activeWorld.pixelIds[0], (byte)0);
                     double angle = activeSubworld.random.nextDouble(-Math.PI / 3, Math.PI / 3);
                     activeSubworld.entities.add(new PixelEntity(
-                            screenXToWorld((int) x[0]) + dx, screenYToWorld((int) y[0]) + dy, activeSubworld, pixel,
+                            screenXToWorld((int) x[0]) + dx, screenYToWorld((int) y[0]) + dy,
+                            activeSubworld, material, pixel.chunk.colors[pixel.i],
                             (float)Math.sin(angle) * 100.f, (float)Math.cos(angle) * 100.f,
                             0, -9.8f
                     ));
@@ -313,18 +314,16 @@ public class Client extends GameApp {
             for (Map.Entry<VectorI, Chunk> entry : activeSubworld.activeChunks.entrySet()) {
                 int baseX = entry.getKey().x * Chunk.size();
                 int baseY = entry.getKey().y * Chunk.size();
-                int i = 0;
-                for (Pixel pixel : entry.getValue().pixels) {
-                    Material material = pixel.material;
+                for (int i = 0; i < Chunk.area(); i++) {
+                    Material material = entry.getValue().materials[i];
                     float drawX = (baseX + i % Chunk.size() - cameraPos.x) * relativePixelWidth;
                     float drawY = (baseY + i / Chunk.size() - cameraPos.y) * relativePixelHeight;
-                    i++;
                     if (drawX < (-1 - (relativePixelWidth)) || drawX > 1 ||
                             drawY < (-1 - (relativePixelHeight)) || drawY > 1
                     ) {
                         continue;
                     }
-                    byte colorId = pixel.color;
+                    byte colorId = entry.getValue().colors[i];
                     drawPixel(drawX, drawY, worldPixelCount, material, colorId, vertexArray, colorArray);
                     worldPixelCount++;
                 }
@@ -332,8 +331,8 @@ public class Client extends GameApp {
             for (Entity entity : activeSubworld.entities) {
                 if (entity instanceof PixelEntity) {
                     Material material =
-                            ((PixelEntity) entity).pixel.material;
-                    int colorId = Pixels.getColor(((PixelEntity) entity).pixel.color);
+                            ((PixelEntity) entity).material;
+                    int colorId = Pixels.getColor(((PixelEntity) entity).color);
                     drawPixel(
                             (entity.x - cameraPos.x) * relativePixelWidth,
                             (entity.y - cameraPos.y) * relativePixelHeight,

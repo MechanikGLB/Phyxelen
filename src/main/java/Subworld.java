@@ -40,8 +40,7 @@ public class Subworld {
 //            }
 
         for (var chunk : activeChunks.values())
-            for (Pixel pixel : chunk.pixels)
-                pixel.solved = false;
+            chunk.pixelSolved.clear();
 //        for (var chunk : activeChunks.entrySet())
 //            chunk.getValue().swapBuffer();
         for (Entity entity : entities)
@@ -51,11 +50,6 @@ public class Subworld {
         entitiesToRemove.clear();
         counter++;
         GameApp.Profiler.endProfile("tick");
-    }
-
-
-    void solvePixelPhysic(int x, int y) {
-
     }
 
 
@@ -113,48 +107,50 @@ public class Subworld {
     }
 
 
-    void setPixel(Pixel pixel) {
+    Pixel getPixel(int x, int y) {
+        return new Pixel(
+                getChunkHavingPixel(x, y),
+                Chunk.toRelative(x) + Chunk.toRelative(y) * Chunk.size()
+        );
+    }
+
+
+    void setPixel(int x, int y, Material material, byte color) {
 //        assert world.pixelIds.length >= pixel;
 
 //        Main.getGame().logicSemaphore.tryAcquire();
-        Chunk chunk = getChunkHavingPixel(pixel.x, pixel.y);
+        Chunk chunk = getChunkHavingPixel(x, y);
         if (chunk == null) return; // TODO: decide what to do in this case
 
-        chunk.setPixel(pixel);
+        chunk.setPixel(x, y, material, color);
 //        Main.getGame().logicSemaphore.release();
     }
 
 
-    void presetPixel(Pixel pixel) {
+    void presetPixel(int x, int y, Material material, byte color) {
 //        assert world.pixelIds.length >= pixel.material.id;
-        Chunk chunk = getChunkHavingPixel(pixel.x, pixel.y);
+        Chunk chunk = getChunkHavingPixel(x, y);
         if (chunk == null) return;
-        chunk.presetPixel(pixel);
+        chunk.presetPixel(x, y, material, color);
     }
 
 
-    void swapPixels(Pixel pixel1, Pixel pixel2) {
-        int xBuffer = pixel1.x;
-        int yBuffer = pixel1.y;
-        pixel1.x = pixel2.x;
-        pixel1.y = pixel2.y;
-        pixel2.x = xBuffer;
-        pixel2.y = yBuffer;
-        setPixel(pixel1);
-        setPixel(pixel2);
-    }
+//    void swapPixels(Pixel pixel1, Pixel pixel2) {
+//        int xBuffer = pixel1.x;
+//        int yBuffer = pixel1.y;
+//        pixel1.x = pixel2.x;
+//        pixel1.y = pixel2.y;
+//        pixel2.x = xBuffer;
+//        pixel2.y = yBuffer;
+//        setPixel(pixel1);
+//        setPixel(pixel2);
+//    }
 
 
-    Pixel getPixel(int x, int y) {
+    Material getPixelMaterial(int x, int y) {
         Chunk chunk = getChunkHavingPixel(x, y);
         if (chunk == null) return null;
-        Pixel pixel = chunk.getPixel(x, y);
-        if (pixel.solved)
-            return pixel;
-        
-        pixel.solvePhysic();
-//        return new Pixel(0, chunk, 0, 0);
-        return chunk.getPixel(x, y);
+        return chunk.getPixelMaterialChecked(x, y);
     }
 
 
