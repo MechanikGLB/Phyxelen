@@ -5,9 +5,8 @@ public class MaterialPowder extends Material {
             return;
         if (pixelUnder.material.density < pixel.material.density) {
             pixel.y -= 1;
-            sw.setPixel(pixel);
             pixelUnder.y += 1;
-            sw.setPixel(pixelUnder);
+            pixel.swapByChunk(pixelUnder);
 //            sw.swapPixels(pixel, pixelUnder);
         } else {
             Pixel pixelUnderLeft = sw.getPixel(pixel.x - 1, pixel.y - 1);
@@ -24,15 +23,13 @@ public class MaterialPowder extends Material {
                     pixel.y -= 1;
                     pixelUnderLeft.x += 1;
                     pixelUnderLeft.y += 1;
-                    sw.setPixel(pixel);
-                    sw.setPixel(pixelUnderLeft);
+                    pixel.swapByChunk(pixelUnderLeft);
                 } else {
                     pixel.x += 1;
                     pixel.y -= 1;
                     pixelUnderRight.x -= 1;
                     pixelUnderRight.y += 1;
-                    sw.setPixel(pixel);
-                    sw.setPixel(pixelUnderRight);
+                    pixel.swapByChunk(pixelUnderRight);
                 }
             }
         }

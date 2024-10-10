@@ -5,6 +5,7 @@ public class Pixel {
     int x;
     int y;
     boolean solved = false;
+//    Pixel[] neighbors = new Pixel[8];
 
     public Pixel(Material material, byte color, Chunk chunk, int x, int y) {
         this.material = material;
@@ -25,5 +26,11 @@ public class Pixel {
         if (solved) return;
         solved = true;
         material.solvePhysic(chunk.subworld, this);
+    }
+
+    void swapByChunk(Pixel other) {
+        Chunk chunkBuffer = chunk;
+        other.chunk.setPixel(this);
+        chunkBuffer.setPixel(other);
     }
 }

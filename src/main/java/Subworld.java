@@ -13,7 +13,6 @@ public class Subworld {
     ConcurrentHashMap<VectorI, Chunk> activeChunks = new ConcurrentHashMap<>();
     Hashtable<VectorI, Chunk> passiveChunks = new Hashtable<>();
     ArrayList<Entity> entities = new ArrayList<>();
-//    Concu
 
     ArrayList<Entity> entitiesToRemove = new ArrayList<>();
     File saveFile;
@@ -150,8 +149,10 @@ public class Subworld {
         Chunk chunk = getChunkHavingPixel(x, y);
         if (chunk == null) return null;
         Pixel pixel = chunk.getPixel(x, y);
-        if (!pixel.solved)
-            pixel.solvePhysic();
+        if (pixel.solved)
+            return pixel;
+        
+        pixel.solvePhysic();
 //        return new Pixel(0, chunk, 0, 0);
         return chunk.getPixel(x, y);
     }

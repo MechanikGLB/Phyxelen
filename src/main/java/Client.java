@@ -20,7 +20,7 @@ public class Client extends GameApp {
     float maxFps = 30;
     /// Frame delta time;
     float fdt;
-    float maxTps = 20;
+    float maxTps = 30;
     /// Tick delta time
     float dt;
 
