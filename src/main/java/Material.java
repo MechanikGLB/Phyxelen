@@ -29,5 +29,23 @@ public abstract class Material {
     Hashtable<Integer, MaterialInteraction> interactionsById;
     double density = 0.02f;
 
-    abstract void solvePhysic(Subworld subworld, Pixel pixel);
+    abstract void solvePhysic(Chunk chunk, int i);
+
+    void swap(Chunk c1, int i1, Chunk c2, int i2) {
+        Material materialBuffer;
+        byte colorBuffer;
+        materialBuffer = c1.materials[i1];
+        colorBuffer = c1.colors[i1];
+        c1.materials[i1] = c2.materials[i2];
+        c1.colors[i1] = c2.colors[i2];
+        c2.materials[i2] = materialBuffer;
+        c2.colors[i2] = colorBuffer;
+    }
+
+    void swapColors(Chunk c1, int i1, Chunk c2, int i2) {
+        byte colorBuffer;
+        colorBuffer = c1.colors[i1];
+        c1.colors[i1] = c2.colors[i2];
+        c2.colors[i2] = colorBuffer;
+    }
 }

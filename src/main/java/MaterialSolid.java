@@ -1,5 +1,5 @@
 public class MaterialSolid extends Material {
-    void solvePhysic(Subworld subworld, Pixel pixel) {
+    void solvePhysic(Chunk chunk, int i) {
 
     };
 }
