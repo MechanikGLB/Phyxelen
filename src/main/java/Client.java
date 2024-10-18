@@ -33,7 +33,7 @@ public class Client extends GameApp {
     /*Temp?*/private int paintingPixel = 1;
     /*Temp?*/private int paintingSize = 0;
 
-    ArrayList<WindowResizeListener> windowResizeListeners;
+    ArrayList<WindowResizeListener> windowResizeListeners = new ArrayList<>();
 
 
     @Override
@@ -89,8 +89,6 @@ public class Client extends GameApp {
             renderer.screenWidth = width;
             renderer.screenHeight = height;
             renderer.screenSizeUpdated();
-            for (var listener : windowResizeListeners)
-                listener.onWindowResize(window, width, height);
         });
     }
 
@@ -227,12 +225,13 @@ public class Client extends GameApp {
     void setPixelAtCursorPosition(int pixel) {
         double[] x = new double[1];
         double[] y = new double[1];
+        Material material = activeWorld.pixelIds[pixel];
         glfwGetCursorPos(window, x, y);
         for (int dx = -paintingSize/2; dx <= paintingSize/2; dx++) {
             for (int dy = -paintingSize/2; dy <= paintingSize/2; dy++) {
                 activeSubworld.presetPixel(
-                        new Pixel(Pixels.getPixelWithRandomColor(pixel), null,
-                                screenXToWorld((int) x[0]) + dx, screenYToWorld((int) y[0]) + dy));
+                        screenXToWorld((int) x[0]) + dx, screenYToWorld((int) y[0]) + dy,
+                        material, (byte) activeSubworld.random.nextInt(material.colors.length));
             }
         }
     }
@@ -259,13 +258,13 @@ public class Client extends GameApp {
             for (int dy = paintingSize/2; dy > -paintingSize/2; dy--) {
                 Pixel pixel = activeSubworld.getPixel(
                         screenXToWorld((int) x[0]) + dx, screenYToWorld((int) y[0]) + dy);
-                if (!(pixel.material instanceof MaterialAir) ) {
-                    activeSubworld.setPixel(
-                            new Pixel(0, null,
-                                    screenXToWorld((int) x[0]) + dx, screenYToWorld((int) y[0]) + dy));
+                Material material = pixel.chunk.materials[pixel.i];
+                if (!(material instanceof MaterialAir) ) {
+                    pixel.chunk.setPixel(pixel.i, activeWorld.pixelIds[0], (byte)0);
                     double angle = activeSubworld.random.nextDouble(-Math.PI / 3, Math.PI / 3);
                     activeSubworld.entities.add(new PixelEntity(
-                            screenXToWorld((int) x[0]) + dx, screenYToWorld((int) y[0]) + dy, activeSubworld, pixel,
+                            screenXToWorld((int) x[0]) + dx, screenYToWorld((int) y[0]) + dy,
+                            activeSubworld, material, pixel.chunk.colors[pixel.i],
                             (float)Math.sin(angle) * 100.f, (float)Math.cos(angle) * 100.f,
                             0, -9.8f
                     ));
@@ -320,6 +319,7 @@ public class Client extends GameApp {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 
             glEnableClientState(GL_VERTEX_ARRAY);
+            glEnableClientState(GL_COLOR_ARRAY);
 
             activeSubworld.draw(fdt);
 //            float xOffset = cameraPos.x % relativePixelWidth;
@@ -501,23 +501,27 @@ public class Client extends GameApp {
             int heightInWorldPixels = (int) (screenHeight / viewScale + 2);
 
             int worldPixelCount = widthInWorldPixels * heightInWorldPixels;
-            vertexArray = new float[worldPixelCount * 2];
+//            vertexArray = new float[worldPixelCount * 2];
+//
+//            colorArray = new float[worldPixelCount * 8 * 3];
+//            movingPixelVertexArray = new float[worldPixelCount * 4];
+//            movingPixelColorArray = new float[worldPixelCount * 4 * 3];
+////            glEnableClientState(GL_VERTEX_ARRAY);
+//            glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+//            glBufferData(GL_ARRAY_BUFFER, vertexArray, GL_STREAM_DRAW);
+//
+////            glEnableClientState(GL_COLOR_ARRAY);
+//            glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+//            glBufferData(GL_ARRAY_BUFFER, colorArray, GL_STREAM_DRAW);
+//
+////            glBindAttribLocation();
+//            elementArray = new int[vertexArray.length * 2];
+//            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+//            glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementArray, GL_STREAM_DRAW);
 
-            colorArray = new float[worldPixelCount * 8 * 3];
-            movingPixelVertexArray = new float[worldPixelCount * 4];
-            movingPixelColorArray = new float[worldPixelCount * 4 * 3];
-//            glEnableClientState(GL_VERTEX_ARRAY);
-            glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-            glBufferData(GL_ARRAY_BUFFER, vertexArray, GL_STREAM_DRAW);
 
-//            glEnableClientState(GL_COLOR_ARRAY);
-            glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
-            glBufferData(GL_ARRAY_BUFFER, colorArray, GL_STREAM_DRAW);
-
-//            glBindAttribLocation();
-            elementArray = new int[vertexArray.length * 2];
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementArray, GL_STREAM_DRAW);
+            for (var listener : windowResizeListeners)
+                listener.onWindowResize(window, screenWidth, screenHeight);
         }
     }
 }
