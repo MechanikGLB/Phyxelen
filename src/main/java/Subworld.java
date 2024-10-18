@@ -5,8 +5,9 @@ import java.io.*;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class Subworld {
+public class Subworld extends GameObject {
     World world = null;
+    SubworldRenderer renderer;
     WorldGenerator generator;
     Random random = new Random();
     byte counter = 0;
@@ -26,7 +27,7 @@ public class Subworld {
     }
 
 
-    public void tick(float dt) {
+    public void update(float dt) {
         GameApp.Profiler.startProfile("tick", (byte)0, (byte)100, (byte)100);
 //        Thread[] threads = new Thread[activeChunks.size()];
 //        activeChunks.values().toArray(threads);
@@ -45,7 +46,7 @@ public class Subworld {
 //        for (var chunk : activeChunks.entrySet())
 //            chunk.getValue().swapBuffer();
         for (Entity entity : entities)
-            entity.tick(dt);
+            entity.update(dt);
 
         entities.removeAll(entitiesToRemove);
         entitiesToRemove.clear();
@@ -54,10 +55,10 @@ public class Subworld {
     }
 
 
-    void solvePixelPhysic(int x, int y) {
-
+    @Override
+    void draw(float fdt) {
+        renderer.draw(fdt);
     }
-
 
     void loadChunk(VectorI indexes) {
         if (activeChunks.containsKey(indexes)) return;

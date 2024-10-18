@@ -34,9 +34,7 @@ public abstract class GameApp {
         File testWorldDir = new File("worlds" + File.separator + "test");
         if (!testWorldDir.exists())
             World.createWorld("test", "test");
-        activeWorld = World.loadWorldByPath("test");
-
-        activeSubworld = activeWorld.loadOrCreateSubworld(activeWorld.defaultSubworldId);
+        enterWorld(World.loadWorldByPath("test"));
     };
 
     protected abstract void loop();
@@ -45,7 +43,7 @@ public abstract class GameApp {
         activeWorld.tick(dt);
     }
 
-    private void chechFolder(Path path) {
+    private void checkFolder(Path path) {
         Files.exists(path);
         try {
             Files.createDirectories(path);
@@ -60,10 +58,18 @@ public abstract class GameApp {
                 Path.of("games"),
                 Path.of("mods")
         )) {
-            chechFolder(path);
+            checkFolder(path);
         }
     }
 
+    public void enterWorld(World world) {
+        activeWorld = world;
+        enterSubworld(activeWorld.loadOrCreateSubworld(activeWorld.defaultSubworldId));
+    }
+
+    public void enterSubworld(Subworld subworld) {
+        activeSubworld = subworld;
+    }
 
     static class Profiler {
         static class ProfilerEntry {

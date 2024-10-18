@@ -1,7 +1,7 @@
 /* Entity is object that has position in subworld and can be placed not at world
    pixel grid.
 */
-public abstract class Entity {
+public abstract class Entity extends GameObject {
     protected float x;
     protected float y;
     protected Subworld subworld;
@@ -18,5 +18,5 @@ public abstract class Entity {
     public Subworld getSubworld() { return subworld; };
 
 //    abstract void draw();
-    abstract void tick(float dt);
+//    abstract void tick(float dt);
 }

@@ -1,10 +1,10 @@
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.Semaphore;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
@@ -15,7 +15,7 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Client extends GameApp {
     protected long window;
-    private Renderer renderer = new Renderer(this);
+    protected Renderer renderer = new Renderer(this);
 
     float maxFps = 30;
     /// Frame delta time;
@@ -24,22 +24,24 @@ public class Client extends GameApp {
     /// Tick delta time
     float dt;
 
-    private VectorF cameraPos = new VectorF(0, 0);
+    protected VectorF cameraPos = new VectorF(0, 0);
     /// Length of world pixel side in real screen pixels
-    private short viewScale = 8;
+    protected short viewScale = 8;
     /// Free camera movement speed in screen pixels per second
-    private short cameraSpeed = 150;
+    protected short cameraSpeed = 150;
 
     /*Temp?*/private int paintingPixel = 1;
     /*Temp?*/private int paintingSize = 0;
 
+    ArrayList<WindowResizeListener> windowResizeListeners;
+
 
     @Override
     public void run() {
-        super.run();
         initGlfw();
         GL.createCapabilities();
         renderer.init();
+        super.run();
         System.out.println("Start");
         loop();
 
@@ -87,6 +89,8 @@ public class Client extends GameApp {
             renderer.screenWidth = width;
             renderer.screenHeight = height;
             renderer.screenSizeUpdated();
+            for (var listener : windowResizeListeners)
+                listener.onWindowResize(window, width, height);
         });
     }
 
@@ -191,6 +195,12 @@ public class Client extends GameApp {
     }
 
 
+    @Override
+    public void enterSubworld(Subworld subworld) {
+        super.enterSubworld(subworld);
+        activeSubworld.renderer = new SubworldRenderer(activeSubworld);
+    }
+
     int screenXToWorld(int x) {
         x -= renderer.screenWidth / 2;
         if (x < 0) x -= viewScale;
@@ -267,16 +277,17 @@ public class Client extends GameApp {
 
     class Renderer {
         Client client;
-        private int screenWidth = 800;
-        private int screenHeight = 600;
-        private float relativePixelWidth = 0.01f;
-        private float relativePixelHeight = 0.01f;
+        protected int screenWidth = 800;
+        protected int screenHeight = 600;
+        protected float relativePixelWidth = 0.01f;
+        protected float relativePixelHeight = 0.01f;
         // Render buffers
         float[] vertexArray;
         float[] colorArray;
+        int[] elementArray;
         private int vertexBuffer;
         private int colorBuffer;
-        private int indexBuffer;
+        private int elementBuffer;
         float[] movingPixelVertexArray;
         float[] movingPixelColorArray;
         private int movingPixelVertexBuffer;
@@ -291,7 +302,7 @@ public class Client extends GameApp {
         void init() {
             vertexBuffer = glGenBuffers();
             colorBuffer = glGenBuffers();
-            indexBuffer = glGenBuffers();
+            elementBuffer = glGenBuffers();
             movingPixelVertexBuffer = glGenBuffers();
             movingPixelColorBuffer = glGenBuffers();
 
@@ -308,54 +319,101 @@ public class Client extends GameApp {
             glViewport(0, 0, screenWidth, screenHeight);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 
-            int worldPixelCount = 0;
-            int movingPixelCount = 0;
-            for (Map.Entry<VectorI, Chunk> entry : activeSubworld.activeChunks.entrySet()) {
-                int baseX = entry.getKey().x * Chunk.size();
-                int baseY = entry.getKey().y * Chunk.size();
-                int i = 0;
-                for (Pixel pixel : entry.getValue().pixels) {
-                    Material material = pixel.material;
-                    float drawX = (baseX + i % Chunk.size() - cameraPos.x) * relativePixelWidth;
-                    float drawY = (baseY + i / Chunk.size() - cameraPos.y) * relativePixelHeight;
-                    i++;
-                    if (drawX < (-1 - (relativePixelWidth)) || drawX > 1 ||
-                            drawY < (-1 - (relativePixelHeight)) || drawY > 1
-                    ) {
-                        continue;
-                    }
-                    byte colorId = pixel.color;
-                    drawPixel(drawX, drawY, worldPixelCount, material, colorId, vertexArray, colorArray);
-                    worldPixelCount++;
-                }
-            }
-            for (Entity entity : activeSubworld.entities) {
-                if (entity instanceof PixelEntity) {
-                    Material material =
-                            ((PixelEntity) entity).pixel.material;
-                    int colorId = Pixels.getColor(((PixelEntity) entity).pixel.color);
-                    drawPixel(
-                            (entity.x - cameraPos.x) * relativePixelWidth,
-                            (entity.y - cameraPos.y) * relativePixelHeight,
-                            movingPixelCount, material, colorId,
-                            movingPixelVertexArray, movingPixelColorArray
-                    );
-                    movingPixelCount++;
-                }
-            }
-
             glEnableClientState(GL_VERTEX_ARRAY);
-            glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
 
-            glBufferData(GL_ARRAY_BUFFER, vertexArray, GL_STREAM_DRAW);
-            glVertexPointer(2, GL_FLOAT, 0, 0);
+            activeSubworld.draw(fdt);
+//            float xOffset = cameraPos.x % relativePixelWidth;
+//            float yOffset = cameraPos.y % relativePixelHeight;
+//            int widthInWorldPixels = (int) (screenWidth / viewScale + 2);
+//            int heightInWorldPixels = (int) (screenHeight / viewScale + 2);
+//            int vert = 0;
+//            int elem = 0;
+//            for (int y = 0; y < heightInWorldPixels; y++) {
+//                for (int x = 0; x < widthInWorldPixels; x++) {
+//                    vertexArray[vert] = x * relativePixelWidth; //+offset
+//                    vertexArray[vert+1] = y * relativePixelHeight;
+//                    if (x < widthInWorldPixels - 1 && y < heightInWorldPixels - 1) {
+//                        elementArray[elem] = vert/2;
+//                        elementArray[elem+1] = vert/2 + 1;
+//                        elementArray[elem+2] = vert/2 + widthInWorldPixels + 1;
+//                        elementArray[elem+3] = vert/2 + widthInWorldPixels;
+//                        elem += 4;
+//                    }
+//                    vert += 2;
+//                }
+//            }
 
-            glEnableClientState(GL_COLOR_ARRAY);
-            glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
-            glBufferData(GL_ARRAY_BUFFER, colorArray, GL_STREAM_DRAW);
-            glColorPointer(3, GL_FLOAT, 0, 0);
+//            int worldPixelCount = 0;
+//            int movingPixelCount = 0;
+//            elementArray.clear();
+//            for (Map.Entry<VectorI, Chunk> entry : activeSubworld.activeChunks.entrySet()) {
+//                int i = 0;
+//                int baseX = entry.getKey().x * Chunk.size();
+//                int baseY = entry.getKey().y * Chunk.size();
+//                for (Pixel pixel : entry.getValue().pixels) {
+//                    Material material = pixel.material;
+//                    float drawX = (baseX + i % Chunk.size() - cameraPos.x) * relativePixelWidth;
+//                    float drawY = (baseY + i / Chunk.size() - cameraPos.y) * relativePixelHeight;
+//                    i++;
+//                    if (drawX < (-1 - (relativePixelWidth)) || drawX > 1 ||
+//                            drawY < (-1 - (relativePixelHeight)) || drawY > 1
+//                    ) {
+//                        continue;
+//                    }
+//                    byte colorId = pixel.color;
+////                    int indexInVertexArray = worldPixelCount*3;
+//                    int indexInVertexArray = (int)drawX / widthInWorldPixels +
+//                            ((int)drawY / heightInWorldPixels) * widthInWorldPixels;
+////                    int indexInVertexArray = (int)drawX + (int)drawY * widthInWorldPixels;
+//                    if (indexInVertexArray < 0 || indexInVertexArray > vertexArray.length - 4)
+//                        continue;
+//                    /*TEMP*/ if (worldPixelCount*4+3 > elementArray.length) continue;
+//                    elementArray[worldPixelCount*4] = (indexInVertexArray);
+//                    elementArray[worldPixelCount*4+1] = (indexInVertexArray + 1);
+//                    elementArray[worldPixelCount*4+2] = (indexInVertexArray + 1 + widthInWorldPixels);
+//                    elementArray[worldPixelCount*4+3] = (indexInVertexArray + widthInWorldPixels);
 
-            glDrawArrays(GL_QUADS, 0, worldPixelCount * 4);
+//                    drawPixel(drawX, drawY, worldPixelCount, material, colorId, vertexArray, colorArray);
+//                    worldPixelCount++;
+//                }
+//            }
+//            for (Entity entity : activeSubworld.entities) {
+//                if (entity instanceof PixelEntity) {
+//                    Material material =
+//                            ((PixelEntity) entity).pixel.material;
+//                    int colorId = Pixels.getColor(((PixelEntity) entity).pixel.color);
+//                    drawPixel(
+//                            (entity.x - cameraPos.x) * relativePixelWidth,
+//                            (entity.y - cameraPos.y) * relativePixelHeight,
+//                            movingPixelCount, material, colorId,
+//                            movingPixelVertexArray, movingPixelColorArray
+//                    );
+//                    movingPixelCount++;
+//                }
+//            }
+
+//            glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+
+//            glBufferData(GL_ARRAY_BUFFER, vertexArray, GL_DYNAMIC_DRAW);
+//            glBufferSubData(GL_ARRAY_BUFFER, 0, vertexArray);
+//            glVertexPointer(2, GL_FLOAT, 0, 0);
+
+//            glEnableClientState(GL_COLOR_ARRAY);
+//            glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+//            glBufferData(GL_ARRAY_BUFFER, colorArray, GL_STREAM_DRAW);
+//            glColorPointer(3, GL_FLOAT, 0, 0);
+
+//            glColor3f(0.5f,0.5f,0.0f);
+//            glDrawArrays(GL_POINTS, 0, worldPixelCount * 4);
+
+//            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+//            glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, elementArray);
+//            glIndexPointer(GL_INT, 0, 0);
+//            glColor3f(0.5f,0.5f,0.0f);
+
+//            glEnableVertexAttribArray();
+//            glDrawElements(GL_QUADS, worldPixelCount, GL_UNSIGNED_INT, 0);
+//            glDrawElements(GL_QUADS, elementArray);
 
 //            glDisableClientState(GL_VERTEX_ARRAY);
 //            glDisableClientState(GL_COLOR_ARRAY);
@@ -384,12 +442,12 @@ public class Client extends GameApp {
             glVertex2f(-0.99f, 0.98f);
             glVertex2f(-0.99f + 10.0f * fdt, 0.98f);
             // Profiler bars
-            int i = 2;
+            int e = 2;
             for (var entry : Profiler.entries.entrySet()) {
                 glColor3b(entry.getValue().r, entry.getValue().g, entry.getValue().b);
-                glVertex2f(-0.99f, 0.99f - 0.01f * i);
-                glVertex2f(-0.99f + entry.getValue().value / 100f, 0.99f - 0.01f * i);
-                i++;
+                glVertex2f(-0.99f, 0.99f - 0.01f * e);
+                glVertex2f(-0.99f + entry.getValue().value / 100f, 0.99f - 0.01f * e);
+                e++;
             }
             glColor3f(0f, 1f, 0f);
             // Marks
@@ -417,7 +475,7 @@ public class Client extends GameApp {
             colorArray[ci + 6] = material.colors[colorId].r;
             colorArray[ci + 7] = material.colors[colorId].g;
             colorArray[ci + 8] = material.colors[colorId].b;
-//
+
             colorArray[ci + 9] = material.colors[colorId].r;
             colorArray[ci + 10] = material.colors[colorId].g;
             colorArray[ci + 11] = material.colors[colorId].b;
@@ -439,8 +497,12 @@ public class Client extends GameApp {
             relativePixelHeight = viewScale / (float) screenHeight * 2;
 
 //        int worldPixelCount = activeSubworld.loadedChunks.entrySet().size() * Chunk.area();
-            int worldPixelCount = (int) (screenWidth / viewScale + 2) * (int) (screenHeight / viewScale + 2);
-            vertexArray = new float[worldPixelCount * 8];
+            int widthInWorldPixels = (int) (screenWidth / viewScale + 2);
+            int heightInWorldPixels = (int) (screenHeight / viewScale + 2);
+
+            int worldPixelCount = widthInWorldPixels * heightInWorldPixels;
+            vertexArray = new float[worldPixelCount * 2];
+
             colorArray = new float[worldPixelCount * 8 * 3];
             movingPixelVertexArray = new float[worldPixelCount * 4];
             movingPixelColorArray = new float[worldPixelCount * 4 * 3];
@@ -453,6 +515,9 @@ public class Client extends GameApp {
             glBufferData(GL_ARRAY_BUFFER, colorArray, GL_STREAM_DRAW);
 
 //            glBindAttribLocation();
+            elementArray = new int[vertexArray.length * 2];
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementArray, GL_STREAM_DRAW);
         }
     }
 }

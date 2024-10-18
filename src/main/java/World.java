@@ -30,7 +30,7 @@ public class World {
 
     public void tick(float dt) {
         for (Subworld subworld : subworlds.values()) {
-            subworld.tick(dt);
+            subworld.update(dt);
         }
     }
 
