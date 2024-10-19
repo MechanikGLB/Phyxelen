@@ -2,9 +2,7 @@ import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.Semaphore;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
@@ -111,7 +109,14 @@ public class Client extends GameApp {
                     continue;
                 }
                 lastTickTime = cycleStartTime;
+                try {
+                    logicSemaphore.acquire();
+                } catch (InterruptedException e) {
+                    logicSemaphore.release();
+                    continue;
+                }
                 tick(dt);
+                logicSemaphore.release();
             }
             Thread.yield();
         });

@@ -21,7 +21,7 @@ public abstract class GameApp {
     protected short counter = 0;
 
     Thread logicThread;
-    Semaphore logicSemaphore = new Semaphore(0);
+    Semaphore logicSemaphore = new Semaphore(1);
 
 
 
