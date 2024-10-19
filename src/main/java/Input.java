@@ -39,9 +39,14 @@ class InputAction {
 
 
 abstract class InputHandler {
+    Input input;
     ArrayList<Integer> boundKeys = new ArrayList<>();
     ArrayList<Integer> pressedKeys = new ArrayList<>();
     ArrayList<ArrayList<InputAction>> keyBindings = new ArrayList<>();
+
+    public InputHandler(Input input) {
+        this.input = input;
+    }
 
     public void processInput(long window) {
         for (int i = 0; i < boundKeys.size(); i++) {
@@ -62,14 +67,14 @@ abstract class InputHandler {
 
     /// Binds `key` to `action`
     /// @param key GLFW constant of key to bind
-     /// @param inputAction Action to bind to
-    public void bindKey(int key, InputAction inputAction) {
+     /// @param inputActionName Name of action to bind to
+    public void bindKey(int key, String inputActionName) {
         int keyIndex = boundKeys.indexOf(key); // TODO: does it work?
         if (keyIndex < 0) {
             boundKeys.add(key);
-            keyBindings.add(new ArrayList(Collections.singletonList(inputAction)));
+            keyBindings.add(new ArrayList(Collections.singletonList(input.getInputAction(inputActionName))));
         } else {
-            keyBindings.get(keyIndex).add(inputAction);
+            keyBindings.get(keyIndex).add(input.getInputAction(inputActionName));
         }
     }
 
@@ -78,6 +83,10 @@ abstract class InputHandler {
 
 
 class KeyboardHandler extends InputHandler {
+    public KeyboardHandler(Input input) {
+        super(input);
+    }
+
     @Override
     boolean getKeyPressed(long window, int keyId) {
         return glfwGetKey(window, keyId) != 0;
@@ -86,6 +95,10 @@ class KeyboardHandler extends InputHandler {
 
 
 class MouseHandler extends InputHandler {
+    public MouseHandler(Input input) {
+        super(input);
+    }
+
     @Override
     boolean getKeyPressed(long window, int keyId) {
         return glfwGetMouseButton(window, keyId) != 0;
@@ -95,8 +108,8 @@ class MouseHandler extends InputHandler {
 
 public class Input {
     private static HashMap<String, InputAction> inputActions = new HashMap<>();
-    final private static KeyboardHandler keyboardHandler = new KeyboardHandler();
-    final private static MouseHandler mouseHandler = new MouseHandler();
+    final private KeyboardHandler keyboardHandler = new KeyboardHandler(this);
+    final private MouseHandler mouseHandler = new MouseHandler(this);
 
     public void addInputAction(String name, InputAction inputAction) {
         inputActions.put(name, inputAction);
@@ -108,10 +121,10 @@ public class Input {
         return inputActions.entrySet();
     }
 
-    public static KeyboardHandler getKeyboardHandler() {
+    public KeyboardHandler getKeyboardHandler() {
         return keyboardHandler;
     }
-    public static MouseHandler getMouseHandler() {
+    public MouseHandler getMouseHandler() {
         return mouseHandler;
     }
 

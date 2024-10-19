@@ -38,7 +38,7 @@ public class World {
     public static World createWorld(String worldName, String gameName) {
         var gameConfig = Main.getGame().content.getGameConfig(gameName);
 
-        List<Character> forbiddenChars = Arrays.asList('/','\\',':','*','?','"','<','>','|');
+        List<java.lang.Character> forbiddenChars = Arrays.asList('/','\\',':','*','?','"','<','>','|');
         StringBuilder path = new StringBuilder();
         for (char ch : worldName.toCharArray()) {
             if (forbiddenChars.contains(ch))

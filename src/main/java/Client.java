@@ -14,6 +14,7 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 public class Client extends GameApp {
     protected long window;
     protected Renderer renderer = new Renderer(this);
+    Input input = new Input();
 
     float maxFps = 30;
     /// Frame delta time;
@@ -27,6 +28,8 @@ public class Client extends GameApp {
     protected short viewScale = 8;
     /// Free camera movement speed in screen pixels per second
     protected short cameraSpeed = 150;
+    boolean freeCamera = true;
+    Character controlledCharacter;
 
     /*Temp?*/private int paintingPixel = 1;
     /*Temp?*/private int paintingSize = 0;
@@ -40,6 +43,7 @@ public class Client extends GameApp {
         GL.createCapabilities();
         renderer.init();
         super.run();
+        bindKeys();
         System.out.println("Start");
         loop();
 
@@ -144,31 +148,8 @@ public class Client extends GameApp {
             renderer.draw();
 
             glfwPollEvents();
+            input.processInput(window);
 
-            cameraSpeed = (short) (200 + 400 * glfwGetKey(window, GLFW_KEY_LEFT_SHIFT));
-
-            if (glfwGetKey(window, GLFW_KEY_UP) != 0 ||
-                    glfwGetKey(window, GLFW_KEY_W) != 0)
-                cameraPos.y += cameraSpeed / viewScale * fdt;
-            if (glfwGetKey(window, GLFW_KEY_DOWN) != 0 ||
-                    glfwGetKey(window, GLFW_KEY_S) != 0)
-                cameraPos.y -= cameraSpeed / viewScale * fdt;
-            if (glfwGetKey(window, GLFW_KEY_LEFT) != 0 ||
-                    glfwGetKey(window, GLFW_KEY_A) != 0)
-                cameraPos.x -= cameraSpeed / viewScale * fdt;
-            if (glfwGetKey(window, GLFW_KEY_RIGHT) != 0 ||
-                    glfwGetKey(window, GLFW_KEY_D) != 0)
-                cameraPos.x += cameraSpeed / viewScale * fdt;
-
-            // Scaling is not ready!
-            if (glfwGetKey(window, GLFW_KEY_MINUS) != 0 && viewScale > 1) {
-                viewScale -= 1;
-                renderer.screenSizeUpdated();
-            }
-            if (glfwGetKey(window, GLFW_KEY_EQUAL) != 0) {
-                viewScale += 1;
-                renderer.screenSizeUpdated();
-            }
 
             for (int i = 0; i < 10; i++)
                 if (glfwGetKey(window, GLFW_KEY_0 + i) != 0)
@@ -279,23 +260,72 @@ public class Client extends GameApp {
     }
 
 
+    void bindKeys() {
+        // Movement keys
+        input.addInputAction("MoveUp",new InputAction(null, o -> {
+            if (controlledCharacter != null)
+                controlledCharacter.go(0, 1);
+            else if (freeCamera)
+                cameraPos.y += cameraSpeed / viewScale * fdt;
+        }, null));
+        input.getKeyboardHandler().bindKey(GLFW_KEY_W, "MoveUp");
+        input.getKeyboardHandler().bindKey(GLFW_KEY_UP, "MoveUp");
+
+        input.addInputAction("MoveDown",new InputAction(null, o -> {
+            if (controlledCharacter != null)
+                controlledCharacter.go(0, -1);
+            else if (freeCamera)
+                cameraPos.y -= cameraSpeed / viewScale * fdt;
+        }, null));
+        input.getKeyboardHandler().bindKey(GLFW_KEY_S, "MoveDown");
+        input.getKeyboardHandler().bindKey(GLFW_KEY_DOWN, "MoveDown");
+
+        input.addInputAction("MoveRight",new InputAction(null, o -> {
+            if (controlledCharacter != null)
+                controlledCharacter.go(1, 0);
+            else if (freeCamera)
+                cameraPos.x += cameraSpeed / viewScale * fdt;
+        }, null));
+        input.getKeyboardHandler().bindKey(GLFW_KEY_D, "MoveRight");
+        input.getKeyboardHandler().bindKey(GLFW_KEY_RIGHT, "MoveRight");
+
+        input.addInputAction("MoveLeft",new InputAction(null, o -> {
+            if (controlledCharacter != null)
+                controlledCharacter.go(-1, 0);
+            else if (freeCamera)
+                cameraPos.x -= cameraSpeed / viewScale * fdt;
+        }, null));
+        input.getKeyboardHandler().bindKey(GLFW_KEY_A, "MoveLeft");
+        input.getKeyboardHandler().bindKey(GLFW_KEY_LEFT, "MoveLeft");
+        // Temp? TODO: decide what to do with it
+        input.addInputAction("Shift",new InputAction(
+                o -> cameraSpeed = 600, null, o -> cameraSpeed = 200));
+        input.getKeyboardHandler().bindKey(GLFW_KEY_LEFT_SHIFT, "Shift");
+        input.getKeyboardHandler().bindKey(GLFW_KEY_RIGHT_SHIFT, "Shift");
+        // Scale
+
+        input.addInputAction("ScaleMinus",new InputAction(o -> {
+            if (viewScale == 1) return;
+            viewScale -= 1;
+            renderer.screenSizeUpdated();
+        }, null, null));
+        input.getKeyboardHandler().bindKey(GLFW_KEY_MINUS, "ScaleMinus");
+
+        input.addInputAction("ScalePlus",new InputAction(o -> {
+            viewScale += 1;
+            renderer.screenSizeUpdated();
+        }, null, null));
+        input.getKeyboardHandler().bindKey(GLFW_KEY_EQUAL, "ScalePlus");
+
+    }
+
+
     class Renderer {
         Client client;
         protected int screenWidth = 800;
         protected int screenHeight = 600;
         protected float relativePixelWidth = 0.01f;
         protected float relativePixelHeight = 0.01f;
-        // Render buffers
-        float[] vertexArray;
-        float[] colorArray;
-        int[] elementArray;
-        private int vertexBuffer;
-        private int colorBuffer;
-        private int elementBuffer;
-        float[] movingPixelVertexArray;
-        float[] movingPixelColorArray;
-        private int movingPixelVertexBuffer;
-        private int movingPixelColorBuffer;
 
 
         Renderer(Client client) {
@@ -304,12 +334,6 @@ public class Client extends GameApp {
 
 
         void init() {
-            vertexBuffer = glGenBuffers();
-            colorBuffer = glGenBuffers();
-            elementBuffer = glGenBuffers();
-            movingPixelVertexBuffer = glGenBuffers();
-            movingPixelColorBuffer = glGenBuffers();
-
             int[] width = new int[1];
             int[] height = new int[1];
             glfwGetWindowSize(client.window, width, height);
@@ -327,115 +351,6 @@ public class Client extends GameApp {
             glEnableClientState(GL_COLOR_ARRAY);
 
             activeSubworld.draw(fdt);
-//            float xOffset = cameraPos.x % relativePixelWidth;
-//            float yOffset = cameraPos.y % relativePixelHeight;
-//            int widthInWorldPixels = (int) (screenWidth / viewScale + 2);
-//            int heightInWorldPixels = (int) (screenHeight / viewScale + 2);
-//            int vert = 0;
-//            int elem = 0;
-//            for (int y = 0; y < heightInWorldPixels; y++) {
-//                for (int x = 0; x < widthInWorldPixels; x++) {
-//                    vertexArray[vert] = x * relativePixelWidth; //+offset
-//                    vertexArray[vert+1] = y * relativePixelHeight;
-//                    if (x < widthInWorldPixels - 1 && y < heightInWorldPixels - 1) {
-//                        elementArray[elem] = vert/2;
-//                        elementArray[elem+1] = vert/2 + 1;
-//                        elementArray[elem+2] = vert/2 + widthInWorldPixels + 1;
-//                        elementArray[elem+3] = vert/2 + widthInWorldPixels;
-//                        elem += 4;
-//                    }
-//                    vert += 2;
-//                }
-//            }
-
-//            int worldPixelCount = 0;
-//            int movingPixelCount = 0;
-//            elementArray.clear();
-//            for (Map.Entry<VectorI, Chunk> entry : activeSubworld.activeChunks.entrySet()) {
-//                int i = 0;
-//                int baseX = entry.getKey().x * Chunk.size();
-//                int baseY = entry.getKey().y * Chunk.size();
-//                for (Pixel pixel : entry.getValue().pixels) {
-//                    Material material = pixel.material;
-//                    float drawX = (baseX + i % Chunk.size() - cameraPos.x) * relativePixelWidth;
-//                    float drawY = (baseY + i / Chunk.size() - cameraPos.y) * relativePixelHeight;
-//                    i++;
-//                    if (drawX < (-1 - (relativePixelWidth)) || drawX > 1 ||
-//                            drawY < (-1 - (relativePixelHeight)) || drawY > 1
-//                    ) {
-//                        continue;
-//                    }
-//                    byte colorId = pixel.color;
-////                    int indexInVertexArray = worldPixelCount*3;
-//                    int indexInVertexArray = (int)drawX / widthInWorldPixels +
-//                            ((int)drawY / heightInWorldPixels) * widthInWorldPixels;
-////                    int indexInVertexArray = (int)drawX + (int)drawY * widthInWorldPixels;
-//                    if (indexInVertexArray < 0 || indexInVertexArray > vertexArray.length - 4)
-//                        continue;
-//                    /*TEMP*/ if (worldPixelCount*4+3 > elementArray.length) continue;
-//                    elementArray[worldPixelCount*4] = (indexInVertexArray);
-//                    elementArray[worldPixelCount*4+1] = (indexInVertexArray + 1);
-//                    elementArray[worldPixelCount*4+2] = (indexInVertexArray + 1 + widthInWorldPixels);
-//                    elementArray[worldPixelCount*4+3] = (indexInVertexArray + widthInWorldPixels);
-
-//                    drawPixel(drawX, drawY, worldPixelCount, material, colorId, vertexArray, colorArray);
-//                    worldPixelCount++;
-//                }
-//            }
-//            for (Entity entity : activeSubworld.entities) {
-//                if (entity instanceof PixelEntity) {
-//                    Material material =
-//                            ((PixelEntity) entity).pixel.material;
-//                    int colorId = Pixels.getColor(((PixelEntity) entity).pixel.color);
-//                    drawPixel(
-//                            (entity.x - cameraPos.x) * relativePixelWidth,
-//                            (entity.y - cameraPos.y) * relativePixelHeight,
-//                            movingPixelCount, material, colorId,
-//                            movingPixelVertexArray, movingPixelColorArray
-//                    );
-//                    movingPixelCount++;
-//                }
-//            }
-
-//            glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-
-//            glBufferData(GL_ARRAY_BUFFER, vertexArray, GL_DYNAMIC_DRAW);
-//            glBufferSubData(GL_ARRAY_BUFFER, 0, vertexArray);
-//            glVertexPointer(2, GL_FLOAT, 0, 0);
-
-//            glEnableClientState(GL_COLOR_ARRAY);
-//            glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
-//            glBufferData(GL_ARRAY_BUFFER, colorArray, GL_STREAM_DRAW);
-//            glColorPointer(3, GL_FLOAT, 0, 0);
-
-//            glColor3f(0.5f,0.5f,0.0f);
-//            glDrawArrays(GL_POINTS, 0, worldPixelCount * 4);
-
-//            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
-//            glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, elementArray);
-//            glIndexPointer(GL_INT, 0, 0);
-//            glColor3f(0.5f,0.5f,0.0f);
-
-//            glEnableVertexAttribArray();
-//            glDrawElements(GL_QUADS, worldPixelCount, GL_UNSIGNED_INT, 0);
-//            glDrawElements(GL_QUADS, elementArray);
-
-//            glDisableClientState(GL_VERTEX_ARRAY);
-//            glDisableClientState(GL_COLOR_ARRAY);
-
-//            glEnableClientState(GL_VERTEX_ARRAY);
-//            glBindBuffer(GL_ARRAY_BUFFER, movingPixelVertexBuffer);
-//            glBufferData(GL_ARRAY_BUFFER, movingPixelVertexArray, GL_STREAM_DRAW);
-//            glVertexPointer(2, GL_FLOAT, 0, 0);
-
-//            glEnableClientState(GL_COLOR_ARRAY);
-//            glBindBuffer(GL_ARRAY_BUFFER, movingPixelColorBuffer);
-//            glBufferData(GL_ARRAY_BUFFER, movingPixelColorArray, GL_STREAM_DRAW);
-//            glColorPointer(3, GL_FLOAT, 0, 0);
-
-//            glDrawArrays(GL_QUADS, 0, movingPixelCount * 4);
-
-//            glDisableClientState(GL_VERTEX_ARRAY);
 
             // Frame rate bar
             float frameRate = 1f / fdt;
@@ -465,35 +380,15 @@ public class Client extends GameApp {
         }
 
 
-        private void drawPixel(float drawX, float drawY, int i, Material material, int colorId,
-                float[] vertexArray, float[] colorArray
-        ) {
-            int ci = i * 12;
-            colorArray[ci] = material.colors[colorId].r;
-            colorArray[ci + 1] = material.colors[colorId].g;
-            colorArray[ci + 2] = material.colors[colorId].b;
-
-            colorArray[ci + 3] = material.colors[colorId].r;
-            colorArray[ci + 4] = material.colors[colorId].g;
-            colorArray[ci + 5] = material.colors[colorId].b;
-
-            colorArray[ci + 6] = material.colors[colorId].r;
-            colorArray[ci + 7] = material.colors[colorId].g;
-            colorArray[ci + 8] = material.colors[colorId].b;
-
-            colorArray[ci + 9] = material.colors[colorId].r;
-            colorArray[ci + 10] = material.colors[colorId].g;
-            colorArray[ci + 11] = material.colors[colorId].b;
-
-            i *= 8;
-            vertexArray[i] = drawX;
-            vertexArray[i + 1] = drawY;
-            vertexArray[i + 2] = drawX + relativePixelWidth;
-            vertexArray[i + 3] = drawY;
-            vertexArray[i + 4] = drawX + relativePixelWidth;
-            vertexArray[i + 5] = drawY + relativePixelHeight;
-            vertexArray[i + 6] = drawX;
-            vertexArray[i + 7] = drawY + relativePixelHeight;
+        public void drawRectAtAbsCoordinates(float x1, float y1, float x2, float y2) {
+            float startX = (x1 - client.cameraPos.x) * relativePixelWidth;
+            float startY = (y1 - client.cameraPos.y) * relativePixelHeight;
+            float width = (x2 - x1) * relativePixelWidth;
+            float height = (y2 - y1) * relativePixelHeight;
+            glVertex2f(startX, startY);
+            glVertex2f(startX + width, startY);
+            glVertex2f(startX + width, startY + height);
+            glVertex2f(startX, startY + height);
         }
 
 
