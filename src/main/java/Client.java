@@ -156,14 +156,15 @@ public class Client extends GameApp {
 
             for (int i = 0; i < 10; i++)
                 if (glfwGetKey(window, GLFW_KEY_0 + i) != 0)
-                    paintingPixel = i;
+                    if (controlledCharacter != null)
+                        controlledCharacter.holdedItem = ((Player)controlledCharacter).inventory.get(i-1);
+                    else
+                        paintingPixel = i;
             if (glfwGetKey(window, GLFW_KEY_LEFT_BRACKET) != 0 && paintingSize > 1)
                 paintingSize -= 1;
             if (glfwGetKey(window, GLFW_KEY_RIGHT_BRACKET) != 0)
                 paintingSize += 1;
 
-            if (glfwGetKey(window, GLFW_KEY_E) != 0)
-                jetPixelAtCursorPosition();
             if (glfwGetKey(window, GLFW_KEY_SPACE) != 0)
                 jetPixelsAtCursorPosition();
 

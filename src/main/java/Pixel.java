@@ -14,4 +14,12 @@ public class Pixel {
     byte color() {
         return chunk.colors[i];
     }
+
+    int x() {
+        return chunk.xIndex * Chunk.size() + i % Chunk.size();
+    }
+
+    int y() {
+        return chunk.yIndex * Chunk.size() + i / Chunk.size();
+    }
 }

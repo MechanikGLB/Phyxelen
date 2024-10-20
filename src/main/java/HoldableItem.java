@@ -18,8 +18,10 @@ public class HoldableItem extends GameObject {
 
     @Override
     void update(float dt) {
-        if (onUpdate != null)
+        if (onUpdate != null) {
             onUpdate.accept(this);
+            counter += dt;
+        }
     }
 
     @Override
