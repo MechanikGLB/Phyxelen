@@ -25,17 +25,12 @@ public class HoldableItem extends GameObject {
     @Override
     void draw(float fdt) {
         Client client = (Client) Main.getGame();
+        glColor3f(0.3f, 0.9f, 0.3f);
         client.renderer.drawRectAtAbsCoordinates(
                 3,0,6,2,
                 holder.getLookDirection(),
                 holder.x, holder.y
         );
-        glBegin(GL_LINES);
-        glVertex2f(client.renderer.screenWidth / 2,client.renderer.screenHeight / 2);
-        glVertex2f(client.renderer.screenWidth / 2 + (float)Math.cos(holder.getLookDirection()) * 40,
-                client.renderer.screenHeight / 2 + (float)Math.sin(holder.getLookDirection()) * 40
-        );
-        glEnd();
     }
 
     void activate() {

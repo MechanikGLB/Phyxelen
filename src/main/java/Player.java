@@ -1,21 +1,26 @@
 import java.nio.DoubleBuffer;
+import java.util.ArrayList;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL21.*;
 
 public class Player extends Character {
     Client client = (Client)Main.getGame();
+    ArrayList<HoldableItem> inventory = new ArrayList<>();
 
     public Player(float x, float y, Subworld subworld) {
         super(x, y, subworld);
-        /*TEMP*/ holdedItem = new HoldableItem(null, item -> {
+        /*TEMP*/
+        inventory.add(new HoldableItem(null, item -> {
             if (item.active)
                 subworld.addEntity(new PixelEntity(this.x, this.y, subworld,
                         subworld.world.pixelIds[1], (byte) 0,
                         (float) Math.cos(getLookDirection()) * 100,
                         (float) Math.sin(getLookDirection()) * 100,
                         0, -9.8f));
-        }, null, this);
+        }, null, this));
+
+        holdedItem = inventory.getFirst();
     }
 
     @Override
@@ -53,8 +58,8 @@ public class Player extends Character {
             client.renderer.drawRectAtAbsCoordinates(
                     x - 4, y + 6, x - 4 + (8f * health / maxHealth), y + 5);
             glEnd();
-            if (holdedItem != null)
-                holdedItem.draw(fdt);
         }
+        if (holdedItem != null)
+            holdedItem.draw(fdt);
     }
 }

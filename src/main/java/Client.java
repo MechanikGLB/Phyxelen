@@ -28,9 +28,10 @@ public class Client extends GameApp {
     protected short viewScale = 8;
     /// Free camera movement speed in screen pixels per second
     protected short cameraSpeed = 150;
-    boolean freeCamera = false;
+    boolean freeCamera = true;
     Character controlledCharacter;
 
+    /*Temp?*/private Character primaryCharacter;
     /*Temp?*/private int paintingPixel = 1;
     /*Temp?*/private int paintingSize = 0;
 
@@ -44,8 +45,8 @@ public class Client extends GameApp {
         renderer.init();
         super.run();
         bindKeys();
-        /*TEMP*/controlledCharacter = new Player(0, 10, activeSubworld);
-        activeSubworld.entities.add(controlledCharacter);
+        /*TEMP*/primaryCharacter = new Player(0, 10, activeSubworld);
+        activeSubworld.entities.add(primaryCharacter);
         System.out.println("Start");
         loop();
 
@@ -339,6 +340,18 @@ public class Client extends GameApp {
                 }
         ));
         input.getMouseHandler().bindKey(GLFW_MOUSE_BUTTON_1, "PrimaryAction");
+
+        // Development
+        input.addInputAction("SwitchEditorMode", new InputAction(o -> {
+            if (controlledCharacter == null) {
+                controlledCharacter = primaryCharacter;
+                freeCamera = false;
+            } else {
+                controlledCharacter = null;
+                freeCamera = true;
+            }
+        }, null, null));
+        input.getKeyboardHandler().bindKey(GLFW_KEY_E, "SwitchEditorMode");
     }
 
 
