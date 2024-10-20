@@ -44,6 +44,8 @@ public class Client extends GameApp {
         renderer.init();
         super.run();
         bindKeys();
+        /*TEMP*/controlledCharacter = new Player(0, 10, activeSubworld);
+        activeSubworld.entities.add(controlledCharacter);
         System.out.println("Start");
         loop();
 
@@ -191,11 +193,18 @@ public class Client extends GameApp {
         return Math.round(cameraPos.x) + x / viewScale;
     }
 
-
     int screenYToWorld(int y) {
         y = renderer.screenHeight / 2 - y;
         if (y < 0) y -= viewScale;
         return Math.round(cameraPos.y) + y / viewScale;
+    }
+
+    float worldXToScreen(float x) {
+        return (x - cameraPos.x) * viewScale + renderer.screenWidth / 2;
+    }
+
+    float worldYToScreen(float y) {
+        return (y - cameraPos.y) * viewScale + renderer.screenHeight / 2;
     }
 
 
@@ -345,6 +354,13 @@ public class Client extends GameApp {
 
         public void draw() {
             glViewport(0, 0, screenWidth, screenHeight);
+
+            glMatrixMode( GL_PROJECTION );
+            glLoadIdentity();
+            glOrtho( 0.0, screenWidth, 0, screenHeight, 1.0, -1.0 );
+            glMatrixMode( GL_MODELVIEW );
+            glLoadIdentity();
+
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 
             glEnableClientState(GL_VERTEX_ARRAY);
@@ -356,39 +372,65 @@ public class Client extends GameApp {
             float frameRate = 1f / fdt;
             glColor3f(1f, 1f, 0f);
             glBegin(GL_LINES);
-            glVertex2f(-0.99f, 0.99f);
-            glVertex2f(-0.99f + 0.01f * frameRate, 0.99f);
+            glVertex2i(4, screenHeight - 4);
+            glVertex2f(4 + 5 * frameRate, screenHeight - 4);
             // Frame time bar
-            glVertex2f(-0.99f, 0.98f);
-            glVertex2f(-0.99f + 10.0f * fdt, 0.98f);
+            glVertex2i(4, screenHeight - 6);
+            glVertex2f(4 + 2000.0f * fdt, screenHeight - 6);
             // Profiler bars
-            int e = 2;
+            int e = 0;
             for (var entry : Profiler.entries.entrySet()) {
                 glColor3b(entry.getValue().r, entry.getValue().g, entry.getValue().b);
-                glVertex2f(-0.99f, 0.99f - 0.01f * e);
-                glVertex2f(-0.99f + entry.getValue().value / 100f, 0.99f - 0.01f * e);
+                glVertex2i(4, screenHeight - 2 * e);
+                glVertex2f(4 + entry.getValue().value * 100, screenHeight - 2 * e);
                 e++;
             }
             glColor3f(0f, 1f, 0f);
+            glEnd();
             // Marks
-            glVertex2f(-0.99f + 0.59f, 0.99f);
-            glVertex2f(-0.99f + 0.59f, 0.98f);
-            glVertex2f(-0.99f + 0.295f, 0.98f);
-            glVertex2f(-0.99f + 0.295f, 0.99f);
+            glBegin(GL_POINTS);
+            glVertex2i(5 * 30, screenHeight - 3);
+            glVertex2i(5 * 60, screenHeight - 3);
+            glVertex2i(5 * 120, screenHeight - 3);
             glEnd();
             glfwSwapBuffers(window);
         }
 
 
         public void drawRectAtAbsCoordinates(float x1, float y1, float x2, float y2) {
-            float startX = (x1 - client.cameraPos.x) * relativePixelWidth;
-            float startY = (y1 - client.cameraPos.y) * relativePixelHeight;
-            float width = (x2 - x1) * relativePixelWidth;
-            float height = (y2 - y1) * relativePixelHeight;
+            float startX = worldXToScreen(x1);
+            float startY = worldYToScreen(y1);
+            float width = (x2 - x1) * viewScale;
+            float height = (y2 - y1) * viewScale;
             glVertex2f(startX, startY);
             glVertex2f(startX + width, startY);
             glVertex2f(startX + width, startY + height);
             glVertex2f(startX, startY + height);
+        }
+
+        public void drawRectAtAbsCoordinates(float centerX, float centerY, float w, float h,
+                                             float angle, float rotationX, float rotationY) {
+            w *= viewScale; h *= viewScale;
+            centerX *= viewScale; centerY *= viewScale;
+            glLoadIdentity();
+            float x = worldXToScreen(centerX - rotationX);
+            float y = worldYToScreen(centerY - rotationY);
+//            rotationX = worldXToScreen(rotationX);
+//            rotationY = worldYToScreen(rotationY);
+//            float startX = (x1 - client.cameraPos.x) * relativePixelWidth;
+//            float startY = (y1 - client.cameraPos.y) * relativePixelHeight;
+
+            glTranslatef(worldXToScreen(rotationX), worldYToScreen(rotationY), 0f);
+            glRotatef(angle * 180f / (float)Math.PI,0, 0, 1);
+            glTranslatef(0, 0, 0f);
+            glBegin(GL_QUADS);
+            glVertex2f(centerX - w/2, centerY + h/2);
+            glVertex2f(centerX + w/2, centerY + h/2);
+            glVertex2f(centerX + w/2, centerY - h/2);
+            glVertex2f(centerX - w/2, centerY - h/2);
+            glEnd();
+            glLoadIdentity();
+
         }
 
 

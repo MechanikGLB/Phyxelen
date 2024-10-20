@@ -31,10 +31,8 @@ public class SubworldRenderer implements WindowResizeListener {
     }
 
     void drawChunks() {
-        var relativePixelWidth = client.renderer.relativePixelWidth;
-        var relativePixelHeight = client.renderer.relativePixelHeight;
-        float screenHalfWidthInWorldPixels = 1.0f / relativePixelWidth;
-        float screenHalfHeightInWorldPixels = 1.0f / relativePixelHeight;
+//        glLoadIdentity();
+        var worldPixelSize = client.viewScale;
         int worldPixelCount = 0;
         for (var chunk : subworld.activeChunks.entrySet()) {
             int baseX = chunk.getKey().x * Chunk.size();
@@ -51,25 +49,25 @@ public class SubworldRenderer implements WindowResizeListener {
             }
             colorArray.rewind();
             for (int i = 0; i < Chunk.area(); i++) {
-                float drawX = (baseX + i % Chunk.size() - client.cameraPos.x) * relativePixelWidth;
-                float drawY = (baseY + i / Chunk.size() - client.cameraPos.y) * relativePixelHeight;
+                float drawX = client.worldXToScreen(baseX + i % Chunk.size());
+                float drawY = client.worldYToScreen(baseY + i / Chunk.size());
 
                 Material material = chunk.getValue().materials[i];
                 ColorWithAplha color = material.colors[chunk.getValue().colors[i]]; // chunk.getValue().colors[i]
-                if (drawX < (-1 - (relativePixelWidth)) || drawX > 1 ||
-                        drawY < (-1 - (relativePixelHeight)) || drawY > 1
+                if (drawX < (-1 - (worldPixelSize)) || drawX > client.renderer.screenWidth ||
+                        drawY < (-1 - (worldPixelSize)) || drawY > client.renderer.screenHeight
                 ) {
                     continue;
                 }
                 if ((worldPixelCount+1)*8 > vertexArray.length) continue;
                 vertexArray[worldPixelCount*8] = drawX;
                 vertexArray[worldPixelCount*8 + 1] = drawY;
-                vertexArray[worldPixelCount*8 + 2] = drawX + relativePixelWidth;
+                vertexArray[worldPixelCount*8 + 2] = drawX + worldPixelSize;
                 vertexArray[worldPixelCount*8 + 3] = drawY;
-                vertexArray[worldPixelCount*8 + 4] = drawX + relativePixelWidth;
-                vertexArray[worldPixelCount*8 + 5] = drawY + relativePixelHeight;
+                vertexArray[worldPixelCount*8 + 4] = drawX + worldPixelSize;
+                vertexArray[worldPixelCount*8 + 5] = drawY + worldPixelSize;
                 vertexArray[worldPixelCount*8 + 6] = drawX;
-                vertexArray[worldPixelCount*8 + 7] = drawY + relativePixelHeight;
+                vertexArray[worldPixelCount*8 + 7] = drawY + worldPixelSize;
                 for (int vert = 0; vert < 4; vert++) {
 //                    colorArray[worldPixelCount * 12 + vert * 3] = color.r;
 //                    colorArray[worldPixelCount * 12 + vert * 3 + 1] = color.g;
@@ -112,8 +110,8 @@ public class SubworldRenderer implements WindowResizeListener {
     }
 
     void updateVertexArraySize() {
-        int horizontalCount = (int)(2.0f / client.renderer.relativePixelWidth) + 3;
-        int verticalCount = (int)(2.0f / client.renderer.relativePixelHeight) + 3;
+        int horizontalCount = (client.renderer.screenWidth / client.viewScale) + 3;
+        int verticalCount = (client.renderer.screenHeight / client.viewScale) + 3;
         // (vertexes for world pixel) * (floats in coordinate)
         vertexArray = new float[horizontalCount * verticalCount * 4 * 2];
         // (vertexes for world pixel) * (floats in color)

@@ -17,7 +17,7 @@ public class EntityWithCollision extends Entity {
     @Override
     void draw(float fdt) {
         // TEMP
-        glColor3f(0.2f, 0.0f, 0f);
+        glColor3f(0.4f, 0.2f, 0f);
         glBegin(GL_QUADS);
         ((Client)Main.getGame()).renderer.drawRectAtAbsCoordinates(
                 x - collisionBoxWidth/2, y - collisionBoxHeight/2,

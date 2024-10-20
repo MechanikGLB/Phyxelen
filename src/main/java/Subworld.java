@@ -57,6 +57,8 @@ public class Subworld extends GameObject {
     @Override
     void draw(float fdt) {
         renderer.draw(fdt);
+        for (var entity : entities)
+            entity.draw(fdt);
     }
 
     void loadChunk(VectorI indexes) {
