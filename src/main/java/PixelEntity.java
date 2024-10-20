@@ -1,15 +1,19 @@
 import static org.lwjgl.opengl.GL20.*;
 
-public class PixelEntity extends Entity {
+public class PixelEntity extends Projectile {
     Material material;
     byte color;
-    float velocityX = 0;
-    float velocityY = 0;
-    float accelerationX = 0;
-    float accelerationY = 0;
+
 
     public PixelEntity(float x, float y, Subworld subworld, Material material, byte color) {
-        super(x, y, subworld);
+        super(x, y, subworld, (self, o) -> {
+            if (o instanceof Pixel && !(((Pixel) o).chunk.materials[((Pixel) o).i] instanceof MaterialAir)) {
+                subworld.setPixel(Math.round(self.x), Math.round(self.y), material, color);
+                subworld.removeEntity(self);
+                return true;
+            }
+            else return false;
+        });
         this.material = material;
         this.color = color;
     }
@@ -24,20 +28,6 @@ public class PixelEntity extends Entity {
         this.accelerationY = accelerationY;
     }
 
-    @Override
-    void update(float dt) {
-        float newX = x + velocityX * dt;
-        float newY = y + velocityY * dt;
-        if (!(subworld.getPixelMaterial(Math.round(newX), Math.round(newY)) instanceof MaterialAir)) {
-            subworld.setPixel(Math.round(x), Math.round(y), material, color);
-            subworld.removeEntity(this);
-            return;
-        }
-        x = newX;
-        y = newY;
-        velocityX += accelerationX;
-        velocityY += accelerationY;
-    }
 
     @Override
     void draw(float fdt) {
