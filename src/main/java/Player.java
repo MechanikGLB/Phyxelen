@@ -8,7 +8,14 @@ public class Player extends Character {
 
     public Player(float x, float y, Subworld subworld) {
         super(x, y, subworld);
-        /*TEMP*/ holdedItem = new HoldableItem(null, null, null, this);
+        /*TEMP*/ holdedItem = new HoldableItem(null, item -> {
+            if (item.active)
+                subworld.addEntity(new PixelEntity(this.x, this.y, subworld,
+                        subworld.world.pixelIds[1], (byte) 0,
+                        (float) Math.cos(getLookDirection()) * 100,
+                        (float) Math.sin(getLookDirection()) * 100,
+                        0, -9.8f));
+        }, null, this);
     }
 
     @Override

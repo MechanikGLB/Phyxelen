@@ -15,6 +15,7 @@ public class Subworld extends GameObject {
     Hashtable<VectorI, Chunk> passiveChunks = new Hashtable<>();
     ArrayList<Entity> entities = new ArrayList<>();
 
+    ArrayList<Entity> entitiesToAdd = new ArrayList<>();
     ArrayList<Entity> entitiesToRemove = new ArrayList<>();
     File saveFile;
 
@@ -49,6 +50,8 @@ public class Subworld extends GameObject {
 
         entities.removeAll(entitiesToRemove);
         entitiesToRemove.clear();
+        entities.addAll(entitiesToAdd);
+        entitiesToAdd.clear();
         counter++;
         GameApp.Profiler.endProfile("tick");
     }
@@ -174,6 +177,10 @@ public class Subworld extends GameObject {
 //    }
 //    Material getMaterial(int x, int y)
 
+
+    void addEntity(Entity entity) {
+        entitiesToAdd.add(entity);
+    }
 
     void removeEntity(Entity entity) {
         entitiesToRemove.add(entity);

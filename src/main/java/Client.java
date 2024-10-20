@@ -28,7 +28,7 @@ public class Client extends GameApp {
     protected short viewScale = 8;
     /// Free camera movement speed in screen pixels per second
     protected short cameraSpeed = 150;
-    boolean freeCamera = true;
+    boolean freeCamera = false;
     Character controlledCharacter;
 
     /*Temp?*/private int paintingPixel = 1;
@@ -160,11 +160,6 @@ public class Client extends GameApp {
                 paintingSize -= 1;
             if (glfwGetKey(window, GLFW_KEY_RIGHT_BRACKET) != 0)
                 paintingSize += 1;
-
-            if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) != 0) {
-                setPixelAtCursorPosition(paintingPixel);
-            } else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_2) != 0)
-                setPixelAtCursorPosition(0);
 
             if (glfwGetKey(window, GLFW_KEY_E) != 0)
                 jetPixelAtCursorPosition();
@@ -311,8 +306,8 @@ public class Client extends GameApp {
                 o -> cameraSpeed = 600, null, o -> cameraSpeed = 200));
         input.getKeyboardHandler().bindKey(GLFW_KEY_LEFT_SHIFT, "Shift");
         input.getKeyboardHandler().bindKey(GLFW_KEY_RIGHT_SHIFT, "Shift");
-        // Scale
 
+        // Scale
         input.addInputAction("ScaleMinus",new InputAction(o -> {
             if (viewScale == 1) return;
             viewScale -= 1;
@@ -326,6 +321,24 @@ public class Client extends GameApp {
         }, null, null));
         input.getKeyboardHandler().bindKey(GLFW_KEY_EQUAL, "ScalePlus");
 
+        // Interacting
+        input.addInputAction("PrimaryAction", new InputAction(
+                o -> {
+                    if (controlledCharacter != null &&
+                            controlledCharacter.holdedItem != null)
+                        controlledCharacter.holdedItem.activate();
+                },
+                o -> {
+                    if (freeCamera)
+                        setPixelAtCursorPosition(paintingPixel);
+                },
+                o -> {
+                    if (controlledCharacter != null &&
+                            controlledCharacter.holdedItem != null)
+                        controlledCharacter.holdedItem.deactivate();
+                }
+        ));
+        input.getMouseHandler().bindKey(GLFW_MOUSE_BUTTON_1, "PrimaryAction");
     }
 
 

@@ -6,6 +6,7 @@ public class HoldableItem extends GameObject {
     Consumer<HoldableItem> onUpdate;
     Consumer<HoldableItem> onDeactivate;
     Character holder;
+    boolean active = false;
     float counter;
 
     public HoldableItem(Consumer<HoldableItem> onActivate, Consumer<HoldableItem> onUpdate, Consumer<HoldableItem> onDeactivate, Character holder) {
@@ -24,27 +25,28 @@ public class HoldableItem extends GameObject {
     @Override
     void draw(float fdt) {
         Client client = (Client) Main.getGame();
-//        glBegin(GL_QUADS);
         client.renderer.drawRectAtAbsCoordinates(
-//                holder.x + (float) Math.cos(holder.getLookDirection()) * 1,
-//                holder.y + (float) Math.sin(holder.getLookDirection()) * 1,
-//                holder.x + (float) Math.cos(holder.getLookDirection()) * 1 + 4,
-//                holder.y + (float) Math.sin(holder.getLookDirection()) * 1 + 2,
-                3,
-                0,
-                6,
-                2,
-//                -2,-4,2,4,
+                3,0,6,2,
                 holder.getLookDirection(),
                 holder.x, holder.y
         );
-//        glEnd();
         glBegin(GL_LINES);
         glVertex2f(client.renderer.screenWidth / 2,client.renderer.screenHeight / 2);
         glVertex2f(client.renderer.screenWidth / 2 + (float)Math.cos(holder.getLookDirection()) * 40,
                 client.renderer.screenHeight / 2 + (float)Math.sin(holder.getLookDirection()) * 40
         );
         glEnd();
-//        System.out.println(holder.getLookDirection());
+    }
+
+    void activate() {
+        active = true;
+        if (onActivate != null)
+            onActivate.accept(this);
+    }
+
+    void deactivate() {
+        active = false;
+        if (onDeactivate != null)
+            onDeactivate.accept(this);
     }
 }

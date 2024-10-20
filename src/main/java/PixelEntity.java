@@ -43,10 +43,10 @@ public class PixelEntity extends Entity {
     void draw(float fdt) {
         // TODO: waits for new world pixel implementation merge
         ColorWithAplha color = material.colors[this.color];
-        glColor4f(color.r, color.g, color.g, color.alpha);
         // TEMP?
-//        glBegin(GL_QUADS);
-//
-//        glEnd();
+        glColor4f(color.r, color.g, color.b, color.alpha);
+        glBegin(GL_QUADS);
+        ((Client)Main.getGame()).renderer.drawRectAtAbsCoordinates(x, y, x+1, y+1);
+        glEnd();
     }
 }
