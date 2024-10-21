@@ -91,6 +91,21 @@ public class Chunk {
     }
 
 
+    void solveLine(int line) {
+        solved = true;
+//            threads[i] = new Thread(() -> {
+//        if (subworld.counter % 2 == 0)
+            for (int i = 0; i < size; i++) {
+    //            if (pixel.solved)
+    //                solved = false;
+                materials[line * size + i].solvePhysic(this, line * size + i);
+            }
+//        else
+//            for (int i = size - 2; i > 0; i--)
+//                materials[line * size + i].solvePhysic(this, line * size + i);
+    }
+
+
     Pixel getPixelLeftNeighbor(int i) {
         if (i % size == 0)
             return null;

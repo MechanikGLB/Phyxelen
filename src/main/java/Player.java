@@ -24,7 +24,7 @@ public class Player extends Character {
                 item.counter = 0;
                 subworld.addEntity(new Projectile(this.x, this.y, subworld,
                         (projectile, o) -> {
-                            if (o instanceof Pixel && !(((Pixel) o).chunk.materials[((Pixel) o).i] instanceof MaterialAir)) {
+                            if (o instanceof Pixel && !(((Pixel) o).material() instanceof MaterialAir)) {
                                 subworld.removeEntity(projectile);
                                 ((Pixel) o).chunk.setPixel(((Pixel) o).i, subworld.world.pixelIds[0], (byte) 0);
                                 return true;
@@ -41,7 +41,7 @@ public class Player extends Character {
                 item.counter = 0;
                 subworld.addEntity(new Projectile(this.x, this.y, subworld,
                         (projectile, o) -> {
-                            if (o instanceof Pixel && !(((Pixel) o).chunk.materials[((Pixel) o).i] instanceof MaterialAir)) {
+                            if (o instanceof Pixel && !(((Pixel) o).material() instanceof MaterialAir)) {
                                 subworld.removeEntity(projectile);
                                 int px = ((Pixel)o).x();
                                 int py = ((Pixel)o).y();
@@ -58,8 +58,8 @@ public class Player extends Character {
                         (float) Math.sin(getLookDirection()) * 100,
                         0f, -9.8f,
                         (short) 3, (short) 1, true, new ColorWithAplha(1f, 0.5f, 0f, 1f)));
-            }}, null, this));
-
+            }}, null, this
+        ));
 
         holdedItem = inventory.getFirst();
     }

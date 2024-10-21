@@ -1,8 +1,6 @@
-import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.*;
 //import java.
 import java.io.*;
-import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Subworld extends GameObject {
@@ -12,6 +10,15 @@ public class Subworld extends GameObject {
     Random random = new Random();
     byte counter = 0;
     ConcurrentHashMap<VectorI, Chunk> activeChunks = new ConcurrentHashMap<>();
+    TreeSet<Chunk> activeChunkTree = new TreeSet<>(new Comparator<Chunk>() {
+        @Override
+        public int compare(Chunk chunk, Chunk t1) {
+            if (chunk.yIndex != t1.yIndex)
+                return chunk.yIndex - t1.yIndex;
+            return chunk.xIndex - t1.xIndex;
+        }
+    });
+//    ArrayList<Chunk> activeChunkArray = new ArrayList<>();
     Hashtable<VectorI, Chunk> passiveChunks = new Hashtable<>();
     ArrayList<Entity> entities = new ArrayList<>();
 
@@ -32,8 +39,25 @@ public class Subworld extends GameObject {
         GameApp.Profiler.startProfile("tick", (byte)0, (byte)100, (byte)100);
 //        Thread[] threads = new Thread[activeChunks.size()];
 //        activeChunks.values().toArray(threads);
-        for (var chunk : activeChunks.values())
-            chunk.tick();
+//        for (var chunk : activeChunks.values())
+//            chunk.tick();
+//        var chunkLineIterator = activeChunkTree.iterator().forEachRemaining();
+        if (!activeChunkTree.isEmpty()) {
+            ArrayList<Chunk> chunkLine = new ArrayList<>();
+            int chunkLineIndex = activeChunkTree.first().yIndex;
+//            int pixelLineIndex = 0;
+            for (var chunk : activeChunkTree) {
+                if (chunkLineIndex != chunk.yIndex) {
+                    for (int i = 0; i < Chunk.size(); i++) {
+                        for (var ch : chunkLine)
+                            ch.solveLine(i);
+                    }
+                    chunkLine.clear();
+                    chunkLineIndex = chunk.yIndex;
+                }
+                chunkLine.add(chunk);
+            }
+        }
 //        for (Thread thread : threads)
 //            try {
 //                thread.join();
@@ -71,6 +95,7 @@ public class Subworld extends GameObject {
         //if () {} // TODO: load from file. True if found
         Chunk chunk = generator.generateChunk(indexes);
         activeChunks.put(indexes, chunk);
+        activeChunkTree.add(chunk);
     }
 
 
@@ -81,6 +106,11 @@ public class Subworld extends GameObject {
 
 
     void updateChunksForUser(int centerX, int centerY, int width, int height) {
+        try {
+            Main.getGame().logicSemaphore.acquire();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         ArrayList<VectorI> toDeactivate = new ArrayList<>();
         for (var active : activeChunks.entrySet()) {
             if (active.getKey().x < centerX - width ||
@@ -92,8 +122,10 @@ public class Subworld extends GameObject {
                 toDeactivate.add(active.getKey());
             }
         }
-        for (var key : toDeactivate)
+        for (var key : toDeactivate) {
+            activeChunkTree.remove(activeChunks.get(key));
             activeChunks.remove(key);
+        }
 
         for (int x = -width; x <= width; x++) {
             for (int y = -height; y <= height; y++) {
@@ -101,6 +133,7 @@ public class Subworld extends GameObject {
                 Chunk passive = passiveChunks.get(indexes);
                 if (passive != null) {
                     activeChunks.put(indexes, passive);
+                    activeChunkTree.add(passive);
                     passiveChunks.remove(indexes);
                 }
                 else if (!activeChunks.containsKey(indexes)) {
@@ -108,6 +141,7 @@ public class Subworld extends GameObject {
                 }
             }
         }
+        Main.getGame().logicSemaphore.release();
     }
 
 
@@ -128,13 +162,10 @@ public class Subworld extends GameObject {
 
     void setPixel(int x, int y, Material material, byte color) {
 //        assert world.pixelIds.length >= pixel;
-
-//        Main.getGame().logicSemaphore.tryAcquire();
         Chunk chunk = getChunkHavingPixel(x, y);
         if (chunk == null) return; // TODO: decide what to do in this case
 
         chunk.setPixel(x, y, material, color);
-//        Main.getGame().logicSemaphore.release();
     }
 
 
