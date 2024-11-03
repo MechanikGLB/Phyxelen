@@ -1,2 +1,2 @@
 # Phyxelen
-Pixel game engine
+game.Pixel game engine

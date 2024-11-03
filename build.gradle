@@ -45,10 +45,11 @@ dependencies {
 
 //    implementation platform("org.snakeyaml:snakeyaml-engine:$lwjglVersion")
     implementation "org.snakeyaml:snakeyaml-engine:2.8"
+//    implementation "org.jbox2d:jbox2d-library"
 }
 
 application {
-    mainClass = 'Main'
+    mainClass = 'game.Main'
 }
 
 test {
