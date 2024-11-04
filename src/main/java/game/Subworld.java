@@ -96,7 +96,8 @@ public class Subworld extends GameObject {
     }
 
 
-    public World world() {return world; };
+    public World world() { return world; }
+    public Random random() { return random; }
 
 
     void unloadChunk(VectorI indexes) {

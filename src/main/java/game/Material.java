@@ -31,6 +31,8 @@ public abstract class Material {
     Hashtable<Integer, MaterialInteraction> interactionsById;
     double density = 0.02f;
 
+    public ColorWithAplha[] getColors() { return colors; }
+
     abstract void solvePhysic(Chunk chunk, int i);
 
     void swap(Chunk c1, int i1, Chunk c2, int i2) {

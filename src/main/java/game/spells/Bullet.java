@@ -26,7 +26,7 @@ public class Bullet extends Spell {
                 (float) Math.cos(caster.getLookDirection()) * 200,
                 (float) Math.sin(caster.getLookDirection()) * 200,
                 0f, -9.8f,
-                (short) 3, (short) 1, true, "bullet.png");
+                (short) 3, (short) 1, true, "bullet.png", ColorWithAplha.white());
 
         subworld.addEntity(projectile);
         return 0.3f;

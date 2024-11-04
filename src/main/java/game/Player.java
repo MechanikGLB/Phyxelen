@@ -2,6 +2,7 @@ package game;
 
 import game.spells.Bullet;
 import game.spells.Orb;
+import game.spells.Sand;
 
 import java.util.ArrayList;
 
@@ -17,7 +18,12 @@ public class Player extends Character {
         /*TEMP*/
         var wand = new Wand(this);
         wand.spells.add(new Bullet());
+        inventory.add(wand);
+        wand = new Wand(this);
         wand.spells.add(new Orb());
+        inventory.add(wand);
+        wand = new Wand(this);
+        wand.spells.add(new Sand());
         inventory.add(wand);
 //        inventory.add(new HoldableItem(null, item -> {
 //            if (item.active && item.counter > 0.15) {

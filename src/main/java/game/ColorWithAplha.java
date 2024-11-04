@@ -15,4 +15,7 @@ public class ColorWithAplha extends Color {
                 Integer.parseInt(colorString.substring(5,7), 16) / 255.f);
         alpha = Integer.parseInt(colorString.substring(7,9), 16) / 255.f;
     }
+
+    static ColorWithAplha white = new ColorWithAplha(1f,1f,1f,1f);
+    public static ColorWithAplha white() { return white; }
 }

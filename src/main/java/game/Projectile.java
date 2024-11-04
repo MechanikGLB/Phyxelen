@@ -18,6 +18,7 @@ public class Projectile extends Entity {
     float angle = 0;
 
     Image image;
+    ColorWithAplha color;
 
     /// Function which receive collided object (can be `game.Pixel`) and returns is collision really happened
     BiFunction<Projectile, Object, Boolean> onCollide = null;
@@ -44,7 +45,7 @@ public class Projectile extends Entity {
 
     public Projectile(float x, float y, Subworld subworld, BiFunction<Projectile, Object, Boolean> onCollide,
                       float velocityX, float velocityY, float accelerationX, float accelerationY,
-                      short width, short height, boolean rotatable, String image
+                      short width, short height, boolean rotatable, String image, ColorWithAplha color
     ) {
         this(x, y, subworld, onCollide, velocityX, velocityY, accelerationX, accelerationY);
         this.width = width;
@@ -52,7 +53,9 @@ public class Projectile extends Entity {
         this.rotatable = rotatable;
         if (rotatable)
             angle = (float) Math.atan2(velocityY, velocityX);
-        this.image = Content.getImage(image);
+        if (image != null)
+            this.image = Content.getImage(image);
+        this.color = color;
     }
 
     @Override
@@ -84,7 +87,7 @@ public class Projectile extends Entity {
         Client client = (Client) Main.getGame();
 //        glColor3f(color.r, color.g, color.b);
 //        glBindTexture(GL_TEXTURE_2D, );
-        glColor4f(1f, 1f, 1f, 1f);
+        glColor4f(color.r, color.g, color.b, color.alpha);
         if (!rotatable) {
             glBegin(GL_QUADS);
             client.renderer.drawRectAtAbsCoordinates(
@@ -94,7 +97,8 @@ public class Projectile extends Entity {
             glEnd();
         } else
             client.renderer.drawRectAtAbsCoordinates(
-                    0, 0, width, height, angle, x, y, image.getTextureBuffer()
+                    0, 0, width, height, angle, x, y,
+                    image != null ? image.getTextureBuffer() : 0
             );
         glDisable(GL_TEXTURE_2D);
     }

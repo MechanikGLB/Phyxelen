@@ -3,31 +3,29 @@ package game.spells;
 import game.*;
 import game.Character;
 
-public class Orb extends Spell {
-    static String name = "Small orb";
-    static String image = "medium_projectile.png";
-
+public class Sand extends Spell {
     @Override
     public float cast(Character caster, Wand wand) {
         var subworld = caster.getSubworld();
+        var material = Content.getMaterial("sand");
+        var colorId = (byte) subworld.random().nextInt(material.getColors().length);
+        var color = material.getColors()[colorId];
         Projectile projectile = new Projectile(
                 wand.getCastX(), wand.getCastY(), subworld,
                 (self, o) -> {
                     if (o instanceof Pixel && !(((Pixel) o).material() instanceof MaterialAir)) {
-                        subworld.removeEntity(self);
-                                subworld.fillPixels(
-                                        ((Pixel)o).x() - 2, ((Pixel)o).y() - 2, 4, 4,
-                                        Content.air(), (byte) 0);
-                                return true;
+                        ((Pixel) o).chunk().setPixel(
+                                Math.round(self.getX()), Math.round(self.getY()), material, colorId);
+                        return true;
                     }
                     return false;
                 },
                 (float) Math.cos(caster.getLookDirection()) * 100,
                 (float) Math.sin(caster.getLookDirection()) * 100,
-                0f, 0f,
-                (short) 6, (short) 6, true, "medium_projectile.png", ColorWithAplha.white());
+                0f, -9.8f,
+                (short) 1, (short) 1, false, null, color);
 
         subworld.addEntity(projectile);
-        return 0.5f;
+        return 0.1f;
     }
 }
