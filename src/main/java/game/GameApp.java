@@ -16,7 +16,7 @@ public abstract class GameApp {
         Client
     }
     protected GameState gameState;
-    protected static Content content = new Content();
+//    protected static Content content = new Content();
     protected static World activeWorld;
     protected static Subworld activeSubworld;
     /// Counter is used for making some computations more rare
@@ -24,6 +24,8 @@ public abstract class GameApp {
 
     Thread logicThread;
     Semaphore logicSemaphore = new Semaphore(1);
+    Semaphore worldPixelSemaphore = new Semaphore(1);
+    Semaphore entitySemaphore = new Semaphore(1);
 
 
 
@@ -58,7 +60,8 @@ public abstract class GameApp {
         for (Path path : Arrays.asList(
                 Path.of("worlds"),
                 Path.of("games"),
-                Path.of("mods")
+                Path.of("mods"),
+                Path.of("assets", "textures")
         )) {
             checkFolder(path);
         }

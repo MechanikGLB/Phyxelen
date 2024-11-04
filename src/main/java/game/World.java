@@ -37,8 +37,13 @@ public class World {
     }
 
 
+    public Material getMaterialById(int id) {
+        return pixelIds[id];
+    }
+
+
     public static World createWorld(String worldName, String gameName) {
-        var gameConfig = Main.getGame().content.getGameConfig(gameName);
+        var gameConfig = Content.getGameConfig(gameName);
 
         List<java.lang.Character> forbiddenChars = Arrays.asList('/','\\',':','*','?','"','<','>','|');
         StringBuilder path = new StringBuilder();
@@ -116,16 +121,17 @@ public class World {
 
     private void loadContent() {
         assert modules.length > 0;
-        Content content = Main.getGame().content;
-        content.loadModules(modules);
+//        Content content = Main.getGame().content;
+        Content.loadModules(modules);
         //temp
-        pixelIds = new Material[content.pixelDefinitions.size() + 1];
+        pixelIds = new Material[Content.materials.size() + 1];
         pixelIds[0] = new MaterialAir();
         pixelIds[0].colors = new ColorWithAplha[1];
         pixelIds[0].colors[0] = new ColorWithAplha(0.2f, 0.1f, 0.0f, 1f);
         pixelIds[0].density = 0.01f;
+        Content.airMaterial = pixelIds[0];
         int i = 1;
-        for (var definition : content.pixelDefinitions.values()) {
+        for (var definition : Content.materials.values()) {
             pixelIds[i] = definition;
             i++;
         }

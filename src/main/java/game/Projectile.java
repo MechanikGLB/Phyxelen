@@ -17,7 +17,7 @@ public class Projectile extends Entity {
     boolean rotatable = false;
     float angle = 0;
 
-    ColorWithAplha color;
+    Image image;
 
     /// Function which receive collided object (can be `game.Pixel`) and returns is collision really happened
     BiFunction<Projectile, Object, Boolean> onCollide = null;
@@ -44,7 +44,7 @@ public class Projectile extends Entity {
 
     public Projectile(float x, float y, Subworld subworld, BiFunction<Projectile, Object, Boolean> onCollide,
                       float velocityX, float velocityY, float accelerationX, float accelerationY,
-                      short width, short height, boolean rotatable, ColorWithAplha color
+                      short width, short height, boolean rotatable, String image
     ) {
         this(x, y, subworld, onCollide, velocityX, velocityY, accelerationX, accelerationY);
         this.width = width;
@@ -52,7 +52,7 @@ public class Projectile extends Entity {
         this.rotatable = rotatable;
         if (rotatable)
             angle = (float) Math.atan2(velocityY, velocityX);
-        this.color = color;
+        this.image = Content.getImage(image);
     }
 
     @Override
@@ -82,7 +82,9 @@ public class Projectile extends Entity {
     @Override
     void draw(float fdt) {
         Client client = (Client) Main.getGame();
-        glColor3f(color.r, color.g, color.b);
+//        glColor3f(color.r, color.g, color.b);
+//        glBindTexture(GL_TEXTURE_2D, );
+        glColor4f(1f, 1f, 1f, 1f);
         if (!rotatable) {
             glBegin(GL_QUADS);
             client.renderer.drawRectAtAbsCoordinates(
@@ -92,7 +94,8 @@ public class Projectile extends Entity {
             glEnd();
         } else
             client.renderer.drawRectAtAbsCoordinates(
-                    0, 0, width, height, angle, x, y
+                    0, 0, width, height, angle, x, y, image.getTextureBuffer()
             );
+        glDisable(GL_TEXTURE_2D);
     }
 }

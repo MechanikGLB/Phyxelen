@@ -31,13 +31,13 @@ dependencies {
     implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
 
     implementation "org.lwjgl:lwjgl"
-    implementation "org.lwjgl:lwjgl-assimp"
+//    implementation "org.lwjgl:lwjgl-assimp"
     implementation "org.lwjgl:lwjgl-glfw"
     implementation "org.lwjgl:lwjgl-openal"
     implementation "org.lwjgl:lwjgl-opengl"
     implementation "org.lwjgl:lwjgl-stb"
     runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-assimp::$lwjglNatives"
+//    runtimeOnly "org.lwjgl:lwjgl-assimp::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-openal::$lwjglNatives"
     runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
@@ -45,6 +45,9 @@ dependencies {
 
 //    implementation platform("org.snakeyaml:snakeyaml-engine:$lwjglVersion")
     implementation "org.snakeyaml:snakeyaml-engine:2.8"
+
+    // https://mvnrepository.com/artifact/im.bci/pngdecoder
+    implementation "im.bci:pngdecoder:0.13"
 //    implementation "org.jbox2d:jbox2d-library"
 }
 

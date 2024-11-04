@@ -3,6 +3,7 @@ package game;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -49,6 +50,12 @@ public class Client extends GameApp {
         bindKeys();
         /*TEMP*/primaryCharacter = new Player(0, 10, activeSubworld);
         activeSubworld.entities.add(primaryCharacter);
+        System.out.println("Loading textures");
+        try {
+            Content.loadTextures();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         System.out.println("Start");
         loop();
 
@@ -394,6 +401,9 @@ public class Client extends GameApp {
 
             glEnableClientState(GL_VERTEX_ARRAY);
             glEnableClientState(GL_COLOR_ARRAY);
+//            glEnableClientState(GL_ALPHA);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glEnable( GL_BLEND );
 
             activeSubworld.draw(fdt);
 
@@ -432,13 +442,17 @@ public class Client extends GameApp {
             float width = (x2 - x1) * viewScale;
             float height = (y2 - y1) * viewScale;
             glVertex2f(startX, startY);
+                glTexCoord2f(0f,0f);
             glVertex2f(startX + width, startY);
+                glTexCoord2f(1f,0f);
             glVertex2f(startX + width, startY + height);
+                glTexCoord2f(1f,1f);
             glVertex2f(startX, startY + height);
+                glTexCoord2f(0f,1f);
         }
 
         public void drawRectAtAbsCoordinates(float centerX, float centerY, float w, float h,
-                                             float angle, float rotationX, float rotationY) {
+                                             float angle, float rotationX, float rotationY, int texture) {
             w *= viewScale; h *= viewScale;
             centerX *= viewScale; centerY *= viewScale;
             glLoadIdentity();
@@ -452,11 +466,19 @@ public class Client extends GameApp {
             glTranslatef(worldXToScreen(rotationX), worldYToScreen(rotationY), 0f);
             glRotatef(angle * 180f / (float)Math.PI,0, 0, 1);
             glTranslatef(0, 0, 0f);
+            if (texture > 0) {
+                glEnable(GL_TEXTURE_2D);
+                glBindTexture(GL_TEXTURE_2D, texture);
+            }
             glBegin(GL_QUADS);
             glVertex2f(centerX - w/2, centerY + h/2);
+                glTexCoord2f(0f,1f);
             glVertex2f(centerX + w/2, centerY + h/2);
+                glTexCoord2f(1f,1f);
             glVertex2f(centerX + w/2, centerY - h/2);
+                glTexCoord2f(1f,0f);
             glVertex2f(centerX - w/2, centerY - h/2);
+                glTexCoord2f(0f,0f);
             glEnd();
             glLoadIdentity();
 

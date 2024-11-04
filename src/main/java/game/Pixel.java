@@ -9,19 +9,23 @@ public class Pixel {
         this.i = i;
     }
 
-    Material material() {
+    public Chunk chunk() { return chunk; }
+
+    public int i() { return i; }
+
+    public Material material() {
         return chunk.materials[i];
     }
 
-    byte color() {
+    public byte color() {
         return chunk.colors[i];
     }
 
-    int x() {
+    public int x() {
         return chunk.xIndex * Chunk.size() + i % Chunk.size();
     }
 
-    int y() {
+    public int y() {
         return chunk.yIndex * Chunk.size() + i / Chunk.size();
     }
 }

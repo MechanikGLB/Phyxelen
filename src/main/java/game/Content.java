@@ -1,29 +1,39 @@
 package game;
 
+import java.io.*;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.util.*;
+
+import de.matthiasmann.twl.utils.PNGDecoder;
 
 import org.snakeyaml.engine.v2.api.Load;
 import org.snakeyaml.engine.v2.api.LoadSettings;
 
 
-enum ModuleType {
-    Mod,
-    Game
-}
-
-
 public class Content {
-    HashMap<String, Material> pixelDefinitions = new HashMap<>();
-    private final Load yaml = new Load(LoadSettings.builder().build());
+    static protected HashMap<String, Material> materials = new HashMap<>();
+    static protected Material airMaterial;
+    static private HashMap<String, Image> images = new HashMap<>();
+    static private final Load yaml = new Load(LoadSettings.builder().build());
 
 
-    HashMap<String, Object> getGameConfig(String gameName) {
+    static public Material getMaterial(String id) {
+        return materials.get(id);
+    }
+    static public Material air() { return airMaterial; }
+    /// Returns loaded image if it exists; else tries load it from disk
+    static public Image getImage(String name) {
+        var image = images.get(name);
+        if (image == null)
+            image = loadImage(name);
+        return image;
+    }
+
+
+    static HashMap<String, Object> getGameConfig(String gameName) {
         try {
             Object readed = yaml.loadFromReader(
                     new FileReader("games" + File.separator + gameName + File.separator + "config.yaml"));
@@ -40,7 +50,7 @@ public class Content {
     }
 
 
-    void loadModules(String[] moduleNames) {
+    static void loadModules(String[] moduleNames) {
         for (String moduleName : moduleNames) {
             FileReader reader;
             if (Files.exists(Path.of("games", moduleName, "config.yaml"))) {
@@ -70,7 +80,7 @@ public class Content {
                             continue;
                         parseMaterialColors(material, materialDefinition);
                         parseMaterialDensity(material, materialDefinition);
-                        pixelDefinitions.put(material.getKey(), materialDefinition);
+                        Content.materials.put(material.getKey(), materialDefinition);
                     }
                 }
             } catch (ClassCastException e) {
@@ -79,7 +89,7 @@ public class Content {
         }
     }
 
-    Material parseMaterialType(Map.Entry<String, HashMap<String, Object>> materialTable) {
+    static private Material parseMaterialType(Map.Entry<String, HashMap<String, Object>> materialTable) {
         String type = (String) materialTable.getValue().get("type");
         switch (type.toLowerCase()) {
             case "solid" -> { return new MaterialSolid(); }
@@ -90,7 +100,7 @@ public class Content {
         }
     }
 
-    void parseMaterialColors(Map.Entry<String, HashMap<String, Object>> materialTable, Material definition) {
+    static private void parseMaterialColors(Map.Entry<String, HashMap<String, Object>> materialTable, Material definition) {
         Object colorObject = materialTable.getValue().get("color");
         if (colorObject != null) {
             ColorWithAplha[] colors = new ColorWithAplha[1];
@@ -106,7 +116,7 @@ public class Content {
         }
     }
 
-    void parseMaterialDensity(Map.Entry<String, HashMap<String, Object>> materialTable, Material definition) {
+    static private void parseMaterialDensity(Map.Entry<String, HashMap<String, Object>> materialTable, Material definition) {
         Object densityObject = materialTable.getValue().get("density");
         if (densityObject != null) {
             definition.density = (Double) densityObject;
@@ -116,4 +126,34 @@ public class Content {
     }
 //    void updateModuleList()
 
+    /// Loads image from disk
+    static public Image loadImage(String name) {
+        try {
+            PNGDecoder pngDecoder = new PNGDecoder(new FileInputStream(
+                    "assets"+File.separator+"textures"+File.separator+name));
+            int width = pngDecoder.getWidth();
+            int height = pngDecoder.getHeight();
+            ByteBuffer buffer = ByteBuffer.allocate(
+                    width * height * 4);
+            pngDecoder.decode(buffer, width * 4, PNGDecoder.Format.RGBA);
+            var image = new Image(buffer, width, height);
+            images.put(name, image);
+            return image;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public static void loadTextures() throws IOException {
+        for (var entry : new File("assets" + File.separator + "textures").listFiles()) {
+            if (entry.isFile() && entry.getName().endsWith(".png")) {
+                PNGDecoder pngDecoder = new PNGDecoder(new FileInputStream(entry));
+                int width = pngDecoder.getWidth();
+                int height = pngDecoder.getHeight();
+                ByteBuffer buffer = ByteBuffer.allocateDirect(
+                        width * height * 4);
+                pngDecoder.decode(buffer, width * 4, PNGDecoder.Format.RGBA);
+                images.put(entry.getName(), new Image(buffer, width, height));
+            }
+        }
+    }
 }

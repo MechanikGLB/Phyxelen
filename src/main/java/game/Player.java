@@ -1,5 +1,8 @@
 package game;
 
+import game.spells.Bullet;
+import game.spells.Orb;
+
 import java.util.ArrayList;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -12,14 +15,10 @@ public class Player extends Character {
     public Player(float x, float y, Subworld subworld) {
         super(x, y, subworld);
         /*TEMP*/
-//        inventory.add(new HoldableItem(null, item -> {
-//            if (item.active)
-//                subworld.addEntity(new PixelEntity(this.x, this.y, subworld,
-//                        subworld.world.pixelIds[1], (byte) 0,
-//                        (float) Math.cos(getLookDirection()) * 100,
-//                        (float) Math.sin(getLookDirection()) * 100,
-//                        0, -9.8f));
-//        }, null, this));
+        var wand = new Wand(this);
+        wand.spells.add(new Bullet());
+        wand.spells.add(new Orb());
+        inventory.add(wand);
 //        inventory.add(new HoldableItem(null, item -> {
 //            if (item.active && item.counter > 0.15) {
 //                item.counter = 0;

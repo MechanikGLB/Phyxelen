@@ -23,7 +23,7 @@ public abstract class HoldableItem extends GameObject {
         client.renderer.drawRectAtAbsCoordinates(
                 3,0,6,2,
                 holder.getLookDirection(),
-                holder.x, holder.y
+                holder.x, holder.y, 0
         );
     }
 

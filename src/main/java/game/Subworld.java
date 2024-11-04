@@ -59,10 +59,16 @@ public class Subworld extends GameObject {
         for (Entity entity : entities)
             entity.update(dt);
 
-        entities.removeAll(entitiesToRemove);
-        entitiesToRemove.clear();
-        entities.addAll(entitiesToAdd);
-        entitiesToAdd.clear();
+        try {
+            Main.getGame().entitySemaphore.acquire();
+            entities.removeAll(entitiesToRemove);
+            entitiesToRemove.clear();
+            entities.addAll(entitiesToAdd);
+            entitiesToAdd.clear();
+            Main.getGame().entitySemaphore.release();
+        } catch (InterruptedException e) {
+
+        }
         counter++;
         GameApp.Profiler.endProfile("tick");
     }
@@ -71,11 +77,15 @@ public class Subworld extends GameObject {
     @Override
     void draw(float fdt) {
         renderer.draw(fdt);
-        for (var entity : entities)
-            entity.draw(fdt);
+        try {
+            Main.getGame().entitySemaphore.acquire();
+            for (var entity : entities)
+                entity.draw(fdt);
+            Main.getGame().entitySemaphore.release();
+        } catch (InterruptedException e) {}
     }
 
-    void loadChunk(VectorI indexes) {
+    public void loadChunk(VectorI indexes) {
         if (activeChunks.containsKey(indexes)) return;
         if (Main.getGame().gameState == GameApp.GameState.Server) return; // TODO: multiplayer, require chunk via net
 
@@ -86,13 +96,16 @@ public class Subworld extends GameObject {
     }
 
 
+    public World world() {return world; };
+
+
     void unloadChunk(VectorI indexes) {
         // TODO: write to file
         activeChunks.remove(indexes);
     }
 
 
-    void updateChunksForUser(int centerX, int centerY, int width, int height) {
+    public void updateChunksForUser(int centerX, int centerY, int width, int height) {
         try {
             Main.getGame().logicSemaphore.acquire();
         } catch (InterruptedException e) {
@@ -139,7 +152,7 @@ public class Subworld extends GameObject {
     }
 
 
-    Pixel getPixel(int x, int y) {
+    public Pixel getPixel(int x, int y) {
         return new Pixel(
                 getChunkHavingPixel(x, y),
                 Chunk.toRelative(x) + Chunk.toRelative(y) * Chunk.size()
@@ -147,7 +160,7 @@ public class Subworld extends GameObject {
     }
 
 
-    void setPixel(int x, int y, Material material, byte color) {
+    public void setPixel(int x, int y, Material material, byte color) {
 //        assert world.pixelIds.length >= pixel;
         Chunk chunk = getChunkHavingPixel(x, y);
         if (chunk == null) return; // TODO: decide what to do in this case
@@ -156,7 +169,7 @@ public class Subworld extends GameObject {
     }
 
 
-    void presetPixel(int x, int y, Material material, byte color) {
+    public void presetPixel(int x, int y, Material material, byte color) {
 //        assert world.pixelIds.length >= pixel.material.id;
         Chunk chunk = getChunkHavingPixel(x, y);
         if (chunk == null) return;
@@ -165,7 +178,7 @@ public class Subworld extends GameObject {
 
 
     /// Fills area with pixels of `material` with `color`
-    void fillPixels(int x, int y, int w, int h, Material material, byte color) {
+    public void fillPixels(int x, int y, int w, int h, Material material, byte color) {
         for (int dx = 0; dx < w; dx++) {
             for (int dy = 0; dy < h; dy++) {
                 setPixel(x + dx, y + dy, material, color);
@@ -186,11 +199,11 @@ public class Subworld extends GameObject {
 //    }
 
 
-    Material getPixelMaterial(int x, int y) {
-        Chunk chunk = getChunkHavingPixel(x, y);
-        if (chunk == null) return null;
-        return chunk.getPixelMaterialChecked(x, y);
-    }
+//    Material getPixelMaterial(int x, int y) {
+//        Chunk chunk = getChunkHavingPixel(x, y);
+//        if (chunk == null) return null;
+//        return chunk.getPixelMaterialChecked(x, y);
+//    }
 
 
 //    boolean getPixelPhysicSolved(int x, int y) {
@@ -206,11 +219,11 @@ public class Subworld extends GameObject {
 //    game.Material getMaterial(int x, int y)
 
 
-    void addEntity(Entity entity) {
+    public void addEntity(Entity entity) {
         entitiesToAdd.add(entity);
     }
 
-    void removeEntity(Entity entity) {
+    public void removeEntity(Entity entity) {
         entitiesToRemove.add(entity);
     }
 }
