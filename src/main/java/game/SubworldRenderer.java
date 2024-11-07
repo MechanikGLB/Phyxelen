@@ -1,6 +1,8 @@
 package game;
 
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 import static org.lwjgl.opengl.GL20.*;
 
@@ -120,9 +122,9 @@ public class SubworldRenderer implements WindowResizeListener {
         // (vertexes for world pixel) * (floats in color)
 //        colorArray = new float[horizontalCount * verticalCount * 4 * 3];
         colorArray = FloatBuffer.allocate(horizontalCount * verticalCount * 4 * 3);
-        glBindBuffer(GL_VERTEX_ARRAY, vertexBuffer);
-        glBufferData(GL_VERTEX_ARRAY, vertexArray, GL_DYNAMIC_DRAW);
-        glBindBuffer(GL_COLOR_ARRAY, colorBuffer);
-        glBufferData(GL_COLOR_ARRAY, colorArray, GL_DYNAMIC_DRAW);
+//        glBindBuffer(GL_VERTEX_ARRAY, vertexBuffer);
+//        glBufferData(GL_VERTEX_ARRAY, vertexArray, GL_DYNAMIC_DRAW);
+//        glBindBuffer(GL_COLOR_ARRAY, colorBuffer);
+//        glBufferData(GL_COLOR_ARRAY, colorArray, GL_DYNAMIC_DRAW);
     }
 }
