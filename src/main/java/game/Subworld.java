@@ -12,13 +12,10 @@ public class Subworld extends GameObject {
     Random random = new Random();
     byte counter = 0;
     ConcurrentHashMap<VectorI, Chunk> activeChunks = new ConcurrentHashMap<>();
-    TreeSet<Chunk> activeChunkTree = new TreeSet<>(new Comparator<Chunk>() {
-        @Override
-        public int compare(Chunk chunk, Chunk t1) {
-            if (chunk.yIndex != t1.yIndex)
-                return chunk.yIndex - t1.yIndex;
-            return chunk.xIndex - t1.xIndex;
-        }
+    TreeSet<Chunk> activeChunkTree = new TreeSet<>((chunk, t1) -> {
+        if (chunk.yIndex != t1.yIndex)
+            return chunk.yIndex - t1.yIndex;
+        return chunk.xIndex - t1.xIndex;
     });
 //    ArrayList<game.Chunk> activeChunkArray = new ArrayList<>();
     Hashtable<VectorI, Chunk> passiveChunks = new Hashtable<>();
