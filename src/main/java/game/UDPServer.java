@@ -4,13 +4,16 @@ import java.net.DatagramPacket;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 
 public class UDPServer implements Runnable {
 
-    private int maxPacketSize = 512;
+    private int maxPacketSize = 1024;
     private byte[] buffer = new byte[maxPacketSize];
+    private byte[] reserveBuffer;
     private final DatagramSocket socket;
 
 
@@ -31,6 +34,7 @@ public class UDPServer implements Runnable {
 
     @Override
     public void run() {//main server cycle
+        System.out.printf("Server started on IP %s%n", socket.getInetAddress().getHostAddress());
         System.out.printf("Server started on port %d%n", socket.getLocalPort());
         while (true) {
             try {
@@ -49,6 +53,7 @@ public class UDPServer implements Runnable {
     public void receiveMessage(DatagramPacket packetFromClient) {
         try {
             socket.receive(packetFromClient);//blocks thread until received
+            int packetLength = packetFromClient.getLength();
             sendToClient("Packet got",
                     packetFromClient.getAddress(), packetFromClient.getPort());//Send response to client
         }
@@ -57,13 +62,11 @@ public class UDPServer implements Runnable {
         }
     }
 
-
     //TODO MORE FUNCTIONS
     public void sendToClient(String message, InetAddress clientAddr, int clientPort) throws IOException {
         byte[] dataBuffer = message.getBytes(); //NOW WE ARE TRUST THAT MESSAGE NOT BIGGER THAN PACKET
         DatagramPacket packet = new DatagramPacket(dataBuffer, dataBuffer.length, clientAddr, clientPort);
-        //TODO: converting big packets to buffer
-        socket.send(packet);
+        socket.send(packet); //large packets separates automatically
         System.out.println("Server sent message: " + message);
     }
 
