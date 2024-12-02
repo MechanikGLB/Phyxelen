@@ -285,9 +285,11 @@ public class Client extends GameApp {
     void bindKeys() {
         // Movement keys
         input.addInputAction("MoveUp",new InputAction(null, o -> {
-            if (controlledCharacter != null)
+            if (controlledCharacter != null) {
                 controlledCharacter.go(0, 1);
-            else if (freeCamera)
+                float vy = ((Player) controlledCharacter).vy;
+                ((Player) controlledCharacter).vy += vy < 0 ? 20 : 10;
+            } else if (freeCamera)
                 cameraPos.y += cameraSpeed / viewScale * fdt;
         }, null));
         input.getKeyboardHandler().bindKey(GLFW_KEY_W, "MoveUp");

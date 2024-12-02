@@ -28,4 +28,8 @@ public class Pixel {
     public int y() {
         return chunk.yIndex * Chunk.size() + i / Chunk.size();
     }
+
+    public boolean isAir() {
+        return material() == Content.airMaterial;
+    }
 }
