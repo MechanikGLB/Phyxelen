@@ -6,6 +6,7 @@ public class EntityWithCollision extends Entity {
     float collisionBoxWidth;
     float collisionBoxHeight;
     boolean collideWorld = true;
+    boolean inAir = true;
     // Velocity
     public float vx = 0;
     public float vy = 0;
@@ -25,8 +26,9 @@ public class EntityWithCollision extends Entity {
                     Math.round(x), Math.round(y-collisionBoxHeight/2)-1);
             var rightPixel = subworld.getPixel(
                     Math.round(x+collisionBoxWidth/2), Math.round(y-collisionBoxHeight/2)-1);
-            if (middlePixel.chunk != null
-                    && leftPixel.isAir() && rightPixel.isAir() && middlePixel.isAir()) {
+            inAir = middlePixel.chunk != null
+                    && leftPixel.isAir() && rightPixel.isAir() && middlePixel.isAir();
+            if (inAir) {
                 y += vy * dt;
             } else {
                 vy = 0;
@@ -64,7 +66,7 @@ public class EntityWithCollision extends Entity {
         );
         Pixel aboveFootPixel = subworld.getPixel(
                 Math.round(horizontalEdgeDelta + dx),
-                Math.round(y - collisionBoxHeight/2 + dy) + 1
+                Math.round(y - collisionBoxHeight/2 + dy) + 2
         );
 
         if (!aboveFootPixel.isAir())

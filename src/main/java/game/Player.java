@@ -12,6 +12,9 @@ import static org.lwjgl.opengl.GL21.*;
 public class Player extends Character {
     Client client = (Client)Main.getGame();
     ArrayList<HoldableItem> inventory = new ArrayList<>();
+    boolean levitating = false;
+    float levitationTime = 0f;
+    float maxLevitationTime = 2f;
 
     public Player(float x, float y, Subworld subworld) {
         super(x, y, subworld);
@@ -33,6 +36,7 @@ public class Player extends Character {
     void update(float dt) {
         super.update(dt);
         if (client.controlledCharacter == this) {
+            // Pointing
             client.cameraPos.x = x;
             client.cameraPos.y = y;
 //            DoubleBuffer cursorPosition = DoubleBuffer.allocate(2);
@@ -46,6 +50,19 @@ public class Player extends Character {
                     y[0] * 2 - 1,
                     x[0] * 2 - 1
             ));
+            // Levitation
+            if (levitating) {
+                if (levitationTime < maxLevitationTime) {
+                    vy += vy < 0 ? 20 : 10;
+                    levitationTime += dt;
+                }
+            } else if (levitationTime > 0) {
+                if (inAir)
+                    levitationTime -= dt * 0.5f;
+                else
+                    levitationTime -= dt;
+            }
+
         }
 //        System.out.println(getLookDirection());
         if (holdedItem != null)
@@ -64,8 +81,18 @@ public class Player extends Character {
             client.renderer.drawRectAtAbsCoordinates(
                     x - 4, y + 6, x - 4 + (8f * health / maxHealth), y + 5);
             glEnd();
+            if (levitationTime > 0) {
+                glColor3f(0.0f, 0.3f, 0.3f);
+                glBegin(GL_QUADS);
+                client.renderer.drawRectAtAbsCoordinates(
+                        x - 4.4f, y - 6.4f, x + 4.4f, y - 4.6f);
+                glColor3f(0.3f, 0.7f, 0.7f);
+                client.renderer.drawRectAtAbsCoordinates(
+                        x - 4, y - 6, x - 4 + (8f * (1 - levitationTime / maxLevitationTime)), y - 5);
+                glEnd();
+            }
         }
         if (holdedItem != null)
             holdedItem.draw(fdt);
-    }
+        }
 }
