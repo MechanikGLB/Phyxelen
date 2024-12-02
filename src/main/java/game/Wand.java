@@ -22,6 +22,8 @@ public class Wand extends HoldableItem {
         return holder.y + (float) Math.sin(holder.getLookDirection()) * 4;
     }
 
+    public ArrayList<Spell> getSpells() { return spells; }
+
     @Override
     void activate() {
         super.activate();

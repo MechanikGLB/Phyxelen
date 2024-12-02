@@ -4,8 +4,12 @@ import game.*;
 import game.Character;
 
 public class Orb extends Spell {
-    static String name = "Small orb";
-    static String image = "medium_projectile.png";
+
+    public Orb() {
+        name = "Small orb";
+        projectileImage = "medium_projectile.png";
+        image = "orb_spell.png";
+    }
 
     @Override
     public float cast(Character caster, Wand wand) {

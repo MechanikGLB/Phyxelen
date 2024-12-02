@@ -17,6 +17,7 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 public class Client extends GameApp {
     protected long window;
     protected Renderer renderer = new Renderer(this);
+    protected game.gui.Main gui = new game.gui.Main();
     Input input = new Input();
 
     float maxFps = 30;
@@ -41,11 +42,17 @@ public class Client extends GameApp {
     ArrayList<WindowResizeListener> windowResizeListeners = new ArrayList<>();
 
 
+    public Character getControlledCharacter() {
+        return controlledCharacter;
+    }
+
+
     @Override
     public void run() {
         initGlfw();
         GL.createCapabilities();
         renderer.init();
+        gui.init();
         super.run();
         bindKeys();
         /*TEMP*/primaryCharacter = new Player(0, 10, activeSubworld);
@@ -402,8 +409,8 @@ public class Client extends GameApp {
             glEnableClientState(GL_VERTEX_ARRAY);
             glEnableClientState(GL_COLOR_ARRAY);
 //            glEnableClientState(GL_ALPHA);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            glEnable( GL_BLEND );
+//            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//            glEnable( GL_BLEND );
 
             activeSubworld.draw(fdt);
 
@@ -432,6 +439,8 @@ public class Client extends GameApp {
             glVertex2i(5 * 60, screenHeight - 3);
             glVertex2i(5 * 120, screenHeight - 3);
             glEnd();
+//            glDisable( GL_BLEND );
+            gui.draw(renderer.screenWidth, renderer.screenHeight);
             glfwSwapBuffers(window);
         }
 

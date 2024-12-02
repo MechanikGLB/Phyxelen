@@ -5,11 +5,14 @@ import game.*;
 import java.util.ArrayList;
 
 public abstract class Spell {
-    static String image;
-    static String name;
-    static float baseCooldown;
+    String projectileImage;
+    String image;
+    String name;
+    float baseCooldown;
 
     ArrayList<SpellModifier> modifiers = new ArrayList<>();
+
+    public String getImage() { return image; }
 
     /// Returns added cooldown
     public abstract float cast(game.Character caster, Wand wand);

@@ -48,6 +48,10 @@ public class Character extends EntityWithCollision {
             health = maxHealth;
     }
 
+    public HoldableItem getHoldedItem() {
+        return holdedItem;
+    }
+
     void go(float dx, float dy) {
         if (canGo) {
             Pixel targetPixel = subworld.getPixel(Math.round(x+dx), Math.round(y+dy));

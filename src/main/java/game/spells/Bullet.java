@@ -6,9 +6,10 @@ import game.Character;
 import game.*;
 
 public class Bullet extends Spell {
-    static String name = "Bullet";
-    static String image = "bullet.png";
     public Bullet() {
+        name = "Bullet";
+        projectileImage = "bullet.png";
+        image = "bullet_spell.png";
     }
 
     @Override

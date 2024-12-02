@@ -25,45 +25,9 @@ public class Player extends Character {
         wand = new Wand(this);
         wand.spells.add(new Sand());
         inventory.add(wand);
-//        inventory.add(new HoldableItem(null, item -> {
-//            if (item.active && item.counter > 0.15) {
-//                item.counter = 0;
-//                subworld.addEntity(new Projectile(this.x, this.y, subworld,
-//                        (projectile, o) -> {
-//                            if (o instanceof Pixel && !(((Pixel) o).material() instanceof MaterialAir)) {
-//                                ((Pixel) o).chunk.setPixel(((Pixel) o).i, subworld.world.pixelIds[0], (byte) 0);
-//                                return true;
-//                            }
-//                            return false;
-//                        },
-//                        (float) Math.cos(getLookDirection()) * 200,
-//                        (float) Math.sin(getLookDirection()) * 200,
-//                        0f, -9.8f,
-//                        (short) 3, (short) 1, true, new ColorWithAplha(1f, 1f, 0f, 1f)));
-//            }}, null, this));
-//        inventory.add(new HoldableItem(null, item -> {
-//            if (item.active && item.counter > 0.3) {
-//                item.counter = 0;
-//                subworld.addEntity(new Projectile(this.x, this.y, subworld,
-//                        (projectile, o) -> {
-//                            if (o instanceof Pixel && !(((Pixel) o).material() instanceof MaterialAir)) {
-//                                subworld.removeEntity(projectile);
-//                                subworld.fillPixels(
-//                                        ((Pixel)o).x() - 2, ((Pixel)o).y() - 2, 4, 4,
-//                                        subworld.world.pixelIds[0], (byte) 0);
-//                                return true;
-//                            }
-//                            return false;
-//                        },
-//                        (float) Math.cos(getLookDirection()) * 100,
-//                        (float) Math.sin(getLookDirection()) * 100,
-//                        0f, -9.8f,
-//                        (short) 3, (short) 1, true, new ColorWithAplha(1f, 0.5f, 0f, 1f)));
-//            }}, null, this
-//        ));
-
-//        holdedItem = inventory.getFirst();
     }
+
+    public ArrayList<HoldableItem> getInventory() { return inventory; }
 
     @Override
     void update(float dt) {

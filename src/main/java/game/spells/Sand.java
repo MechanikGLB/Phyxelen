@@ -4,6 +4,11 @@ import game.*;
 import game.Character;
 
 public class Sand extends Spell {
+    public Sand() {
+        name = "Sand";
+        image = "spell_template.png";
+    }
+
     @Override
     public float cast(Character caster, Wand wand) {
         var subworld = caster.getSubworld();
