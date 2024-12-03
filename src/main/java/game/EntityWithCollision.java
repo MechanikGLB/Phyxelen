@@ -29,7 +29,11 @@ public class EntityWithCollision extends Entity {
             inAir = middlePixel.chunk != null
                     && leftPixel.isAir() && rightPixel.isAir() && middlePixel.isAir();
             if (inAir) {
-                y += vy * dt;
+                Pixel castResult = subworld.rayCast(x, y - collisionBoxHeight/2, x, y - collisionBoxHeight/2 + vy * dt);
+                if (castResult == null)
+                    y += vy * dt;
+                else
+                    y = castResult.y() + collisionBoxHeight / 2 + 1;
             } else {
                 vy = 0;
             }

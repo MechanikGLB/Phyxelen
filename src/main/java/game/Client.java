@@ -172,7 +172,7 @@ public class Client extends GameApp {
 
             for (int i = 0; i < 10; i++)
                 if (glfwGetKey(window, GLFW_KEY_0 + i) != 0)
-                    if (controlledCharacter != null)
+                    if (controlledCharacter != null && ((Player)controlledCharacter).inventory.size() >= i)
                         controlledCharacter.holdedItem = ((Player)controlledCharacter).inventory.get(i-1);
                     else
                         paintingPixel = i;

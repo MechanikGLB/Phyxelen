@@ -5,6 +5,9 @@ import java.util.*;
 import java.io.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static java.lang.Math.*;
+import static org.lwjgl.opengl.GL21.*;
+
 public class Subworld extends GameObject {
     World world = null;
     SubworldRenderer renderer;
@@ -157,6 +160,10 @@ public class Subworld extends GameObject {
         );
     }
 
+    public Pixel getPixel(float x, float y) {
+        return getPixel(round(x), round(y));
+    }
+
 
     public void setPixel(int x, int y, Material material, byte color) {
 //        assert world.pixelIds.length >= pixel;
@@ -182,6 +189,26 @@ public class Subworld extends GameObject {
                 setPixel(x + dx, y + dy, material, color);
             }
         }
+    }
+
+
+//    Pixel vectorCast(float x, float y, float dx, float dy)
+
+
+    Pixel rayCast(float x1, float y1, float x2, float y2) {
+        int stepCount = round(max(abs(x2-x1), abs(y2-y1)));
+        float xStep = (x2-x1)/stepCount;
+        float yStep = (y2-y1)/stepCount;
+        for (int i = 0; i < stepCount; i++) {
+            float x = x1 + xStep * i;
+            float y = y1 + yStep * i;
+            Pixel pixel = getPixel(x, y);
+            if (pixel.chunk == null)
+                break;
+            if (!pixel.isAir())
+                return pixel;
+        }
+        return null;
     }
 
 

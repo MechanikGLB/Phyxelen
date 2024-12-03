@@ -60,9 +60,10 @@ public class Projectile extends Entity {
 
     @Override
     void update(float dt) {
-        float newX = x + velocityX * dt;
-        float newY = y + velocityY * dt;
-        Pixel pixel = subworld.getPixel(Math.round(newX), Math.round(newY));
+        Pixel castResult = subworld.rayCast(x, y, x + velocityX * dt, y + velocityY * dt);
+        float newX = castResult == null ? x + velocityX * dt : castResult.x();
+        float newY = castResult == null ? y + velocityY * dt : castResult.y();
+        Pixel pixel = castResult == null ? subworld.getPixel(newX, newY) : castResult;
         if (pixel.chunk == null)
             return;
         if (onCollide.apply(this, pixel)) {
