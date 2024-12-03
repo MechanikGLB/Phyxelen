@@ -43,7 +43,7 @@ public class Main {
             var wand = (Wand) player.getHoldedItem();
             ArrayList<Spell> spells = wand.getSpells();
             for (int i = 0; i < spells.size(); i++) {
-                drawRectTextured(10+100*i, 100, 90+100*i, 190, 255, 255, 255, 255,
+                drawRectTextured(10+100*i, 100, 90+100*i, 180, 255, 255, 255, 255,
                         Content.getImage(spells.get(i).getImage()).getTextureBuffer());
 
             }
@@ -104,13 +104,13 @@ public class Main {
         glBegin(GL_QUADS);
         glColor4b((byte) (r / 2 - 1), (byte) (g / 2 - 1), (byte) (b / 2 - 1), (byte) (a / 2 - 1));
         glVertex2i(x1, y1);
-        glTexCoord2f(0f,1f);
-        glVertex2i(x2, y1);
-        glTexCoord2f(1f,1f);
-        glVertex2i(x2, y2);
-        glTexCoord2f(1f,0f);
-        glVertex2i(x1, y2);
         glTexCoord2f(0f,0f);
+        glVertex2i(x2, y1);
+        glTexCoord2f(1f,0f);
+        glVertex2i(x2, y2);
+        glTexCoord2f(1f,1f);
+        glVertex2i(x1, y2);
+        glTexCoord2f(0f,1f);
         glEnd();
         glDisable(GL_TEXTURE_2D);
     }

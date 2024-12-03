@@ -416,9 +416,9 @@ public class Client extends GameApp {
 
             glEnableClientState(GL_VERTEX_ARRAY);
             glEnableClientState(GL_COLOR_ARRAY);
-//            glEnableClientState(GL_ALPHA);
-//            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-//            glEnable( GL_BLEND );
+            glEnableClientState(GL_ALPHA);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glEnable( GL_BLEND );
 
             activeSubworld.draw(fdt);
 
@@ -489,14 +489,16 @@ public class Client extends GameApp {
             }
             glBegin(GL_QUADS);
             glVertex2f(centerX - w/2, centerY + h/2);
-                glTexCoord2f(0f,1f);
-            glVertex2f(centerX + w/2, centerY + h/2);
-                glTexCoord2f(1f,1f);
-            glVertex2f(centerX + w/2, centerY - h/2);
-                glTexCoord2f(1f,0f);
-            glVertex2f(centerX - w/2, centerY - h/2);
                 glTexCoord2f(0f,0f);
+            glVertex2f(centerX + w/2, centerY + h/2);
+                glTexCoord2f(1f,0f);
+            glVertex2f(centerX + w/2, centerY - h/2);
+                glTexCoord2f(1f,1f);
+            glVertex2f(centerX - w/2, centerY - h/2);
+                glTexCoord2f(0f,1f);
             glEnd();
+            if (texture > 0)
+                glDisable(GL_TEXTURE_2D);
             glLoadIdentity();
 
         }

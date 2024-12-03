@@ -24,16 +24,5 @@ public class Image {
                 bytes);
     }
 
-    public int getTextureBuffer() {
-//        if (textureBuffer == -1) {
-//            textureBuffer = glGenTextures();
-//            glBindTexture(GL_TEXTURE_2D, textureBuffer);
-//            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-//            bytes.rewind();
-//            System.out.println(bytes.capacity());
-//            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-//                    bytes);
-//        }
-        return textureBuffer;
-    }
+    public int getTextureBuffer() { return textureBuffer; }
 }

@@ -3,9 +3,17 @@ package game;
 import static org.lwjgl.opengl.GL21.*;
 
 public abstract class HoldableItem extends GameObject {
+    public float width;
+    public float height;
+    private String textureName;
+    private Image image;
     Character holder;
     boolean active = false;
     float counter;
+
+    public void setTexture(String textureName) {
+        this.textureName = textureName;
+    }
 
     public HoldableItem(Character holder) {
         this.holder = holder;
@@ -18,12 +26,14 @@ public abstract class HoldableItem extends GameObject {
 
     @Override
     void draw(float fdt) {
+        if (image == null)
+            image = Content.getImage(textureName);
         Client client = (Client) Main.getGame();
-        glColor3f(0.3f, 0.9f, 0.3f);
+        glColor3f(1f, 1f, 1f);
         client.renderer.drawRectAtAbsCoordinates(
-                3,0,6,2,
+                3,0, width, height,
                 holder.getLookDirection(),
-                holder.x, holder.y, 0
+                holder.x, holder.y, image.getTextureBuffer()
         );
     }
 

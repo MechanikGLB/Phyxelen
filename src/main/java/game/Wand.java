@@ -13,6 +13,8 @@ public class Wand extends HoldableItem {
 
     public Wand(Character holder) {
         super(holder);
+        width = 20;
+        height = 11;
     }
 
     public float getCastX() {

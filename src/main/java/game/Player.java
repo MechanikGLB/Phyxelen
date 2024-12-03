@@ -20,12 +20,15 @@ public class Player extends Character {
         super(x, y, subworld);
         /*TEMP*/
         var wand = new Wand(this);
+        wand.setTexture("wand_1.png");
         wand.spells.add(new Bullet());
         inventory.add(wand);
         wand = new Wand(this);
+        wand.setTexture("wand_2.png");
         wand.spells.add(new Orb());
         inventory.add(wand);
         wand = new Wand(this);
+        wand.setTexture("wand_3.png");
         wand.spells.add(new Sand());
         inventory.add(wand);
     }

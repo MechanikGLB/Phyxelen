@@ -24,8 +24,6 @@ public class Chunk {
         materials = new Material[area()];
         colors = new byte[area()];
         pixelSolved = new BitSet(area());
-//        for (int i = 0; i < area(); i++)
-//            pixels[i] = new game.Pixel(0, this, i % size, i / size);
     }
 
     /// game.Chunk side size in pixels
