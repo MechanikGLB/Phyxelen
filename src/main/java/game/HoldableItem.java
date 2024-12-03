@@ -15,6 +15,8 @@ public abstract class HoldableItem extends GameObject {
         this.textureName = textureName;
     }
 
+    public Image getImage() { return Content.getImage(textureName); }
+
     public HoldableItem(Character holder) {
         this.holder = holder;
     }

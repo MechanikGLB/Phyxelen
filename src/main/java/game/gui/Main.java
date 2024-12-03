@@ -37,13 +37,15 @@ public class Main {
                 drawRect(10+100*i, 10, 90+100*i, 90, 200, 255, 200, 255);
             else
                 drawRect(10+100*i, 10, 90+100*i, 90, 100, 155, 100, 255);
-            drawRect(20+100*i, 20, 80+100*i, 80, 80, 100, 80, 255);
+            drawRect(16+100*i, 16, 84+100*i, 84, 80, 100, 80, 255);
+            drawRectTextured(10+100*i, 50-20, 80+100*i, 50+20, 255, 255, 255, 255, inventory.get(i).getImage().getTextureBuffer());
         }
         if (player.getHoldedItem() instanceof Wand) {
             var wand = (Wand) player.getHoldedItem();
             ArrayList<Spell> spells = wand.getSpells();
+            drawRect(10, 100, 90+100*(spells.size()-1), 180, 80, 100, 80, 255);
             for (int i = 0; i < spells.size(); i++) {
-                drawRectTextured(10+100*i, 100, 90+100*i, 180, 255, 255, 255, 255,
+                drawRectTextured(16+100*i, 106, 84+100*i, 174, 255, 255, 255, 255,
                         Content.getImage(spells.get(i).getImage()).getTextureBuffer());
 
             }
