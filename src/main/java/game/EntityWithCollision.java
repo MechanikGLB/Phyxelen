@@ -1,19 +1,22 @@
 package game;
 
+import static java.lang.Math.*;
 import static org.lwjgl.opengl.GL21.*;
 
 public class EntityWithCollision extends Entity {
     float collisionBoxWidth;
     float collisionBoxHeight;
     boolean collideWorld = true;
+    boolean collidable = false;
     boolean inAir = true;
     // Velocity
     public float vx = 0;
     public float vy = 0;
     public float gravity = -9.8f;
 
-    public EntityWithCollision(float x, float y, Subworld subworld) {
+    public EntityWithCollision(float x, float y, Subworld subworld, boolean collidable) {
         super(x, y, subworld);
+        this.collidable = collidable;
     }
 
     @Override
@@ -80,5 +83,45 @@ public class EntityWithCollision extends Entity {
                 dy = 1;
         }
         x += dx; y += dy;
+    }
+
+    boolean intersectedByRay(float x1, float y1, float x2, float y2) {
+        // From https://noonat.github.io/intersect/
+        float scaleX = 1.0f / (x2-x1);
+        float scaleY = 1.0f / (y2-y1);
+        float signX = scaleX < 0 ? -1: 1;
+        float signY = scaleY < 0 ? -1: 1;
+        float nearTimeX = (x - signX * (collisionBoxWidth / 2) - x1) * scaleX;
+        float nearTimeY = (y - signY * (collisionBoxHeight / 2) - y1) * scaleY;
+        float farTimeX = (x + signX * (collisionBoxWidth / 2) - x1) * scaleX;
+        float farTimeY = (y + signY * (collisionBoxHeight / 2) - y1) * scaleY;
+
+        if (nearTimeX > farTimeY || nearTimeY > farTimeX) {
+            return false;
+        }
+
+        float nearTime = max(nearTimeX, nearTimeY);
+        float farTime = min(farTimeX, farTimeY);
+
+        if (nearTime >= 1 || farTime <= 0) {
+            return false;
+        }
+
+        // We don't need this now
+//        float hitTime = clamp(nearTime, 0, 1);
+////        if (nearTimeX > nearTimeY) {
+////            hit_normal.x = -signX;
+////            hit_normal.y = 0;
+////        } else {
+////            hit_normal.x = 0;
+////            hit_normal.y = -signY;
+////        }
+////        hit.delta.x = (1.0 - hit.time) * -delta.x;
+////        hit.delta.y = (1.0 - hit.time) * -delta.y;
+//        float hitX = x1 + (x1-x2) * hitTime;
+//        float hitY = y1 + (y1-y2) * hitTime;
+//        return hit;
+        return true;
+        // try https://tavianator.com/2015/ray_box_nan.html one day
     }
 }

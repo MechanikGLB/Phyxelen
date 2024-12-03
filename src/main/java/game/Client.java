@@ -55,8 +55,11 @@ public class Client extends GameApp {
         gui.init();
         super.run();
         bindKeys();
-        /*TEMP*/primaryCharacter = new Player(0, 10, activeSubworld);
+        /*TEMP*/
+        primaryCharacter = new Player(0, 10, activeSubworld);
         activeSubworld.entities.add(primaryCharacter);
+        activeSubworld.collidableEntities.add(primaryCharacter);
+
         System.out.println("Loading textures");
         try {
             Content.loadTextures();

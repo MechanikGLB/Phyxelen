@@ -23,6 +23,7 @@ public class Subworld extends GameObject {
 //    ArrayList<game.Chunk> activeChunkArray = new ArrayList<>();
     Hashtable<VectorI, Chunk> passiveChunks = new Hashtable<>();
     ArrayList<Entity> entities = new ArrayList<>();
+    ArrayList<EntityWithCollision> collidableEntities = new ArrayList<>();
 
     ArrayList<Entity> entitiesToAdd = new ArrayList<>();
     ArrayList<Entity> entitiesToRemove = new ArrayList<>();
@@ -62,8 +63,12 @@ public class Subworld extends GameObject {
         try {
             Main.getGame().entitySemaphore.acquire();
             entities.removeAll(entitiesToRemove);
+            collidableEntities.removeAll(entitiesToRemove);
             entitiesToRemove.clear();
             entities.addAll(entitiesToAdd);
+            for (var entity : entitiesToAdd)
+                if (entity instanceof EntityWithCollision && ((EntityWithCollision) entity).collidable)
+                    collidableEntities.add((EntityWithCollision) entity);
             entitiesToAdd.clear();
             Main.getGame().entitySemaphore.release();
         } catch (InterruptedException e) {

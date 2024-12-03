@@ -21,6 +21,8 @@ public class Bullet extends Spell {
                     if (o instanceof Pixel && !(((Pixel) o).material() instanceof MaterialAir)) {
                         ((Pixel) o).chunk().setPixel(((Pixel) o).i(), Content.air(), (byte) 0);
                         return true;
+                    } else if (o instanceof Character) {
+                        ((Character)o).damage(5);
                     }
                     return false;
                 },

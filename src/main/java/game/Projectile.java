@@ -63,6 +63,15 @@ public class Projectile extends Entity {
         Pixel castResult = subworld.rayCast(x, y, x + velocityX * dt, y + velocityY * dt);
         float newX = castResult == null ? x + velocityX * dt : castResult.x();
         float newY = castResult == null ? y + velocityY * dt : castResult.y();
+
+        for (EntityWithCollision entity : subworld.collidableEntities) {
+            if (entity.intersectedByRay(x, y, newX, newY)) {
+                subworld.removeEntity(this);
+                onCollide.apply(this, entity);
+                return;
+            }
+        }
+
         Pixel pixel = castResult == null ? subworld.getPixel(newX, newY) : castResult;
         if (pixel.chunk == null)
             return;

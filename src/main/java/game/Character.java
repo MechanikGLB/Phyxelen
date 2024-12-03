@@ -9,7 +9,7 @@ public class Character extends EntityWithCollision {
     protected HoldableItem holdedItem;
 
     public Character(float x, float y, Subworld subworld) {
-        super(x, y, subworld);
+        super(x, y, subworld, true);
         collisionBoxWidth = 4;
         collisionBoxHeight = 6;
     }
@@ -40,6 +40,14 @@ public class Character extends EntityWithCollision {
         this.health = health;
         if (clipHealth && health > maxHealth)
             health = maxHealth;
+    }
+
+    public void damage(int damage) {
+        this.health -= damage;
+        if (clipHealth && health > maxHealth)
+            health = maxHealth;
+        if (health < 0)
+            health = 0;
     }
 
     public void setClipHealth(boolean clipHealth) {
