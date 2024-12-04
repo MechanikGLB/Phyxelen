@@ -28,6 +28,8 @@ dependencies {
 //    testImplementation platform('org.junit:junit-bom:5.10.0')
 //    testImplementation 'org.junit.jupiter:junit-jupiter'
 
+    // https://www.lwjgl.org/
+    // https://javadoc.lwjgl.org/
     implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
 
     implementation "org.lwjgl:lwjgl"

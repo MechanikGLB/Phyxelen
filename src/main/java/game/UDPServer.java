@@ -34,17 +34,20 @@ public class UDPServer implements Runnable {
 
     @Override
     public void run() {//main server cycle
-        System.out.printf("Server started on IP %s%n", socket.getInetAddress().getHostAddress());
+        System.out.printf("Server started on IP %s%n", socket.getLocalAddress().getHostAddress());
         System.out.printf("Server started on port %d%n", socket.getLocalPort());
         while (true) {
+            if (socket.isClosed())
+                return;
             try {
-
                 DatagramPacket packetFromClient = new DatagramPacket(buffer, buffer.length);
                 receiveMessage(packetFromClient);
                 //TODO: Server logic
                 System.out.println("Server received: " + new String(packetFromClient.getData()));
             }
             catch (Exception e) {
+                if (socket.isClosed())
+                    return;
                 throw new RuntimeException(e);
             }
         }
@@ -54,10 +57,10 @@ public class UDPServer implements Runnable {
         try {
             socket.receive(packetFromClient);//blocks thread until received
             int packetLength = packetFromClient.getLength();
+            System.out.println(new String(packetFromClient.getData()));
             sendToClient("Packet got",
                     packetFromClient.getAddress(), packetFromClient.getPort());//Send response to client
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -82,9 +85,9 @@ public class UDPServer implements Runnable {
 
 
     public void shutdown() {
-        socket.close();
-        Thread.currentThread().interrupt();
         System.out.println("Server stopped");
+        socket.close();
+//        Thread.currentThread().interrupt();
     }
 }
 

@@ -42,8 +42,8 @@ public class Subworld extends GameObject {
         GameApp.Profiler.startProfile("tick", (byte)0, (byte)100, (byte)100);
 //        Thread[] threads = new Thread[activeChunks.size()];
 //        activeChunks.values().toArray(threads);
-        for (var chunk : activeChunks.values())
-            chunk.tick();
+//        for (var chunk : activeChunks.values())
+//            chunk.tick();
 //        var chunkLineIterator = activeChunkTree.iterator().forEachRemaining();
 
 //        for (Thread thread : threads)
@@ -92,7 +92,7 @@ public class Subworld extends GameObject {
 
     public void loadChunk(VectorI indexes) {
         if (activeChunks.containsKey(indexes)) return;
-        if (Main.getGame().gameState == GameApp.GameState.Server) return; // TODO: multiplayer, require chunk via net
+        if (Main.getGame().gameState == GameApp.GameState.Client) return; // TODO: multiplayer, require chunk via net
 
         //if () {} // TODO: load from file. True if found
         Chunk chunk = generator.generateChunk(indexes);

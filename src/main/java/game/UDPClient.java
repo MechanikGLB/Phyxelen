@@ -7,6 +7,8 @@ import java.net.InetAddress;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import game.NetMessage.*;
+
 //FOR TESTS ONLY
 //This Class will be renamed or deleted in future!
 
@@ -14,7 +16,7 @@ public class UDPClient implements Runnable {
     private final DatagramSocket socket;
     private final InetAddress address;
     private final int port;
-    private final BlockingQueue<byte[]> queue = new LinkedBlockingQueue<>();//consumer-producer
+    private final BlockingQueue<Message> queue = new LinkedBlockingQueue<>();//consumer-producer
     private int maxPacketSize = 1024;
     private final byte[] buffer = new byte[maxPacketSize];
     private final int[] timeouts = {11, 29, 73, 277, 997};
@@ -35,9 +37,10 @@ public class UDPClient implements Runnable {
     @Override
     public void run(){
         try {
-            while (true) {
-                byte[] message = queue.take();
-                sendToServer(message);
+            queue.add(new Hello());
+            while (!socket.isClosed()) {
+                Message message = queue.take();
+                sendToServer(message.buildMessage());
                 //TODO:communication logic
             }
         }
@@ -70,8 +73,9 @@ public class UDPClient implements Runnable {
     }
 
     public void shutdown() {
-        socket.close();
-        Thread.currentThread().interrupt();
         System.out.println("Client stopped");
+        queue.add(new Quit());
+        socket.close();
+//        Thread.currentThread().interrupt();
     }
 }

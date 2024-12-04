@@ -17,6 +17,7 @@ public abstract class GameApp {
     }
     protected GameState gameState;
 //    protected static Content content = new Content();
+
     protected static World activeWorld;
     protected static Subworld activeSubworld;
     /// Counter is used for making some computations more rare
