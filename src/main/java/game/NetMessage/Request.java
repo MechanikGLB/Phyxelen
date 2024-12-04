@@ -3,7 +3,7 @@ package game.NetMessage;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-public class Request {
+public class Request extends Message {
     static byte id = Messages.getNextMessageIndex();
     byte requestedID; //ID of the requested message
     int requestData = 0; // information with request to server(optional)
