@@ -4,13 +4,12 @@ import java.util.BitSet;
 
 public class Chunk {
     /// Width (and height) of chunk in world pixels. Always same for all chunks during session
-    private static short size = 32;
+    private static final short size = 32;
     /// Owning subworld
     Subworld subworld;
     // Index within `chunks` array of subworld
     int xIndex;
     int yIndex;
-    // game.World pixel data
 
     Material[] materials;
     byte[] colors;
@@ -52,6 +51,9 @@ public class Chunk {
     public void presetPixel(int i, Material material, byte color) {
         solved = false;
         materials[i] = material;
+        if (color == -1) {
+            color = (byte) GameApp.activeSubworld.random.nextInt(material.colors.length);
+        }
         colors[i] = color;
     }
 
@@ -79,34 +81,42 @@ public class Chunk {
     }
 
     public void tick() {
-        if (solved && (Main.getGame().counter + yIndex) % 8 != 0) return;
-        solved = true;
+//        if (solved && (Main.getGame().counter + yIndex) % 8 != 0) return;
+//        solved = true;
 //            threads[i] = new Thread(() -> {
-        if (subworld.counter % 2 == 0)
-        for (int i = 0; i < area(); i++) {
-            if (pixelSolved.get(i))
-                continue;
-//            int newI = size * i % size;
-//            int x = i % size; int y = i / size;
-//            if (y + subworld.counter % 2 == 0) continue;
-//            int newI = y + x * size;
-//            if (!pixelSolved.get(newI))
-            materials[i].solvePhysic(this, i);
-        }
-        else
-            for (int i = area() - 1; i > 0 ; i--) {
-                if (pixelSolved.get(i))
-                    continue;
-                materials[i].solvePhysic(this, i);
-//            for (int y = 0; y < size; y++) {
-//                for (int x = size - 1; x > 0; x--) {
-//                    materials[x + y * size].solvePhysic(this, x + y * size);
-//                }
+//        if (subworld.pixelPhysicPhase) {
+//            for (int i = 0; i < area(); i += 1) {
+////                if (pixelSolved.get(i))
+////                    continue;
+//                materials[i].solvePhysic(this, i);
 //            }
+//        } else {
+//            for (int i = 1; i < area() - 1; i += 2) {
+////                if (pixelSolved.get(i))
+////                    continue;
+//                materials[i].solvePhysic(this, i);
+//            }
+//            for (int i = 0; i < area(); i += 2) {
+//                materials[i].solvePhysic(this, i);
+//            }
+//        }
+//        else
+//            for (int i = area() - 1; i > 0 ; i--) {
+//                if (pixelSolved.get(i))
+//                    continue;
+//                materials[i].solvePhysic(this, i);
+            for (int y = 0; y < size; y++) {
+                for (int x = 0; x < size; x++) {
+                    var i = x + y * size;
+                    if (pixelSolved.get(i))
+                        continue;
+                    materials[i].solvePhysic(this, i);
+                }
+            }
 //                int x = i % size; int y = i / size;
 //                int newI = y + x * size;
 //                materials[i].solvePhysic(this, i);
-            }
+//            }
     }
 
 
@@ -149,7 +159,7 @@ public class Chunk {
             Chunk neighborChunk = subworld.activeChunks.get(new VectorI(xIndex - 1, yIndex));
             if (neighborChunk == null)
                 return null;
-            return new Pixel(neighborChunk, i + size - 1);
+            return new Pixel(neighborChunk, i - 1);
         }
         else
             return new Pixel(this, i - size - 1);
@@ -176,7 +186,7 @@ public class Chunk {
             Chunk neighborChunk = subworld.activeChunks.get(new VectorI(xIndex, yIndex - 1));
             if (neighborChunk == null)
                 return null;
-            return null; //new game.Pixel(neighborChunk, i + size * (size + 1));
+            return new game.Pixel(neighborChunk, i + size * (size - 1) - 1);
         }
         else if (i % size == size - 1) {
             Chunk neighborChunk = subworld.activeChunks.get(new VectorI(xIndex + 1, yIndex));

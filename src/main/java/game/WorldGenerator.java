@@ -2,6 +2,8 @@ package game;
 
 import java.util.Random;
 
+import static java.lang.Math.*;
+
 /// game.WorldGenerator holds data for one subworld generation.
 public class WorldGenerator {
     Subworld subworld;
@@ -19,13 +21,20 @@ public class WorldGenerator {
         chunk.yIndex = indexes.y;
         int baseX = Chunk.size() * indexes.x;
         int baseY = Chunk.size() * indexes.y;
-        Material air = GameApp.activeWorld.pixelIds[0];
-        Material land = GameApp.activeWorld.pixelIds[1];
+        Material air = Content.airMaterial;// GameApp.activeWorld.pixelIds[0];
+        Material land = Content.getMaterial("sand");
+        Material land2 = Content.getMaterial("stone");
         int i = 0;
         for (int y = 0; y < Chunk.size(); y++)
             for (int x = 0; x < Chunk.size(); x++) {
-                if (baseY + y < Math.sin((baseX + x)*0.1)*0.5*Math.abs(x+baseX)) {
-                    chunk.presetPixel(i, land, (byte)GameApp.activeSubworld.random.nextInt(land.colors.length - 1));
+                float noise = OpenSimplex2S.noise2(0, (baseX + x) * 0.01, (baseY + y) * 0.01);
+                float factor = noise + (baseY + y + 60) * 0.006f;
+                if (abs(baseX) > 600)
+                    factor -= (abs(baseX + x) - 600) * 0.01f;
+                if (factor < 0.05) {
+                    chunk.presetPixel(i, land2, (byte) -1);
+                } else if (factor < 0.2) {
+                    chunk.presetPixel(i, land, (byte) -1);
                 } else {
                     chunk.materials[i] = air;
                 }

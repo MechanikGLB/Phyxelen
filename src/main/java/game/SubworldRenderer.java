@@ -38,12 +38,6 @@ public class SubworldRenderer implements WindowResizeListener {
 //        glLoadIdentity();
         var worldPixelSize = client.viewScale;
         int worldPixelCount = 0;
-        try {
-            client.logicSemaphore.acquire();
-        } catch (InterruptedException e) {
-            client.logicSemaphore.release();
-            return;
-        }
         for (var chunk : subworld.activeChunks.entrySet()) {
             int baseX = chunk.getKey().x * Chunk.size();
             int baseY = chunk.getKey().y * Chunk.size();
@@ -84,7 +78,6 @@ public class SubworldRenderer implements WindowResizeListener {
                 ++worldPixelCount;
             }
         }
-        client.logicSemaphore.release();
 
         glEnableClientState(GL_VERTEX_ARRAY);
         glEnableClientState(GL_COLOR_ARRAY);

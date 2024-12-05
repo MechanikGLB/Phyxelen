@@ -23,13 +23,6 @@ public abstract class GameApp {
     /// Counter is used for making some computations more rare
     protected short counter = 0;
 
-    Thread logicThread;
-    Semaphore logicSemaphore = new Semaphore(1);
-    Semaphore worldPixelSemaphore = new Semaphore(1);
-    Semaphore entitySemaphore = new Semaphore(1);
-
-
-
     public GameState getGameState() {return gameState;}
 
 
