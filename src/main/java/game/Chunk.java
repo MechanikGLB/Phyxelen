@@ -4,7 +4,7 @@ import java.util.BitSet;
 
 public class Chunk {
     /// Width (and height) of chunk in world pixels. Always same for all chunks during session
-    private static short size = 32;
+    private static final short size = 32;
     /// Owning subworld
     Subworld subworld;
     // Index within `chunks` array of subworld
@@ -159,7 +159,7 @@ public class Chunk {
             Chunk neighborChunk = subworld.activeChunks.get(new VectorI(xIndex - 1, yIndex));
             if (neighborChunk == null)
                 return null;
-            return new Pixel(neighborChunk, i + size - 1);
+            return new Pixel(neighborChunk, i - 1);
         }
         else
             return new Pixel(this, i - size - 1);
@@ -186,7 +186,7 @@ public class Chunk {
             Chunk neighborChunk = subworld.activeChunks.get(new VectorI(xIndex, yIndex - 1));
             if (neighborChunk == null)
                 return null;
-            return null; //new game.Pixel(neighborChunk, i + size * (size + 1));
+            return new game.Pixel(neighborChunk, i + size * (size - 1) - 1);
         }
         else if (i % size == size - 1) {
             Chunk neighborChunk = subworld.activeChunks.get(new VectorI(xIndex + 1, yIndex));

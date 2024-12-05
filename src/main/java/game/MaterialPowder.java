@@ -22,14 +22,6 @@ public class MaterialPowder extends Material {
                 return;
             Material pixelUnderRightMaterial = pixelUnderRight.material();
             boolean canMoveRight = pixelUnderRightMaterial.density < selfMaterial.density;
-//            if (canMoveLeft) {
-//                pixelUnderLeftMaterial = pixelUnderLeft.material();
-//                canMoveLeft = pixelUnderLeftMaterial.density < selfMaterial.density;
-//            }
-//            if (canMoveRight) {
-//                pixelUnderRightMaterial = pixelUnderRight.material();
-//                canMoveRight = pixelUnderRightMaterial.density < selfMaterial.density;
-//            }
             if (canMoveLeft || canMoveRight) {
                 if (canMoveLeft && (!canMoveRight || chunk.subworld.random.nextBoolean())) {
                     chunk.setPixel(i, pixelUnderLeftMaterial, pixelUnderLeft.color());
