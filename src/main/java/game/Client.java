@@ -121,33 +121,6 @@ public class Client extends GameApp {
     protected void loop() {
         long lastCycleStartTime = System.currentTimeMillis();
 
-        logicThread = new Thread(() -> {
-            long lastTickTime = System.currentTimeMillis();
-            while (!glfwWindowShouldClose(window)) {
-                long cycleStartTime = System.currentTimeMillis();
-                dt = (cycleStartTime - lastTickTime) / 1000f;
-                if (dt < (1.0f / maxTps)) {
-                    try {
-                        Thread.sleep((long) ((1.0f / maxTps - dt) * 1000.0f));
-                    } catch (InterruptedException e) {
-                        continue;
-                    }
-                    continue;
-                }
-                lastTickTime = cycleStartTime;
-                try {
-                    logicSemaphore.acquire();
-                } catch (InterruptedException e) {
-                    logicSemaphore.release();
-                    continue;
-                }
-                tick(dt);
-                logicSemaphore.release();
-            }
-            Thread.yield();
-        });
-        logicThread.start();
-
         while (!glfwWindowShouldClose(window)) {
             long cycleStartTime = System.currentTimeMillis();
 
@@ -166,6 +139,7 @@ public class Client extends GameApp {
                 updateChunks();
             }
 //            System.out.println(dt);
+            tick(fdt);
 
             renderer.draw();
 
@@ -189,11 +163,11 @@ public class Client extends GameApp {
 
             counter++;
         }
-        try {
-            logicThread.join();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+//        try {
+//            logicThread.join();
+//        } catch (InterruptedException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
 

@@ -14,6 +14,7 @@ public class Subworld extends GameObject {
     WorldGenerator generator;
     Random random = new Random();
     byte counter = 0;
+    float pixelPhysicCounter;
     ConcurrentHashMap<VectorI, Chunk> activeChunks = new ConcurrentHashMap<>();
     TreeSet<Chunk> activeChunkTree = new TreeSet<>((chunk, t1) -> {
         if (chunk.yIndex != t1.yIndex)
@@ -42,8 +43,6 @@ public class Subworld extends GameObject {
         GameApp.Profiler.startProfile("tick", (byte)0, (byte)100, (byte)100);
 //        Thread[] threads = new Thread[activeChunks.size()];
 //        activeChunks.values().toArray(threads);
-//        for (var chunk : activeChunks.values())
-//            chunk.tick();
 //        var chunkLineIterator = activeChunkTree.iterator().forEachRemaining();
 
 //        for (Thread thread : threads)
@@ -53,27 +52,27 @@ public class Subworld extends GameObject {
 //                throw new RuntimeException(e);
 //            }
 
-        for (var chunk : activeChunks.values())
-            chunk.pixelSolved.clear();
-//        for (var chunk : activeChunks.entrySet())
-//            chunk.getValue().swapBuffer();
+        pixelPhysicCounter += dt;
+        if (pixelPhysicCounter >= 0.05) {
+            for (var chunk : activeChunks.values())
+                chunk.tick();
+            for (var chunk : activeChunks.values())
+                chunk.pixelSolved.clear();
+
+            pixelPhysicCounter = 0;
+        }
         for (Entity entity : entities)
             entity.update(dt);
 
-        try {
-            Main.getGame().entitySemaphore.acquire();
-            entities.removeAll(entitiesToRemove);
-            collidableEntities.removeAll(entitiesToRemove);
-            entitiesToRemove.clear();
-            entities.addAll(entitiesToAdd);
-            for (var entity : entitiesToAdd)
-                if (entity instanceof EntityWithCollision && ((EntityWithCollision) entity).collidable)
-                    collidableEntities.add((EntityWithCollision) entity);
-            entitiesToAdd.clear();
-            Main.getGame().entitySemaphore.release();
-        } catch (InterruptedException e) {
+        entities.removeAll(entitiesToRemove);
+        collidableEntities.removeAll(entitiesToRemove);
+        entitiesToRemove.clear();
+        entities.addAll(entitiesToAdd);
+        for (var entity : entitiesToAdd)
+            if (entity instanceof EntityWithCollision && ((EntityWithCollision) entity).collidable)
+                collidableEntities.add((EntityWithCollision) entity);
+        entitiesToAdd.clear();
 
-        }
         counter++;
         GameApp.Profiler.endProfile("tick");
     }
@@ -82,12 +81,8 @@ public class Subworld extends GameObject {
     @Override
     void draw(float fdt) {
         renderer.draw(fdt);
-        try {
-            Main.getGame().entitySemaphore.acquire();
-            for (var entity : entities)
-                entity.draw(fdt);
-            Main.getGame().entitySemaphore.release();
-        } catch (InterruptedException e) {}
+        for (var entity : entities)
+            entity.draw(fdt);
     }
 
     public void loadChunk(VectorI indexes) {
@@ -112,11 +107,6 @@ public class Subworld extends GameObject {
 
 
     public void updateChunksForUser(int centerX, int centerY, int width, int height) {
-        try {
-            Main.getGame().logicSemaphore.acquire();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
         ArrayList<VectorI> toDeactivate = new ArrayList<>();
         for (var active : activeChunks.entrySet()) {
             if (active.getKey().x < centerX - width ||
@@ -147,7 +137,6 @@ public class Subworld extends GameObject {
                 }
             }
         }
-        Main.getGame().logicSemaphore.release();
     }
 
 
