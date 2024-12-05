@@ -52,6 +52,9 @@ public class Chunk {
     public void presetPixel(int i, Material material, byte color) {
         solved = false;
         materials[i] = material;
+        if (color == -1) {
+            color = (byte) GameApp.activeSubworld.random.nextInt(material.colors.length);
+        }
         colors[i] = color;
     }
 
