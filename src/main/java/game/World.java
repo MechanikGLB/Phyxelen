@@ -2,11 +2,8 @@ package game;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.*;
 import java.io.*;
-import java.util.List;
-import java.util.Map;
 
 import org.snakeyaml.engine.v2.api.Dump;
 import org.snakeyaml.engine.v2.api.DumpSettings;
@@ -115,7 +112,10 @@ public class World {
 
 
     private void startup() {
-        loadContent();
+        if (Main.getClient() == null)
+            loadContent();
+        else
+            requireContentFromServer();
     }
 
 
@@ -133,7 +133,21 @@ public class World {
         int i = 1;
         for (var definition : Content.materials.values()) {
             pixelIds[i] = definition;
+            definition.id = (byte) i;
             i++;
         }
+    }
+
+
+    private void requireContentFromServer() {
+        Content.loadModules(modules);
+
+        // ...
+
+        ArrayList<String> idOrder = new ArrayList<>();
+        for (byte i = 1; i <= idOrder.size(); i++) {
+            Content.getMaterial(idOrder.get(i)).id = i;
+        }
+
     }
 }

@@ -28,10 +28,14 @@ public abstract class GameApp {
 
     public void run() {
         checkDirectoryStructure();
-        // temp
-        File testWorldDir = new File("worlds" + File.separator + "test");
-        if (!testWorldDir.exists())
-            World.createWorld("test", "test");
+        if (gameState != GameState.Client) {
+            enterWorld(new World());
+        } else {
+            // temp
+            File testWorldDir = new File("worlds" + File.separator + "test");
+            if (!testWorldDir.exists())
+                World.createWorld("test", "test");
+        }
         enterWorld(World.loadWorldByPath("test"));
     };
 

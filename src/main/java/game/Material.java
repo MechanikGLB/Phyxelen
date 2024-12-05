@@ -26,6 +26,7 @@ class MaterialBurnRule {
 
 
 public abstract class Material {
+    byte id;
     ColorWithAplha[] colors;
     Hashtable<String, MaterialInteraction> interactions;
     Hashtable<Integer, MaterialInteraction> interactionsById;
