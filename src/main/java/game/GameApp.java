@@ -25,18 +25,21 @@ public abstract class GameApp {
 
     public GameState getGameState() {return gameState;}
 
+    public World getActiveWorld() {return activeWorld;}
+    public Subworld getActiveSubworld() {return activeSubworld;}
 
     public void run() {
         checkDirectoryStructure();
-        if (gameState != GameState.Client) {
+        if (gameState == GameState.Client) {
             enterWorld(new World());
         } else {
             // temp
             File testWorldDir = new File("worlds" + File.separator + "test");
-            if (!testWorldDir.exists())
+            if (!testWorldDir.exists()) {
                 World.createWorld("test", "test");
+            }
+            enterWorld(World.loadWorldByPath("test"));
         }
-        enterWorld(World.loadWorldByPath("test"));
     };
 
     protected abstract void loop();

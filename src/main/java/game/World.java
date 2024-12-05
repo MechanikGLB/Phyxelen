@@ -5,6 +5,8 @@ import java.nio.file.Path;
 import java.util.*;
 import java.io.*;
 
+import game.NetMessage.FirstSync;
+import game.NetMessage.Request;
 import org.snakeyaml.engine.v2.api.Dump;
 import org.snakeyaml.engine.v2.api.DumpSettings;
 import org.snakeyaml.engine.v2.api.Load;
@@ -115,7 +117,7 @@ public class World {
         if (Main.getClient() == null)
             loadContent();
         else
-            requireContentFromServer();
+            Main.getClient().addMessage(new Request(FirstSync.getId()));
     }
 
 
@@ -139,14 +141,12 @@ public class World {
     }
 
 
-    private void requireContentFromServer() {
+    public void requireContentFromServer(ArrayList<String> materials) {
         Content.loadModules(modules);
+        System.out.println(Arrays.toString(materials.toArray()));
 
-        // ...
-
-        ArrayList<String> idOrder = new ArrayList<>();
-        for (byte i = 1; i <= idOrder.size(); i++) {
-            Content.getMaterial(idOrder.get(i)).id = i;
+        for (byte i = 1; i <= materials.size(); i++) {
+            Content.getMaterial(materials.get(i)).id = i;
         }
 
     }

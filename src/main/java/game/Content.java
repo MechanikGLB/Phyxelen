@@ -78,6 +78,7 @@ public class Content {
                         Material materialDefinition = parseMaterialType(material);
                         if (materialDefinition == null)
                             continue;
+                        materialDefinition.name = material.getKey();
                         parseMaterialColors(material, materialDefinition);
                         parseMaterialDensity(material, materialDefinition);
                         Content.materials.put(material.getKey(), materialDefinition);

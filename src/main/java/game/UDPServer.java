@@ -15,6 +15,8 @@ public class UDPServer implements Runnable {
     private byte[] buffer = new byte[maxPacketSize];
     private byte[] reserveBuffer;
     private final DatagramSocket socket;
+    private InetAddress sessionAddress;
+    private int sessionPort;
 
 
     public UDPServer(int maxPacketSize, int port)throws IOException {
@@ -41,6 +43,7 @@ public class UDPServer implements Runnable {
                 return;
             try {
                 DatagramPacket packetFromClient = new DatagramPacket(buffer, buffer.length);
+                //TODO:SessionManager
                 receiveMessage(packetFromClient);
                 //TODO: Server logic
                 System.out.println("Server received: " + new String(packetFromClient.getData()));
@@ -58,6 +61,7 @@ public class UDPServer implements Runnable {
             socket.receive(packetFromClient);//blocks thread until received
             int packetLength = packetFromClient.getLength();
             System.out.println(new String(packetFromClient.getData()));
+
             sendToClient("Packet got",
                     packetFromClient.getAddress(), packetFromClient.getPort());//Send response to client
         } catch (Exception e) {

@@ -8,7 +8,7 @@ import static java.lang.Math.*;
 public class WorldGenerator {
     Subworld subworld;
     int[] rectangles;
-    Random random = new Random();
+//    Random random = new Random(subworld.seed);
 
     public WorldGenerator(Subworld subworld) {
         this.subworld = subworld;
@@ -27,7 +27,7 @@ public class WorldGenerator {
         int i = 0;
         for (int y = 0; y < Chunk.size(); y++)
             for (int x = 0; x < Chunk.size(); x++) {
-                float noise = OpenSimplex2S.noise2(0, (baseX + x) * 0.01, (baseY + y) * 0.01);
+                float noise = OpenSimplex2S.noise2(subworld.seed, (baseX + x) * 0.01, (baseY + y) * 0.01);
                 float factor = noise + (baseY + y + 60) * 0.006f;
                 if (abs(baseX) > 600)
                     factor -= (abs(baseX + x) - 600) * 0.01f;

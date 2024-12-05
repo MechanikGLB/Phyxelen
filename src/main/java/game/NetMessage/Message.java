@@ -1,8 +1,11 @@
 package game.NetMessage;
 
+import java.nio.ByteBuffer;
+
 abstract public class Message {
 
     public abstract byte[] buildMessage();
+    public abstract void processMessage(ByteBuffer message);
 }
 
 

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.nio.ByteBuffer;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -20,6 +21,7 @@ public class UDPClient implements Runnable {
     private int maxPacketSize = 1024;
     private final byte[] buffer = new byte[maxPacketSize];
     private final int[] timeouts = {11, 29, 73, 277, 997};
+    private boolean serverActive = false;
 
     public UDPClient(String ip, int port) throws IOException {
         this.address = InetAddress.getByName(ip);//Server addr
@@ -38,18 +40,26 @@ public class UDPClient implements Runnable {
     public void run(){
         try {
             queue.add(new Hello());
-            while (!socket.isClosed()) {
-                Message message = queue.take();
-                sendToServer(message.buildMessage());
-                //TODO:communication logic
+            Message message = queue.take();
+            sendToServer(message.buildMessage());
+            //TODO:Server response check
+            if(serverActive) {
+                Thread ReceiveHandler = new Thread(this::receiver);
+                Thread SendHandler = new Thread(this::sender);
+                ReceiveHandler.start();
+                SendHandler.start();
             }
+            else {
+                System.out.println("Server timed out");
+            }
+
         }
         catch (Exception e) {
             e.getStackTrace();
         }
     }
     //TODO:Upgrade to send(type,data) with metadata
-    public void sendToServer(byte[] dataToSend) {
+    protected void sendToServer(byte[] dataToSend) {
         DatagramPacket packetToServer = new DatagramPacket(dataToSend, dataToSend.length,
                 address, port);
 
@@ -66,16 +76,54 @@ public class UDPClient implements Runnable {
         }
     }
 
+    public void addMessage(Message message) {
+        queue.add(message);
+    }
+
+    public void receiver(){
+        try {
+            while (!socket.isClosed()) {
+                responseReceive();
+            }
+        }
+        catch (Exception e)
+        {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public void sender(){
+        try {
+            while (!socket.isClosed()) {
+                Message message = queue.take();
+                sendToServer(message.buildMessage());
+            }
+        }
+        catch (Exception e)
+        {
+            System.out.println(e.getMessage());
+        }
+    }
+
     public void responseReceive() throws IOException {
         DatagramPacket packetFromServer = new DatagramPacket(buffer, buffer.length);
         socket.receive(packetFromServer);
-        System.out.println(new String(packetFromServer.getData()));//replace with new logic
+        System.out.println(new String(packetFromServer.getData()));//may be chaotic
+        Messages.process(ByteBuffer.wrap(packetFromServer.getData()));
     }
 
     public void shutdown() {
         System.out.println("Client stopped");
         queue.add(new Quit());
         socket.close();
-//        Thread.currentThread().interrupt();
+        Thread.currentThread().interrupt();
     }
+
+    public void setServerActive(boolean serverActive) {
+        this.serverActive = serverActive;
+    }
+    public boolean isServerActive() {
+        return serverActive;
+    }
+
 }

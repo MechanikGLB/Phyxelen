@@ -1,5 +1,7 @@
 package game;
 
+import game.NetMessage.Request;
+
 import java.util.*;
 //import java.
 import java.io.*;
@@ -13,6 +15,7 @@ public class Subworld extends GameObject {
     SubworldRenderer renderer;
     WorldGenerator generator;
     Random random = new Random();
+    int seed = random.nextInt();
     byte counter = 0;
     float pixelPhysicCounter;
     boolean pixelPhysicPhase = false;
@@ -89,7 +92,10 @@ public class Subworld extends GameObject {
 
     public void loadChunk(VectorI indexes) {
         if (activeChunks.containsKey(indexes)) return;
-        if (Main.getGame().gameState == GameApp.GameState.Client) return; // TODO: multiplayer, require chunk via net
+        if (Main.getGame().gameState == GameApp.GameState.Client){
+            
+            return;
+        }; // TODO: multiplayer, require chunk via net
 
         //if () {} // TODO: load from file. True if found
         Chunk chunk = generator.generateChunk(indexes);
