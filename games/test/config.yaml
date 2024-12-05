@@ -2,7 +2,7 @@ materials:
   stone:
     density: 10.0
     type: solid
-    colors: ["#444444FF", "#555555FF"]
+    colors: ["#444444FF", "#4A4A4AFF", "#505050FF", "#555555FF"]
   sand:
     type: powder
     density: 5.0

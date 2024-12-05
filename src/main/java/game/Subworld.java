@@ -15,6 +15,7 @@ public class Subworld extends GameObject {
     Random random = new Random();
     byte counter = 0;
     float pixelPhysicCounter;
+    boolean pixelPhysicPhase = false;
     ConcurrentHashMap<VectorI, Chunk> activeChunks = new ConcurrentHashMap<>();
     TreeSet<Chunk> activeChunkTree = new TreeSet<>((chunk, t1) -> {
         if (chunk.yIndex != t1.yIndex)
@@ -55,11 +56,12 @@ public class Subworld extends GameObject {
         pixelPhysicCounter += dt;
         if (pixelPhysicCounter >= 0.05) {
             for (var chunk : activeChunks.values())
-                chunk.tick();
-            for (var chunk : activeChunks.values())
                 chunk.pixelSolved.clear();
+            for (var chunk : activeChunkTree)
+                chunk.tick();
 
             pixelPhysicCounter = 0;
+            pixelPhysicPhase = !pixelPhysicPhase;
         }
         for (Entity entity : entities)
             entity.update(dt);

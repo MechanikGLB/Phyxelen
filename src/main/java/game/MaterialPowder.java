@@ -7,25 +7,29 @@ public class MaterialPowder extends Material {
         Pixel pixelUnder = chunk.getPixelBottomNeighbor(i);
         if (pixelUnder == null)
             return;
-        Material pixelUnderMaterial = pixelUnder.chunk.materials[pixelUnder.i];
+        Material pixelUnderMaterial = pixelUnder.material();
         if (pixelUnderMaterial.density < selfMaterial.density) {
             chunk.setPixel(i, pixelUnderMaterial, pixelUnder.color());
             pixelUnder.chunk.setPixel(pixelUnder.i, selfMaterial, selfColor);
         } else {
             Pixel pixelUnderLeft = chunk.getPixelBottomLeftNeighbor(i);
-            Material pixelUnderLeftMaterial = null;
-            boolean canMoveLeft = pixelUnderLeft != null;
-            if (canMoveLeft) {
-                pixelUnderLeftMaterial = pixelUnderLeft.material();
-                canMoveLeft = pixelUnderLeftMaterial.density < selfMaterial.density;
-            }
+            if (pixelUnderLeft == null)
+                return;
+            Material pixelUnderLeftMaterial = pixelUnderLeft.material();
+            boolean canMoveLeft = pixelUnderLeftMaterial.density < selfMaterial.density;
             Pixel pixelUnderRight = chunk.getPixelBottomRightNeighbor(i);
-            Material pixelUnderRightMaterial = null;
-            boolean canMoveRight = pixelUnderRight != null;
-            if (canMoveRight) {
-                pixelUnderRightMaterial = pixelUnderRight.material();
-                canMoveRight = pixelUnderRightMaterial.density < selfMaterial.density;
-            }
+            if (pixelUnderRight == null)
+                return;
+            Material pixelUnderRightMaterial = pixelUnderRight.material();
+            boolean canMoveRight = pixelUnderRightMaterial.density < selfMaterial.density;
+//            if (canMoveLeft) {
+//                pixelUnderLeftMaterial = pixelUnderLeft.material();
+//                canMoveLeft = pixelUnderLeftMaterial.density < selfMaterial.density;
+//            }
+//            if (canMoveRight) {
+//                pixelUnderRightMaterial = pixelUnderRight.material();
+//                canMoveRight = pixelUnderRightMaterial.density < selfMaterial.density;
+//            }
             if (canMoveLeft || canMoveRight) {
                 if (canMoveLeft && (!canMoveRight || chunk.subworld.random.nextBoolean())) {
                     chunk.setPixel(i, pixelUnderLeftMaterial, pixelUnderLeft.color());
