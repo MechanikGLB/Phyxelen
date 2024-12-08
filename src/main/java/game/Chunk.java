@@ -139,6 +139,16 @@ public class Chunk {
         return new Pixel(this, i);
     }
 
+
+    Pixel getPixelRightNeighbor(int i) {
+        if (i % size == size - 1) {
+            Chunk neighborChunk = subworld.activeChunks.get(new VectorI(xIndex + 1, yIndex));
+            if (neighborChunk == null)
+                return null;
+            return Pixel.get(neighborChunk, i - size + 1);
+        } else
+            return Pixel.get(this, i + 1);
+    }
     Pixel getPixelTopNeighbor(int i) {
         if (i < area - size)
             return new Pixel(this, i + size);
@@ -149,7 +159,6 @@ public class Chunk {
             return new Pixel(neighborChunk, size - (area - i));
         }
     }
-
     Pixel getPixelTopNeighborChecked(int i) {
         if (i < area - size) {
             return getSolvedPixel(i + size);
@@ -162,9 +171,12 @@ public class Chunk {
         }
     }
     Pixel getPixelLeftNeighbor(int i) {
-        if (i % size == 0)
-            return null;
-        else
+        if (i % size == 0) {
+            Chunk neighborChunk = subworld.activeChunks.get(new VectorI(xIndex - 1, yIndex));
+            if (neighborChunk == null)
+                return null;
+            return Pixel.get(neighborChunk, i + size - 1);
+        } else
             return new Pixel(this, i - 1);
     }
     // TODO: reorder conditions to make the most frequent first

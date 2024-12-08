@@ -30,7 +30,7 @@ public class WorldGenerator {
                 float noise = OpenSimplex2S.noise2(0, (baseX + x) * 0.01, (baseY + y) * 0.01);
                 float factor = noise + (baseY + y + 60) * 0.006f;
                 if (abs(baseX) > 600)
-                    factor -= (abs(baseX + x) - 600) * 0.01f;
+                    factor -= pow((abs(baseX + x) - 600) * 0.01f, 2f);
                 if (factor < 0.05) {
                     chunk.presetPixel(i, land2, (byte) -1);
                 } else if (factor < 0.2) {

@@ -2,64 +2,55 @@ package game;
 
 public class MaterialLiquid extends Material {
     void solvePhysic(Chunk chunk, int i) {
-//        game.Pixel pixelUnder = sw.getPixel(pixel.x, pixel.y - 1);
-//        if (pixelUnder == null)
-//            return;
-//        if (pixelUnder.material.density < pixel.material.density) {
-//            pixel.y -= 1;
-//            sw.setPixel(pixel);
-//            pixelUnder.y += 1;
-//            sw.setPixel(pixelUnder);
-//        } else {
-//            game.Pixel pixelUnderLeft = sw.getPixel(pixel.x - 1, pixel.y - 1);
-//            boolean canMoveDownLeft =
-//                    (pixelUnderLeft != null &&
-//                            pixelUnderLeft.material.density < pixel.material.density);
-//            game.Pixel pixelUnderRight = sw.getPixel(pixel.x + 1, pixel.y - 1);
-//            boolean canMoveDownRight =
-//                    (pixelUnderRight != null &&
-//                            pixelUnderRight.material.density < pixel.material.density);
-//            if (canMoveDownLeft || canMoveDownRight) {
-//                if (canMoveDownLeft && (!canMoveDownRight || sw.random.nextBoolean())) {
-//                    pixel.x -= 1;
-//                    pixel.y -= 1;
-//                    pixelUnderLeft.x += 1;
-//                    pixelUnderLeft.y += 1;
-//                    sw.setPixel(pixel);
-//                    sw.setPixel(pixelUnderLeft);
-//                } else {
-//                    pixel.x += 1;
-//                    pixel.y -= 1;
-//                    pixelUnderRight.x -= 1;
-//                    pixelUnderRight.y += 1;
-//                    sw.setPixel(pixel);
-//                    sw.setPixel(pixelUnderRight);
-//                }
-//            } else {
-//                if (sw.random.nextBoolean()) {
-//                    game.Pixel pixelLeft = sw.getPixel(pixel.x - 1, pixel.y);
-//                    boolean canMoveLeft =
-//                            (pixelLeft != null &&
-//                                    pixelLeft.material.density < pixel.material.density);
-//                    if (canMoveLeft) {
-//                        pixel.x -= 1;
-//                        pixelLeft.x += 1;
-//                        sw.setPixel(pixel);
-//                        sw.setPixel(pixelLeft);
-//                    }
-//                    return;
-//                }
-//                game.Pixel pixelRight = sw.getPixel(pixel.x + 1, pixel.y);
-//                boolean canMoveRight =
-//                        (pixelRight != null &&
-//                                pixelRight.material.density < pixel.material.density);
-//                if (canMoveRight) {
-//                    pixel.x += 1;
-//                    pixelRight.x -= 1;
-//                    sw.setPixel(pixel);
-//                    sw.setPixel(pixelRight);
-//                }
-//            }
-//        }
+        Material selfMaterial = chunk.materials[i];
+        byte selfColor = chunk.colors[i];
+        Pixel pixelUnder = chunk.getPixelBottomNeighbor(i);
+        if (pixelUnder == null)
+            return;
+        Material pixelUnderMaterial = pixelUnder.material();
+        if (pixelUnderMaterial.density < selfMaterial.density && pixelUnder.canBeReplaced()) {
+            chunk.setPixel(i, pixelUnderMaterial, pixelUnder.color());
+            pixelUnder.chunk.setPixel(pixelUnder.i, selfMaterial, selfColor);
+        } else {
+            Pixel pixelUnderLeft = chunk.getPixelBottomLeftNeighbor(i);
+            if (pixelUnderLeft == null)
+                return;
+            Material pixelUnderLeftMaterial = pixelUnderLeft.material();
+            boolean canMoveUnderLeft = pixelUnderLeftMaterial.density < selfMaterial.density && pixelUnderLeft.canBeReplaced();
+            Pixel pixelUnderRight = chunk.getPixelBottomRightNeighbor(i);
+            if (pixelUnderRight == null)
+                return;
+            Material pixelUnderRightMaterial = pixelUnderRight.material();
+            boolean canMoveUnderRight = pixelUnderRightMaterial.density < selfMaterial.density && pixelUnderRight.canBeReplaced();
+            if (canMoveUnderLeft || canMoveUnderRight) {
+                if (canMoveUnderLeft && (!canMoveUnderRight || chunk.subworld.random.nextBoolean())) {
+                    chunk.setPixel(i, pixelUnderLeftMaterial, pixelUnderLeft.color());
+                    pixelUnderLeft.chunk.setPixel(pixelUnderLeft.i, selfMaterial, selfColor);
+                } else {
+                    chunk.setPixel(i, pixelUnderRightMaterial, pixelUnderRight.color());
+                    pixelUnderRight.chunk.setPixel(pixelUnderRight.i, selfMaterial, selfColor);
+                }
+            } else {
+                Pixel pixelLeft = chunk.getPixelLeftNeighbor(i);
+                if (pixelLeft == null)
+                    return;
+                Material pixelLeftMaterial = pixelLeft.material();
+                boolean canMoveLeft = pixelLeftMaterial.density < selfMaterial.density && pixelLeft.canBeReplaced();
+                Pixel pixelRight = chunk.getPixelRightNeighbor(i);
+                if (pixelRight == null)
+                    return;
+                Material pixelRightMaterial = pixelRight.material();
+                boolean canMoveRight = pixelRightMaterial.density < selfMaterial.density && pixelRight.canBeReplaced();
+                if (canMoveLeft || canMoveRight) {
+                    if (canMoveLeft && (!canMoveRight || chunk.subworld.random.nextBoolean())) {
+                        chunk.setPixel(i, pixelLeftMaterial, pixelLeft.color());
+                        pixelLeft.chunk.setPixel(pixelLeft.i, selfMaterial, selfColor);
+                    } else {
+                        chunk.setPixel(i, pixelRightMaterial, pixelRight.color());
+                        pixelRight.chunk.setPixel(pixelRight.i, selfMaterial, selfColor);
+                    }
+                }
+            }
+        }
     }
 }
