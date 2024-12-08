@@ -175,6 +175,8 @@ public class Subworld extends GameObject {
 
     public void updateChunksForUser(int centerX, int centerY, int width, int height) {
         ArrayList<VectorI> toDeactivate = new ArrayList<>();
+        height = max(height, 2);
+        width = max(width, 2);
         for (var active : activeChunks.entrySet()) {
             if (active.getKey().x < centerX - width ||
                 active.getKey().x > centerX + width ||
@@ -264,9 +266,9 @@ public class Subworld extends GameObject {
             float x = x1 + xStep * i;
             float y = y1 + yStep * i;
             Pixel pixel = getPixel(x, y);
-            Material material = pixel.material();
             if (pixel.chunk == null)
                 break;
+            Material material = pixel.material();
             if (material.density >= minDensity)
                 return pixel;
         }
@@ -312,5 +314,26 @@ public class Subworld extends GameObject {
 
     public void removeEntity(Entity entity) {
         entitiesToRemove.add(entity);
+    }
+
+    public void jetPixels(int x, int y, int size) {
+        size += 2;
+        for (int dx = -size/2; dx <= size/2; dx++) {
+            for (int dy = size/2; dy > -size/2; dy--) {
+                Pixel pixel = getPixel(
+                        x + dx, y + dy);
+                Material material = pixel.material();
+                if (!(material instanceof MaterialAir) ) {
+                    double angle = random.nextDouble(-Math.PI / 3, Math.PI / 3);
+                    entities.add(new PixelEntity(
+                            x + dx, y + dy,
+                            this, material, pixel.color(),
+                            (float)Math.sin(angle) * 100.f, (float)Math.cos(angle) * 100.f,
+                            0, -9.8f
+                    ));
+                    pixel.chunk.setPixel(pixel.i, Content.airMaterial, (byte) 0);
+                }
+            }
+        }
     }
 }

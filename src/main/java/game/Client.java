@@ -135,7 +135,7 @@ public class Client extends GameApp {
             }
             lastCycleStartTime = cycleStartTime;
 
-            if (counter % 32 == 0) {
+            if (counter % 16 == 0) {
                 updateChunks();
             }
 //            System.out.println(dt);
@@ -239,23 +239,7 @@ public class Client extends GameApp {
         double[] x = new double[1];
         double[] y = new double[1];
         glfwGetCursorPos(window, x, y);
-        for (int dx = -paintingSize/2; dx <= paintingSize/2; dx++) {
-            for (int dy = paintingSize/2; dy > -paintingSize/2; dy--) {
-                Pixel pixel = activeSubworld.getPixel(
-                        screenXToWorld((int) x[0]) + dx, screenYToWorld((int) y[0]) + dy);
-                Material material = pixel.chunk.materials[pixel.i];
-                if (!(material instanceof MaterialAir) ) {
-                    pixel.chunk.setPixel(pixel.i, activeWorld.pixelIds[0], (byte)0);
-                    double angle = activeSubworld.random.nextDouble(-Math.PI / 3, Math.PI / 3);
-                    activeSubworld.entities.add(new PixelEntity(
-                            screenXToWorld((int) x[0]) + dx, screenYToWorld((int) y[0]) + dy,
-                            activeSubworld, material, pixel.chunk.colors[pixel.i],
-                            (float)Math.sin(angle) * 100.f, (float)Math.cos(angle) * 100.f,
-                            0, -9.8f
-                    ));
-                }
-            }
-        }
+        activeSubworld.jetPixels(screenXToWorld((int) x[0]), screenYToWorld((int) y[0]), paintingSize);
     }
 
 

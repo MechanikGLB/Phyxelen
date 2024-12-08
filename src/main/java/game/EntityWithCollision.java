@@ -67,6 +67,9 @@ public class EntityWithCollision extends Entity {
                 Math.round(y - collisionBoxHeight/2 + dy) + 2
         );
 
+        if (footPixel.chunk == null)
+            return;
+
         if (aboveFootPixel.material().density >= 2)
             dx = 0;
         else if (footPixel.material().density >= 2) {
