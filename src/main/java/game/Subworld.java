@@ -216,7 +216,7 @@ public class Subworld extends GameObject {
 
 
     public Pixel getPixel(int x, int y) {
-        return new Pixel(
+        return Pixel.get(
                 getChunkHavingPixel(x, y),
                 Chunk.toRelative(x) + Chunk.toRelative(y) * Chunk.size()
         );

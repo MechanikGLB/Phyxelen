@@ -450,26 +450,24 @@ public class Client extends GameApp {
             float width = (x2 - x1) * viewScale;
             float height = (y2 - y1) * viewScale;
             glVertex2f(startX, startY);
-                glTexCoord2f(0f,0f);
+            glTexCoord2f(0f,0f);
             glVertex2f(startX + width, startY);
-                glTexCoord2f(1f,0f);
+            glTexCoord2f(1f,0f);
             glVertex2f(startX + width, startY + height);
-                glTexCoord2f(1f,1f);
+            glTexCoord2f(1f,1f);
             glVertex2f(startX, startY + height);
-                glTexCoord2f(0f,1f);
+            glTexCoord2f(0f,1f);
         }
 
         public void drawRectAtAbsCoordinates(float centerX, float centerY, float w, float h,
-                                             float angle, float rotationX, float rotationY, int texture) {
+                                             float angle, float rotationX, float rotationY, int texture,
+                                             float uv0, float uv1, float uv2, float uv3
+        ) {
             w *= viewScale; h *= viewScale;
             centerX *= viewScale; centerY *= viewScale;
             glLoadIdentity();
             float x = worldXToScreen(centerX - rotationX);
             float y = worldYToScreen(centerY - rotationY);
-//            rotationX = worldXToScreen(rotationX);
-//            rotationY = worldYToScreen(rotationY);
-//            float startX = (x1 - client.cameraPos.x) * relativePixelWidth;
-//            float startY = (y1 - client.cameraPos.y) * relativePixelHeight;
 
             glTranslatef(worldXToScreen(rotationX), worldYToScreen(rotationY), 0f);
             glRotatef(angle * 180f / (float)Math.PI,0, 0, 1);
@@ -479,19 +477,23 @@ public class Client extends GameApp {
                 glBindTexture(GL_TEXTURE_2D, texture);
             }
             glBegin(GL_QUADS);
+            glTexCoord2f(uv2, uv0);
             glVertex2f(centerX - w/2, centerY + h/2);
-                glTexCoord2f(0f,0f);
+            glTexCoord2f(uv3, uv0);
             glVertex2f(centerX + w/2, centerY + h/2);
-                glTexCoord2f(1f,0f);
+            glTexCoord2f(uv3, uv1);
             glVertex2f(centerX + w/2, centerY - h/2);
-                glTexCoord2f(1f,1f);
+            glTexCoord2f(uv2, uv1);
             glVertex2f(centerX - w/2, centerY - h/2);
-                glTexCoord2f(0f,1f);
             glEnd();
             if (texture > 0)
                 glDisable(GL_TEXTURE_2D);
             glLoadIdentity();
+        }
 
+        public void drawRectAtAbsCoordinates(float centerX, float centerY, float w, float h,
+                                             float angle, float rotationX, float rotationY, int texture) {
+            drawRectAtAbsCoordinates(centerX, centerY, w, h, angle, rotationX, rotationY, texture, 0, 1, 0, 1);
         }
 
 

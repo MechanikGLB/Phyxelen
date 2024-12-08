@@ -6,6 +6,7 @@ import game.spells.Sand;
 
 import java.util.ArrayList;
 
+import static java.lang.Math.PI;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL21.*;
 
@@ -15,10 +16,19 @@ public class Player extends Character {
     boolean levitating = false;
     float levitationTime = 0f;
     float maxLevitationTime = 2f;
+    byte animation = 0;
+    static byte ANIMATION_IDLE = 0;
+    static byte ANIMATION_WALK = 1;
+    static byte ANIMATION_JUMP = 2;
+    static byte ANIMATION_FALL = 3;
+    private byte animationFrame = 0;
+    private float animationTime = 0;
 
     public Player(float x, float y, Subworld subworld) {
         super(x, y, subworld);
-        /*TEMP*/
+        collisionBoxWidth = 4;
+        collisionBoxHeight = 8;
+
         var wand = new Wand(this);
         wand.setTexture("wand_1.png");
         wand.spells.add(new Bullet());
@@ -62,6 +72,22 @@ public class Player extends Character {
                     levitationTime -= dt;
             }
 
+            if (inAir) {
+                if (levitating && levitationTime < maxLevitationTime)
+                    animation = ANIMATION_JUMP;
+                else if (vy < -40)
+                    animation = ANIMATION_FALL;
+            } else {
+                if (true)
+                    animation = ANIMATION_WALK;
+                else
+                    animation = ANIMATION_IDLE;
+            }
+        }
+        animationTime += dt;
+        if (animationTime >= 0.6) {
+            animationTime = 0;
+            animationFrame = (byte)((animationFrame + 1) % 2);
         }
 //        System.out.println(getLookDirection());
         if (holdedItem != null)
@@ -91,7 +117,14 @@ public class Player extends Character {
                 glEnd();
             }
         }
+        glColor3f(1f, 1f, 1f);
+        client.renderer.drawRectAtAbsCoordinates(
+                0, 0, 10 * ((getLookDirection() > PI / 2 || getLookDirection() < -PI / 2) ? -1 : 1), 10,
+                0, x, y,
+                Content.getImage("player.png").getTextureBuffer(),
+                0, 1, (animation * 2 + animationFrame) * 10/80f, (animation * 2 + 1 + animationFrame) * 10/80f);
+
         if (holdedItem != null)
             holdedItem.draw(fdt);
-        }
+    }
 }
