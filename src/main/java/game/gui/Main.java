@@ -38,7 +38,7 @@ public class Main {
             else
                 drawRect(10+100*i, 10, 90+100*i, 90, 100, 155, 100, 255);
             drawRect(16+100*i, 16, 84+100*i, 84, 80, 100, 80, 255);
-            drawRectTextured(10+100*i, 50-20, 80+100*i, 50+20, 255, 255, 255, 255, inventory.get(i).getImage().getTextureBuffer());
+            drawRectTextured(28+100*i, 10, 72+100*i, 80, 255, 255, 255, 255, inventory.get(i).getImage().getTextureBuffer());
         }
         if (player.getHoldedItem() instanceof Wand) {
             var wand = (Wand) player.getHoldedItem();

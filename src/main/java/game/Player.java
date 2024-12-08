@@ -23,6 +23,7 @@ public class Player extends Character {
     static byte ANIMATION_FALL = 3;
     private byte animationFrame = 0;
     private float animationTime = 0;
+    boolean walking = false; /// For animation only
 
     public Player(float x, float y, Subworld subworld) {
         super(x, y, subworld);
@@ -78,7 +79,7 @@ public class Player extends Character {
                 else if (vy < -40)
                     animation = ANIMATION_FALL;
             } else {
-                if (true)
+                if (walking)
                     animation = ANIMATION_WALK;
                 else
                     animation = ANIMATION_IDLE;
@@ -123,8 +124,15 @@ public class Player extends Character {
                 0, x, y,
                 Content.getImage("player.png").getTextureBuffer(),
                 0, 1, (animation * 2 + animationFrame) * 10/80f, (animation * 2 + 1 + animationFrame) * 10/80f);
-
+        if (walking)
+            walking = false;
         if (holdedItem != null)
             holdedItem.draw(fdt);
+    }
+
+    @Override
+    void go(float dx, float dy) {
+        walking = dx != 0;
+        super.go(dx, dy);
     }
 }
