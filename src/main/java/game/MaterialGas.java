@@ -2,6 +2,16 @@ package game;
 
 public class MaterialGas extends Material {
     void solvePhysic(Chunk chunk, int i) {
+        Material selfMaterial = chunk.materials[i];
+        byte selfColor = chunk.colors[i];
+        Pixel pixelAbove = chunk.getPixelTopNeighborChecked(i);
+        if (pixelAbove == null)
+            return;
+        Material pixelAboveMaterial = pixelAbove.material();
+        if (pixelAboveMaterial.density > selfMaterial.density && !(pixelAboveMaterial instanceof MaterialSolid)) {
+            chunk.setPixel(i, pixelAboveMaterial, pixelAbove.color());
+            pixelAbove.chunk.setPixel(pixelAbove.i, selfMaterial, selfColor);
+        }
 //        game.Pixel pixelAbove = sw.getPixel(pixel.x, pixel.y + 1);
 //        if (pixelAbove == null)
 //            return;

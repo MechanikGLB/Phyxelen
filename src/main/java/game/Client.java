@@ -354,6 +354,16 @@ public class Client extends GameApp {
             }
         }, null, null));
         input.getKeyboardHandler().bindKey(GLFW_KEY_E, "SwitchEditorMode");
+
+        input.addInputAction("PhysicCounterDown", new InputAction(o -> {
+            activeSubworld.pixelPhysicFreezingCountdown -= 1;
+        }, null, null));
+        input.getKeyboardHandler().bindKey(GLFW_KEY_PERIOD, "PhysicCounterDown");
+
+        input.addInputAction("PhysicCounterUp", new InputAction(o -> {
+            activeSubworld.pixelPhysicFreezingCountdown += 1;
+        }, null, null));
+        input.getKeyboardHandler().bindKey(GLFW_KEY_COMMA, "PhysicCounterUp");
     }
 
 

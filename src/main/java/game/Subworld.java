@@ -14,8 +14,9 @@ public class Subworld extends GameObject {
     WorldGenerator generator;
     Random random = new Random();
     byte counter = 0;
-    float pixelPhysicCounter;
-    boolean pixelPhysicPhase = false;
+    float pixelPhysicCounter; /// Counter for pixel update rate
+    boolean pixelPhysicPhase = false; // Maybe temporary
+    byte pixelPhysicFreezingCountdown = -1; /// -1 -- do not stop, 0 -- stop, n -- stop after "n" steps
     ConcurrentHashMap<VectorI, Chunk> activeChunks = new ConcurrentHashMap<>();
     TreeSet<Chunk> activeChunkTree = new TreeSet<>((chunk, t1) -> {
         if (chunk.yIndex != t1.yIndex)
@@ -54,15 +55,22 @@ public class Subworld extends GameObject {
 //            }
 
         pixelPhysicCounter += dt;
-        if (pixelPhysicCounter >= 0.05) {
-            for (var chunk : activeChunks.values())
-                chunk.pixelSolved.clear();
-            for (var chunk : activeChunkTree)
-                chunk.tick();
+        if (pixelPhysicCounter >= 0.03) {
+            if (pixelPhysicFreezingCountdown != 0) {
+                for (var chunk : activeChunks.values())
+                    chunk.pixelSolved.clear();
+                Pixel.rewindPool();
+                for (var chunk : activeChunkTree)
+                    if (!chunk.solved)
+                        chunk.tick();
 
-            pixelPhysicCounter = 0;
-            pixelPhysicPhase = !pixelPhysicPhase;
+                pixelPhysicCounter = 0;
+                pixelPhysicPhase = !pixelPhysicPhase;
+            }
+            if (pixelPhysicFreezingCountdown > 0)
+                pixelPhysicFreezingCountdown -= 1;
         }
+
         for (Entity entity : entities)
             entity.update(dt);
 
