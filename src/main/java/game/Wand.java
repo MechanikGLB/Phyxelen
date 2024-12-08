@@ -18,10 +18,10 @@ public class Wand extends HoldableItem {
     }
 
     public float getCastX() {
-        return holder.x + (float) Math.cos(holder.getLookDirection()) * 6;
+        return holder.x + (float) Math.cos(holder.getLookDirection()) * 8;
     }
     public float getCastY() {
-        return holder.y + (float) Math.sin(holder.getLookDirection()) * 4;
+        return holder.y + (float) Math.sin(holder.getLookDirection()) * 8;
     }
 
     public ArrayList<Spell> getSpells() { return spells; }

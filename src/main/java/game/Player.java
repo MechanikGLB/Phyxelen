@@ -42,16 +42,12 @@ public class Player extends Character {
             // Pointing
             client.cameraPos.x = x;
             client.cameraPos.y = y;
-//            DoubleBuffer cursorPosition = DoubleBuffer.allocate(2);
             double[] x = new double[1];
             double[] y = new double[1];
-//            glfwGetCursorPos(client.window, cursorPosition, cursorPosition);
             glfwGetCursorPos(client.window, x, y);
-            x[0] /= client.renderer.screenWidth;
-            y[0] /= client.renderer.screenHeight;
             setLookDirection(-(float) Math.atan2(
-                    y[0] * 2 - 1,
-                    x[0] * 2 - 1
+                    y[0] - client.renderer.screenHeight / 2d,
+                    x[0] - client.renderer.screenWidth / 2d
             ));
             // Levitation
             if (levitating) {
