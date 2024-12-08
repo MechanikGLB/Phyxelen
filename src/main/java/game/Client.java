@@ -483,7 +483,7 @@ public class Client extends GameApp {
             glVertex2f(centerX + w/2, centerY + h/2);
             glTexCoord2f(uv3, uv1);
             glVertex2f(centerX + w/2, centerY - h/2);
-            glTexCoord2f(uv2, uv1);
+            glTexCoord2f(uv2,  uv1);
             glVertex2f(centerX - w/2, centerY - h/2);
             glEnd();
             if (texture > 0)

@@ -6,7 +6,6 @@ import java.io.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static java.lang.Math.*;
-import static org.lwjgl.opengl.GL21.*;
 
 class HorizontalChunkTree extends TreeSet<Chunk> {
 //    private final Comparator<Chunk> comparator = (o1, o2) -> o2.xIndex - o1.xIndex;
@@ -257,7 +256,7 @@ public class Subworld extends GameObject {
 //    Pixel vectorCast(float x, float y, float dx, float dy)
 
 
-    Pixel rayCast(float x1, float y1, float x2, float y2) {
+    Pixel rayCast(float x1, float y1, float x2, float y2, float minDensity) {
         int stepCount = round(max(abs(x2-x1), abs(y2-y1)));
         float xStep = (x2-x1)/stepCount;
         float yStep = (y2-y1)/stepCount;
@@ -265,9 +264,10 @@ public class Subworld extends GameObject {
             float x = x1 + xStep * i;
             float y = y1 + yStep * i;
             Pixel pixel = getPixel(x, y);
+            Material material = pixel.material();
             if (pixel.chunk == null)
                 break;
-            if (!pixel.isAir())
+            if (material.density >= minDensity)
                 return pixel;
         }
         return null;
