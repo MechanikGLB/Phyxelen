@@ -40,8 +40,7 @@ public class UDPClient implements Runnable {
     public void run(){
         try {
             queue.add(new Hello());
-            Message message = queue.take();
-            sendToServer(message.buildMessage());
+            sendToServer();
             //TODO:Server response check
             if(serverActive) {
                 Thread ReceiveHandler = new Thread(this::receiver);
@@ -58,8 +57,10 @@ public class UDPClient implements Runnable {
             e.getStackTrace();
         }
     }
-    //TODO:Upgrade to send(type,data) with metadata
-    protected void sendToServer(byte[] dataToSend) {
+
+    protected void sendToServer() throws InterruptedException {
+        Message message = queue.take();
+        byte[] dataToSend = message.buildMessage();
         DatagramPacket packetToServer = new DatagramPacket(dataToSend, dataToSend.length,
                 address, port);
 
@@ -95,8 +96,7 @@ public class UDPClient implements Runnable {
     public void sender(){
         try {
             while (!socket.isClosed()) {
-                Message message = queue.take();
-                sendToServer(message.buildMessage());
+                sendToServer();
             }
         }
         catch (Exception e)
@@ -106,10 +106,11 @@ public class UDPClient implements Runnable {
     }
 
     public void responseReceive() throws IOException {
-        DatagramPacket packetFromServer = new DatagramPacket(buffer, buffer.length);
-        socket.receive(packetFromServer);
-        System.out.println(new String(packetFromServer.getData()));//may be chaotic
-        Messages.process(ByteBuffer.wrap(packetFromServer.getData()));
+//        DatagramPacket packetFromServer = new DatagramPacket(buffer, buffer.length);
+//        socket.receive(packetFromServer);
+//        System.out.println(new String(packetFromServer.getData()));//may be chaotic
+//        Messages.process(ByteBuffer.wrap(packetFromServer.getData()));
+        //TODO:Correct receiving
     }
 
     public void shutdown() {

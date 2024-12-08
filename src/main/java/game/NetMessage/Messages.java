@@ -18,4 +18,9 @@ public class Messages {
     public static void process(ByteBuffer message) {
         messages.get(message.get(0)).processMessage(message.slice(1, message.capacity()));
     }
+
+    public static Message getType(ByteBuffer message) {
+        return messages.get(message.get(0));
+    }
+
 }

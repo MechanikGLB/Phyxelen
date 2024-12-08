@@ -25,10 +25,15 @@ public class Hello extends Message {
     @Override
     public void processMessage(ByteBuffer message) {
         GameApp.GameState state = Main.getGame().getGameState();
+        //if handshake with server successful
         if(state == GameApp.GameState.Client){
             Main.getClient().setServerActive(true);
         }
+        //if Client want to handshake
         else if(state == GameApp.GameState.Server){
+//            Main.getServer().
+            //TODO:Server response
         }
+
     }
 }
