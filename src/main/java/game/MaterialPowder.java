@@ -8,7 +8,7 @@ public class MaterialPowder extends Material {
         if (pixelUnder == null)
             return;
         Material pixelUnderMaterial = pixelUnder.material();
-        if (pixelUnderMaterial.density < selfMaterial.density) {
+        if (pixelUnderMaterial.density < selfMaterial.density && pixelUnder.canBeReplaced()) {
             chunk.setPixel(i, pixelUnderMaterial, pixelUnder.color());
             pixelUnder.chunk.setPixel(pixelUnder.i, selfMaterial, selfColor);
         } else {
@@ -16,12 +16,12 @@ public class MaterialPowder extends Material {
             if (pixelUnderLeft == null)
                 return;
             Material pixelUnderLeftMaterial = pixelUnderLeft.material();
-            boolean canMoveLeft = pixelUnderLeftMaterial.density < selfMaterial.density;
+            boolean canMoveLeft = pixelUnderLeftMaterial.density < selfMaterial.density && pixelUnderLeft.canBeReplaced();
             Pixel pixelUnderRight = chunk.getPixelBottomRightNeighbor(i);
             if (pixelUnderRight == null)
                 return;
             Material pixelUnderRightMaterial = pixelUnderRight.material();
-            boolean canMoveRight = pixelUnderRightMaterial.density < selfMaterial.density;
+            boolean canMoveRight = pixelUnderRightMaterial.density < selfMaterial.density && pixelUnderRight.canBeReplaced();
             if (canMoveLeft || canMoveRight) {
                 if (canMoveLeft && (!canMoveRight || chunk.subworld.random.nextBoolean())) {
                     chunk.setPixel(i, pixelUnderLeftMaterial, pixelUnderLeft.color());

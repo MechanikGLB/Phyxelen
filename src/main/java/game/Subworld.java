@@ -10,6 +10,54 @@ import java.util.concurrent.ConcurrentHashMap;
 import static java.lang.Math.*;
 import static org.lwjgl.opengl.GL21.*;
 
+class HorizontalChunkTree extends TreeSet<Chunk> {
+//    private final Comparator<Chunk> comparator = (o1, o2) -> o2.xIndex - o1.xIndex;
+
+    public HorizontalChunkTree() {
+        super((o1, o2) -> o2.xIndex - o1.xIndex);
+    }
+}
+
+class ChunkTree extends TreeSet<HorizontalChunkTree> {
+    public ChunkTree() {
+        super((o1, o2) -> o1.first().yIndex - o2.first().yIndex);
+    }
+
+    public boolean add(Chunk chunk) {
+        HorizontalChunkTree subtree = null;
+
+        for (var chunks : this)
+            if (chunks.first().yIndex == chunk.yIndex) {
+                subtree = chunks;
+                break;
+            }
+        if (subtree != null)
+            return subtree.add(chunk);
+        else {
+            var newSubtree = new HorizontalChunkTree();
+            newSubtree.add(chunk);
+            return add(newSubtree);
+        }
+    }
+
+    public boolean remove(Chunk chunk) {
+        HorizontalChunkTree subtree = null;
+
+        for (var chunks : this)
+            if (chunks.first().yIndex == chunk.yIndex) {
+                subtree = chunks;
+                break;
+            }
+        if (subtree != null) {
+            if (subtree.size() == 1)
+                remove(subtree);
+            return subtree.remove(chunk);
+        } else
+            return false;
+    }
+}
+
+
 public class Subworld extends GameObject {
     World world = null;
     SubworldRenderer renderer;
@@ -17,14 +65,17 @@ public class Subworld extends GameObject {
     Random random = new Random();
     int seed = random.nextInt();
     byte counter = 0;
-    float pixelPhysicCounter;
-    boolean pixelPhysicPhase = false;
+    float pixelPhysicCounter; /// Counter for pixel update rate
+    byte pixelPhysicPhase = 0; // Maybe temporary
+    byte pixelPhysicFreezingCountdown = -1; /// -1 -- do not stop, 0 -- stop, n -- stop after "n" steps
     ConcurrentHashMap<VectorI, Chunk> activeChunks = new ConcurrentHashMap<>();
-    TreeSet<Chunk> activeChunkTree = new TreeSet<>((chunk, t1) -> {
-        if (chunk.yIndex != t1.yIndex)
-            return chunk.yIndex - t1.yIndex;
-        return chunk.xIndex - t1.xIndex;
-    });
+    ChunkTree activeChunkTree = new ChunkTree();
+//    TreeSet<Chunk> activeChunkTree = new TreeSet<>((chunk, t1) -> {
+//        if (chunk.yIndex != t1.yIndex)
+//            return chunk.yIndex - t1.yIndex;
+//        return chunk.xIndex - t1.xIndex;
+//    });
+
 //    ArrayList<game.Chunk> activeChunkArray = new ArrayList<>();
     Hashtable<VectorI, Chunk> passiveChunks = new Hashtable<>();
     ArrayList<Entity> entities = new ArrayList<>();
@@ -57,15 +108,30 @@ public class Subworld extends GameObject {
 //            }
 
         pixelPhysicCounter += dt;
-        if (pixelPhysicCounter >= 0.05) {
-            for (var chunk : activeChunks.values())
-                chunk.pixelSolved.clear();
-            for (var chunk : activeChunkTree)
-                chunk.tick();
+        if (pixelPhysicCounter >= 0.03) {
+            if (pixelPhysicFreezingCountdown != 0) {
+                for (var chunk : activeChunks.values())
+                    chunk.pixelSolved.clear();
+                Pixel.rewindPool();
+                for (var chunkTree : activeChunkTree)
+                    if (pixelPhysicPhase / 8 % 2 == 0) {
+                        for (var chunk : chunkTree)
+                            if (!chunk.solved)
+                                chunk.tick();
+                    } else {
+                        chunkTree.descendingIterator().forEachRemaining((chunk) -> {
+                            if (!chunk.solved)
+                                chunk.tick();
+                        });
+                    }
 
-            pixelPhysicCounter = 0;
-            pixelPhysicPhase = !pixelPhysicPhase;
+                pixelPhysicCounter = 0;
+                pixelPhysicPhase += 1;
+            }
+            if (pixelPhysicFreezingCountdown > 0)
+                pixelPhysicFreezingCountdown -= 1;
         }
+
         for (Entity entity : entities)
             entity.update(dt);
 
@@ -156,7 +222,7 @@ public class Subworld extends GameObject {
 
 
     public Pixel getPixel(int x, int y) {
-        return new Pixel(
+        return Pixel.get(
                 getChunkHavingPixel(x, y),
                 Chunk.toRelative(x) + Chunk.toRelative(y) * Chunk.size()
         );

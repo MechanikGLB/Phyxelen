@@ -22,7 +22,7 @@ public class EntityWithCollision extends Entity {
     @Override
     void update(float dt) {
         if (gravity != 0) {
-            vy += gravity;
+            vy += gravity * dt * 30;
             var leftPixel = subworld.getPixel(
                     Math.round(x-collisionBoxWidth/2), Math.round(y-collisionBoxHeight/2)-1);
             var middlePixel = subworld.getPixel(
@@ -44,16 +44,7 @@ public class EntityWithCollision extends Entity {
     }
 
     @Override
-    void draw(float fdt) {
-        // TEMP
-        glColor3f(0.4f, 0.2f, 0f);
-        glBegin(GL_QUADS);
-        ((Client)Main.getGame()).renderer.drawRectAtAbsCoordinates(
-                x - collisionBoxWidth/2, y - collisionBoxHeight/2,
-                x + collisionBoxWidth/2, y + collisionBoxHeight/2
-        );
-        glEnd();
-    }
+    void draw(float fdt) {}
 
 
     @Override
