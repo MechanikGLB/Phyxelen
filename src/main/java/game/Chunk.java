@@ -85,7 +85,7 @@ public class Chunk {
 //        if (solved && (Main.getGame().counter + yIndex) % 8 != 0) return;
 //        solved = true;
 //            threads[i] = new Thread(() -> {
-        if (subworld.pixelPhysicPhase) {
+        if (subworld.pixelPhysicPhase % 2 == 0) {
             for (int i = 0; i < area; i += 1) {
                 if (pixelSolved.get(i))
                     continue;
