@@ -54,9 +54,7 @@ public class UDPServer implements Runnable {
 
     public void receiveMessage(DatagramPacket packetFromClient) {
         try {
-            socket.receive(packetFromClient);//blocks thread until received
-            DatagramPacket packetFromServer = new DatagramPacket(buffer, buffer.length);
-            Messages.process(ByteBuffer.wrap(packetFromServer.getData()));
+            Messages.process(ByteBuffer.wrap(packetFromClient.getData()));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -67,8 +65,11 @@ public class UDPServer implements Runnable {
             while (!socket.isClosed()) {
                 DatagramPacket packetFromClient = new DatagramPacket(buffer, buffer.length);
                 socket.receive(packetFromClient);
+                System.out.println(packetFromClient.getAddress().getHostAddress());
+                System.out.println(packetFromClient.getData()[0]);
                 ConnectedUser userToProcess = new ConnectedUser(socket, packetFromClient.getAddress(), packetFromClient.getPort());
-                if ((Messages.getType(ByteBuffer.wrap(packetFromClient.getData())).getClass().getName()) == "Hello"){
+                if (packetFromClient.getData()[0] == Hello.getId()){
+                    System.out.println("Client Connected");
                     if(!playersList.contains(userToProcess))
                     {
                         playersList.add(userToProcess);
@@ -135,6 +136,7 @@ class ConnectedUser {
         messagesQueue.add(new Hello());
         Thread sender = new Thread(this::sender);
         sender.start();
+        System.out.println("Client Handler started");
     }
 
     public void closeSession(Thread thread) {

@@ -11,7 +11,7 @@ import java.util.Arrays;
 
 public class Hello extends Message {
     static byte id = Messages.getNextMessageIndex();
-    static {Messages.addMessages(new FirstSync(null));}
+    static {Messages.addMessages(new Hello());}
     static InetAddress address;
     static int port;
 
