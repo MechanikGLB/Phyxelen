@@ -127,7 +127,7 @@ public class World {
         pixelIds = new Material[Content.materials.size() + 1];
         pixelIds[0] = new MaterialAir();
         pixelIds[0].colors = new ColorWithAplha[1];
-        pixelIds[0].colors[0] = new ColorWithAplha(0.2f, 0.1f, 0.0f, 1f);
+        pixelIds[0].colors[0] = new ColorWithAplha(0.5f, 0.7f, 0.8f, 0f);
         pixelIds[0].density = 0.01f;
         Content.airMaterial = pixelIds[0];
         int i = 1;

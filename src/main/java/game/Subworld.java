@@ -322,6 +322,8 @@ public class Subworld extends GameObject {
             for (int dy = size/2; dy > -size/2; dy--) {
                 Pixel pixel = getPixel(
                         x + dx, y + dy);
+                if (pixel.chunk == null)
+                    return;
                 Material material = pixel.material();
                 if (!(material instanceof MaterialAir) ) {
                     double angle = random.nextDouble(-Math.PI / 3, Math.PI / 3);

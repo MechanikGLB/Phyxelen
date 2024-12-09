@@ -29,7 +29,7 @@ public class EntityWithCollision extends Entity {
                     Math.round(x), Math.round(y-collisionBoxHeight/2)-1);
             var rightPixel = subworld.getPixel(
                     Math.round(x+collisionBoxWidth/2), Math.round(y-collisionBoxHeight/2)-1);
-            inAir = middlePixel.chunk != null
+            inAir = leftPixel.chunk != null && rightPixel.chunk != null
                     && leftPixel.material().density < 2 && rightPixel.material().density < 2 && middlePixel.material().density < 2;
             if (inAir) {
                 Pixel castResult = subworld.rayCast(x, y - collisionBoxHeight/2, x, y - collisionBoxHeight/2 + vy * dt, 2);
