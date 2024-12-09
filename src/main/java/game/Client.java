@@ -135,7 +135,7 @@ public class Client extends GameApp {
             }
             lastCycleStartTime = cycleStartTime;
 
-            if (counter % 16 == 0) {
+            if (counter % 8 == 0) {
                 updateChunks();
             }
 //            System.out.println(dt);
@@ -418,11 +418,10 @@ public class Client extends GameApp {
             glVertex2i(5 * 60, screenHeight - 3);
             glVertex2i(5 * 120, screenHeight - 3);
             glEnd();
-//            glDisable( GL_BLEND );
-            glBegin(GL_QUADS);
-            glColor4f(1,1,1,0.1f);
-            drawRectAtAbsCoordinates(0,0, Chunk.size(), Chunk.size());
-            glEnd();
+//            glBegin(GL_QUADS);
+//            glColor4f(1,1,1,0.1f);
+//            drawRectAtAbsCoordinates(0,0, Chunk.size(), Chunk.size());
+//            glEnd();
             gui.draw(renderer.screenWidth, renderer.screenHeight);
             glfwSwapBuffers(window);
         }
