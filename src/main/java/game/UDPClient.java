@@ -65,6 +65,7 @@ public class UDPClient implements Runnable {
     protected void sendToServer() throws InterruptedException {
         Message message = queue.take();
         byte[] dataToSend = message.buildMessage();
+        System.out.println("Sent to Server: " + dataToSend[0]);
         DatagramPacket packetToServer = new DatagramPacket(dataToSend, dataToSend.length,
                 address, port);
 
@@ -106,6 +107,7 @@ public class UDPClient implements Runnable {
     public void responseReceive() throws IOException {
         DatagramPacket packetFromServer = new DatagramPacket(buffer, buffer.length);
         socket.receive(packetFromServer);
+        System.out.println("Received from Server: " + packetFromServer.getData()[0]);
         Messages.process(ByteBuffer.wrap(packetFromServer.getData()));
     }
 

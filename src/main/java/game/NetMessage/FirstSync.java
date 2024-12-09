@@ -2,13 +2,14 @@ package game.NetMessage;
 
 import game.Client;
 import game.Main;
+import game.Material;
 
 import javax.lang.model.type.NullType;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
-public class FirstSync extends Message {
+public class FirstSync extends RequestableMessage {
 
     static byte id = Messages.getNextMessageIndex();
     static {Messages.addMessages(new FirstSync(null));}
@@ -39,6 +40,17 @@ public class FirstSync extends Message {
             message.put((byte) 0);
         }
         return message.array();
+    }
+
+    @Override
+    public Message getMessage() {
+        ArrayList<String> materials = new ArrayList<>();
+
+        var materialsByID = Main.getGame().getActiveWorld().getMaterialsById();
+        for (Material material : materialsByID) {
+            materials.add(material.getName());
+        }
+        return new FirstSync(materials);
     }
 
     @Override

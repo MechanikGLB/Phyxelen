@@ -1,14 +1,15 @@
 package game.NetMessage;
 
+import game.*;
+
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 public class Request extends Message {
     static byte id = Messages.getNextMessageIndex();
-    static {Messages.addMessages(new Request((byte)0,0));}
+    static {Messages.addMessages(new Request((byte)0,null));}
 
     byte requestedID; //ID of the requested message
-    int requestData = 0; // information with request to server(optional)
+    Connection target; // information with target(optional)
 
     public Request(byte requestedID) {
         this.requestedID = requestedID;
@@ -18,21 +19,30 @@ public class Request extends Message {
         return id;
     }
 
-    public Request(byte requestedID,int requestData) {
+    public Request(byte requestedID, Connection target) {
         this.requestedID = requestedID;
-        this.requestData = requestData;
+        this.target = target;
     }
 
     public byte[] buildMessage() {
-            ByteBuffer message = ByteBuffer.allocate(2+Integer.BYTES);
+            ByteBuffer message = ByteBuffer.allocate(2);
             message.put(id);
             message.put(requestedID);
-            message.putInt(requestData);
             return message.array();
         }
 
     @Override
     public void processMessage(ByteBuffer message) {
-
+        target = Main.getServer().getCurrentConnection();
+        Message prototype = Messages.messages.get(message.get());
+        GameApp.GameState state = Main.getGame().getGameState();
+        if (prototype instanceof RequestableMessage) {
+            if(state == GameApp.GameState.Server){
+                target.addMessage(((RequestableMessage) prototype).getMessage());
+            }
+            if(state == GameApp.GameState.Client){
+                Main.getClient().addMessage(prototype);
+            }
+        }
     }
 }

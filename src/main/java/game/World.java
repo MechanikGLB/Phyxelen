@@ -40,6 +40,10 @@ public class World {
         return pixelIds[id];
     }
 
+    public Material[] getMaterialsById() {
+        return pixelIds;
+    }
+
 
     public static World createWorld(String worldName, String gameName) {
         var gameConfig = Content.getGameConfig(gameName);

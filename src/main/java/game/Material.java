@@ -48,6 +48,11 @@ public abstract class Material {
         c2.colors[i2] = colorBuffer;
     }
 
+
+    public String getName() {
+        return name;
+    }
+
     void swapColors(Chunk c1, int i1, Chunk c2, int i2) {
         byte colorBuffer;
         colorBuffer = c1.colors[i1];
