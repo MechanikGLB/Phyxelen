@@ -66,9 +66,12 @@ public class Projectile extends Entity {
 
         for (EntityWithCollision entity : subworld.collidableEntities) {
             if (entity.intersectedByRay(x, y, newX, newY)) {
-                subworld.removeEntity(this);
-                onCollide.apply(this, entity);
-                return;
+                if (onCollide.apply(this, entity)) {
+                    subworld.removeEntity(this);
+                    for (var func : onHit)
+                        func.accept(this, entity);
+                    return;
+                }
             }
         }
 
