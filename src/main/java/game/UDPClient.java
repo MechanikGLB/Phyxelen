@@ -40,6 +40,7 @@ public class UDPClient implements Runnable {
     public void run(){
         try {
 
+            System.out.println("UDP Client started");
             queue.add(new Hello());//Execute handshake
             sendToServer();
             responseReceive();

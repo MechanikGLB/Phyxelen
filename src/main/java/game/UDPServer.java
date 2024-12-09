@@ -44,31 +44,13 @@ public class UDPServer implements Runnable {
 
     @Override
     public void run() {//main server cycle
-        System.out.printf("Server started on IP %s%n", socket.getLocalAddress().getHostAddress());
+        System.out.printf("Server started on local IP %s%n", socket.getLocalAddress().getHostAddress());
+//        System.out.printf("Server Name local IP %s%n", socket.getLocalAddress().getHostName());
+//        System.out.printf("Server started on IP %s%n", socket.getInetAddress().getHostAddress());
+//        System.out.printf("Server Name IP %s%n", socket.getInetAddress().getHostName());
         System.out.printf("Server started on port %d%n", socket.getLocalPort());
-        while (true) {
-            if (socket.isClosed())
-                return;
-            try {
-                Thread receiver = new Thread(this::receiver);
-                receiver.start();
-//                DatagramPacket packetFromClient = new DatagramPacket(buffer, buffer.length);
-//                //TODO:SessionManager
-//                receiveMessage(packetFromClient);
-//                //TODO: Server logic
-//                System.out.println("Server received: " + new String(packetFromClient.getData()));
-            }
-            catch (Exception e) {
-                if (socket.isClosed())
-                    return;
-                throw new RuntimeException(e);
-            }
-        }
+        receiver();
     }
-
-//    public void NetListener() throws IOException {
-//
-//    }
 
     public void receiveMessage(DatagramPacket packetFromClient) {
         try {
@@ -81,7 +63,6 @@ public class UDPServer implements Runnable {
     }
 
     public void receiver(){
-//        ArrayList<Thread> playersOnline = new ArrayList<>();
         try {
             while (!socket.isClosed()) {
                 DatagramPacket packetFromClient = new DatagramPacket(buffer, buffer.length);
