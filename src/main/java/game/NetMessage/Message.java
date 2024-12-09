@@ -1,5 +1,6 @@
 package game.NetMessage;
 
+import java.net.InetAddress;
 import java.nio.ByteBuffer;
 
 abstract public class Message {

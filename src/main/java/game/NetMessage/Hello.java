@@ -5,12 +5,15 @@ import game.GameApp;
 import game.Main;
 import game.UDPClient;
 
+import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 public class Hello extends Message {
     static byte id = Messages.getNextMessageIndex();
     static {Messages.addMessages(new FirstSync(null));}
+    static InetAddress address;
+    static int port;
 
     public static byte getId() {
         return id;
@@ -28,11 +31,6 @@ public class Hello extends Message {
         //if handshake with server successful
         if(state == GameApp.GameState.Client){
             Main.getClient().setServerActive(true);
-        }
-        //if Client want to handshake
-        else if(state == GameApp.GameState.Server){
-//            Main.getServer().
-            //TODO:Server response
         }
 
     }

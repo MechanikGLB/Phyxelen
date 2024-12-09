@@ -18,7 +18,7 @@ public class UDPClient implements Runnable {
     private final InetAddress address;
     private final int port;
     private final BlockingQueue<Message> queue = new LinkedBlockingQueue<>();//consumer-producer
-    private int maxPacketSize = 1024;
+    private final int maxPacketSize = 1024;
     private final byte[] buffer = new byte[maxPacketSize];
     private final int[] timeouts = {11, 29, 73, 277, 997};
     private boolean serverActive = false;
@@ -29,24 +29,27 @@ public class UDPClient implements Runnable {
         this.socket = new DatagramSocket();
     }
 
-    public UDPClient(String ip, int port, int maxPacketSize) throws IOException {
-        this.maxPacketSize = maxPacketSize;
-        this.address = InetAddress.getByName(ip);//Server addr
-        this.port = port;//Server port
-        this.socket = new DatagramSocket();
-    }
+//    public UDPClient(String ip, int port, int maxPacketSize) throws IOException {
+//        this.maxPacketSize = maxPacketSize;
+//        this.address = InetAddress.getByName(ip);//Server addr
+//        this.port = port;//Server port
+//        this.socket = new DatagramSocket();
+//    }
 
     @Override
     public void run(){
         try {
-            queue.add(new Hello());
+
+            queue.add(new Hello());//Execute handshake
             sendToServer();
-            //TODO:Server response check
+            responseReceive();
+
             if(serverActive) {
                 Thread ReceiveHandler = new Thread(this::receiver);
                 Thread SendHandler = new Thread(this::sender);
                 ReceiveHandler.start();
                 SendHandler.start();
+                queue.add(new Request(FirstSync.getId()));
             }
             else {
                 System.out.println("Server timed out");
@@ -83,48 +86,40 @@ public class UDPClient implements Runnable {
 
     public void receiver(){
         try {
-            while (!socket.isClosed()) {
+            while (!socket.isClosed())
                 responseReceive();
-            }
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
 
     public void sender(){
         try {
-            while (!socket.isClosed()) {
+            while (!socket.isClosed())
                 sendToServer();
-            }
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
 
     public void responseReceive() throws IOException {
-//        DatagramPacket packetFromServer = new DatagramPacket(buffer, buffer.length);
-//        socket.receive(packetFromServer);
-//        System.out.println(new String(packetFromServer.getData()));//may be chaotic
-//        Messages.process(ByteBuffer.wrap(packetFromServer.getData()));
-        //TODO:Correct receiving
+        DatagramPacket packetFromServer = new DatagramPacket(buffer, buffer.length);
+        socket.receive(packetFromServer);
+        Messages.process(ByteBuffer.wrap(packetFromServer.getData()));
     }
 
     public void shutdown() {
-        System.out.println("Client stopped");
         queue.add(new Quit());
         socket.close();
+        System.out.println("Client stopped");
         Thread.currentThread().interrupt();
     }
 
     public void setServerActive(boolean serverActive) {
         this.serverActive = serverActive;
     }
-    public boolean isServerActive() {
-        return serverActive;
-    }
+//    public boolean isServerActive() {
+//        return serverActive;
+//    }
 
 }

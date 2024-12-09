@@ -1,8 +1,10 @@
 package game;
 
+import game.NetMessage.Hello;
 import game.NetMessage.Message;
 import game.NetMessage.Messages;
 
+import javax.sound.midi.Receiver;
 import java.net.DatagramPacket;
 import java.io.IOException;
 import java.net.DatagramSocket;
@@ -20,9 +22,9 @@ public class UDPServer implements Runnable {
     private byte[] buffer = new byte[maxPacketSize];
 //    private byte[] reserveBuffer;
     private final DatagramSocket socket;
-    private InetAddress sessionAddress;
-    private int sessionPort;
-    private ArrayList<ConnectedUser> usersOnline = new ArrayList<ConnectedUser>();
+//    private InetAddress sessionAddress;
+//    private int sessionPort;
+    private ArrayList<ConnectedUser> playersList = new ArrayList<ConnectedUser>();
 
 
     public UDPServer(int maxPacketSize, int port)throws IOException {
@@ -48,12 +50,13 @@ public class UDPServer implements Runnable {
             if (socket.isClosed())
                 return;
             try {
-
-                DatagramPacket packetFromClient = new DatagramPacket(buffer, buffer.length);
-                //TODO:SessionManager
-                receiveMessage(packetFromClient);
-                //TODO: Server logic
-                System.out.println("Server received: " + new String(packetFromClient.getData()));
+                Thread receiver = new Thread(this::receiver);
+                receiver.start();
+//                DatagramPacket packetFromClient = new DatagramPacket(buffer, buffer.length);
+//                //TODO:SessionManager
+//                receiveMessage(packetFromClient);
+//                //TODO: Server logic
+//                System.out.println("Server received: " + new String(packetFromClient.getData()));
             }
             catch (Exception e) {
                 if (socket.isClosed())
@@ -63,46 +66,47 @@ public class UDPServer implements Runnable {
         }
     }
 
-    public void NetListener() throws IOException {
-
-    }
+//    public void NetListener() throws IOException {
+//
+//    }
 
     public void receiveMessage(DatagramPacket packetFromClient) {
         try {
             socket.receive(packetFromClient);//blocks thread until received
-            int packetLength = packetFromClient.getLength();
-            System.out.println(new String(packetFromClient.getData()));
-            //TODO: Rework logic
+            DatagramPacket packetFromServer = new DatagramPacket(buffer, buffer.length);
+            Messages.process(ByteBuffer.wrap(packetFromServer.getData()));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void clientHandler(){
+    public void receiver(){
+//        ArrayList<Thread> playersOnline = new ArrayList<>();
         try {
             while (!socket.isClosed()) {
                 DatagramPacket packetFromClient = new DatagramPacket(buffer, buffer.length);
                 socket.receive(packetFromClient);
+                ConnectedUser userToProcess = new ConnectedUser(socket, packetFromClient.getAddress(), packetFromClient.getPort());
                 if ((Messages.getType(ByteBuffer.wrap(packetFromClient.getData())).getClass().getName()) == "Hello"){
-                    Thread clientSession = new Thread(this::SessionHandler);
-                    //TODO: Check existence of player
+                    if(!playersList.contains(userToProcess))
+                    {
+                        playersList.add(userToProcess);
+                        playersList.getLast().startSession();
+                    }
                 }
+                receiveMessage(packetFromClient);
             }
         }
         catch (Exception e) {}
     }
 
-    public void SessionHandler(){
-        //TODO:SessionHandler
-    }
-
-    public void sendToClient(Message message, InetAddress clientAddr, int clientPort) throws IOException {
-        byte[] dataToSend = message.buildMessage();
-        DatagramPacket packetToClient = new DatagramPacket(dataToSend, dataToSend.length,
-                clientAddr, clientPort);
-
-                socket.send(packetToClient);
-        }
+//    public void sendToClient(Message message, InetAddress clientAddr, int clientPort) throws IOException {
+//        byte[] dataToSend = message.buildMessage();
+//        DatagramPacket packetToClient = new DatagramPacket(dataToSend, dataToSend.length,
+//                clientAddr, clientPort);
+//
+//                socket.send(packetToClient);
+//        }
 //        byte[] dataBuffer = message.getBytes(); //NOW WE ARE TRUST THAT MESSAGE NOT BIGGER THAN PACKET
 //        DatagramPacket packet = new DatagramPacket(dataBuffer, dataBuffer.length, clientAddr, clientPort);
 //        socket.send(packet); //large packets separates automatically
@@ -113,6 +117,10 @@ public class UDPServer implements Runnable {
         return socket.getLocalPort();
     }
 
+    public boolean isClosed() {
+        return socket.isClosed();
+    }
+
     public void shutdown() {
         System.out.println("Server stopped");
         socket.close();
@@ -121,11 +129,14 @@ public class UDPServer implements Runnable {
 }
 
 class ConnectedUser {
-    private InetAddress playerAddress;
-    private int playerPort;
-    private BlockingQueue<Message> messagesQueue = new LinkedBlockingQueue<>();
+    private final InetAddress playerAddress;
+    private final int playerPort;
+    private final BlockingQueue<Message> messagesQueue = new LinkedBlockingQueue<>();
+    private DatagramSocket socket;
+    private boolean connected = false;
 
-    public ConnectedUser(InetAddress playerAddress, int playerPort) {
+    public ConnectedUser(DatagramSocket socket, InetAddress playerAddress, int playerPort) {
+        this.socket = socket;
         this.playerAddress = playerAddress;
         this.playerPort = playerPort;
     }
@@ -138,11 +149,40 @@ class ConnectedUser {
         return playerPort;
     }
 
-    public Message takeMessage() throws InterruptedException {
-        return messagesQueue.take();
+    public void startSession() {
+        connected = true;
+        messagesQueue.add(new Hello());
+        Thread sender = new Thread(this::sender);
+        sender.start();
     }
+
+    public void closeSession(Thread thread) {
+        connected = false;
+    }
+
+    protected void sender(){
+        try {
+            while (!socket.isClosed() && connected)
+                sendToClient();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+//    public Message takeMessage() throws InterruptedException {
+//        return messagesQueue.take();
+//    }
     public void addMessage(Message message) {
         messagesQueue.add(message);
+    }
+
+    public void sendToClient() throws InterruptedException, IOException {
+        Message message = messagesQueue.take();
+        byte[] dataToSend = message.buildMessage();
+        DatagramPacket packetToClient = new DatagramPacket(dataToSend, dataToSend.length,
+                playerAddress, playerPort);
+
+        socket.send(packetToClient);
     }
 
 }
