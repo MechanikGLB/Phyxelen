@@ -246,10 +246,13 @@ public class Subworld extends GameObject {
 
 
     /// Fills area with pixels of `material` with `color`
-    public void fillPixels(int x, int y, int w, int h, Material material, byte color) {
+    public void fillPixels(int x, int y, int w, int h, Material material, byte color, float maxReplaceDensity) {
         for (int dx = 0; dx < w; dx++) {
             for (int dy = 0; dy < h; dy++) {
-                setPixel(x + dx, y + dy, material, color);
+                Pixel pixel = getPixel(x + dx, y + dy);
+                if (pixel.chunk == null || maxReplaceDensity >= 0 && pixel.material().density > maxReplaceDensity)
+                    continue;
+                pixel.chunk.setPixel(pixel.i, material, color);
             }
         }
     }
@@ -326,8 +329,8 @@ public class Subworld extends GameObject {
                     return;
                 Material material = pixel.material();
                 if (!(material instanceof MaterialAir) ) {
-                    double angle = random.nextDouble(-Math.PI / 3, Math.PI / 3);
-                    entities.add(new PixelEntity(
+                    double angle = random.nextDouble(-Math.PI, Math.PI);
+                    addEntity(new PixelEntity(
                             x + dx, y + dy,
                             this, material, pixel.color(),
                             (float)Math.sin(angle) * 100.f, (float)Math.cos(angle) * 100.f,

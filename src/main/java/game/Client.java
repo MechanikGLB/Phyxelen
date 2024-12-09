@@ -56,9 +56,9 @@ public class Client extends GameApp {
         gui.init();
         super.run();
         bindKeys();
-        /*TEMP*/
+
         primaryCharacter = new Player(0, 0, activeSubworld);
-        primaryCharacter.spawn();
+//        primaryCharacter.spawn();
         activeSubworld.addEntity(primaryCharacter);
 
         System.out.println("Loading textures");
