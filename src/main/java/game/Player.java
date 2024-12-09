@@ -16,6 +16,7 @@ public class Player extends Character {
     boolean levitating = false;
     float levitationTime = 0f;
     float maxLevitationTime = 2f;
+
     byte animation = 0;
     static byte ANIMATION_IDLE = 0;
     static byte ANIMATION_WALK = 1;
@@ -24,6 +25,9 @@ public class Player extends Character {
     private byte animationFrame = 0;
     private float animationTime = 0;
     boolean walking = false; /// For animation only
+
+    private final float respawnTime = 3f;
+    private float respawnTimer = respawnTime;
 
     public Player(float x, float y, Subworld subworld) {
         super(x, y, subworld);
@@ -93,11 +97,20 @@ public class Player extends Character {
 //        System.out.println(getLookDirection());
         if (holdedItem != null)
             holdedItem.update(dt);
+
+        if (health <= 0) {
+            respawnTimer -= dt;
+            if (respawnTimer <= 0) {
+                spawn();
+            }
+        }
     }
 
     @Override
     void draw(float fdt) {
         super.draw(fdt);
+        if (health <= 0)
+            return;
         if (client.controlledCharacter == this) {
             glColor3f(0.4f, 0.2f, 0.2f);
             glBegin(GL_QUADS);
@@ -134,5 +147,24 @@ public class Player extends Character {
     void go(float dx, float dy) {
         walking = dx != 0;
         super.go(dx, dy);
+    }
+
+    @Override
+    public void damage(int damage) {
+        super.damage(damage);
+        if (health <= 0)
+            die();
+    }
+
+    public void spawn() {
+        health = maxHealth;
+        x = subworld.random.nextInt(-200, 200);
+        y = 40;
+        client.controlledCharacter = this;
+    }
+
+    public void die() {
+        health = 0;
+        client.controlledCharacter = null;
     }
 }

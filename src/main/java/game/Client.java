@@ -32,12 +32,13 @@ public class Client extends GameApp {
     protected short viewScale = 8;
     /// Free camera movement speed in screen pixels per second
     protected short cameraSpeed = 150;
-    boolean freeCamera = true;
     Character controlledCharacter;
+    private Player primaryCharacter;
 
-    /*Temp?*/private Character primaryCharacter;
-    /*Temp?*/private int paintingPixel = 1;
-    /*Temp?*/private int paintingSize = 0;
+    // Editor
+    boolean editMode = false;
+    private int paintingPixel = 1;
+    private int paintingSize = 0;
 
     ArrayList<WindowResizeListener> windowResizeListeners = new ArrayList<>();
 
@@ -56,9 +57,9 @@ public class Client extends GameApp {
         super.run();
         bindKeys();
         /*TEMP*/
-        primaryCharacter = new Player(0, 10, activeSubworld);
-        activeSubworld.entities.add(primaryCharacter);
-        activeSubworld.collidableEntities.add(primaryCharacter);
+        primaryCharacter = new Player(0, 0, activeSubworld);
+        primaryCharacter.spawn();
+        activeSubworld.addEntity(primaryCharacter);
 
         System.out.println("Loading textures");
         try {
@@ -253,7 +254,7 @@ public class Client extends GameApp {
                 o -> {
                     if (controlledCharacter != null) {
                         controlledCharacter.go(0, 1);
-                    } else if (freeCamera)
+                    } else if (editMode)
                         cameraPos.y += cameraSpeed / viewScale * fdt;},
                 o -> {
                     if (controlledCharacter != null)
@@ -265,7 +266,7 @@ public class Client extends GameApp {
         input.addInputAction("MoveDown",new InputAction(null, o -> {
             if (controlledCharacter != null)
                 controlledCharacter.go(0, -1);
-            else if (freeCamera)
+            else if (editMode)
                 cameraPos.y -= cameraSpeed / viewScale * fdt;
         }, null));
         input.getKeyboardHandler().bindKey(GLFW_KEY_S, "MoveDown");
@@ -274,7 +275,7 @@ public class Client extends GameApp {
         input.addInputAction("MoveRight",new InputAction(null, o -> {
             if (controlledCharacter != null)
                 controlledCharacter.go(1, 0);
-            else if (freeCamera)
+            else if (editMode)
                 cameraPos.x += cameraSpeed / viewScale * fdt;
         }, null));
         input.getKeyboardHandler().bindKey(GLFW_KEY_D, "MoveRight");
@@ -283,7 +284,7 @@ public class Client extends GameApp {
         input.addInputAction("MoveLeft",new InputAction(null, o -> {
             if (controlledCharacter != null)
                 controlledCharacter.go(-1, 0);
-            else if (freeCamera)
+            else if (editMode)
                 cameraPos.x -= cameraSpeed / viewScale * fdt;
         }, null));
         input.getKeyboardHandler().bindKey(GLFW_KEY_A, "MoveLeft");
@@ -316,7 +317,7 @@ public class Client extends GameApp {
                         controlledCharacter.holdedItem.activate();
                 },
                 o -> {
-                    if (freeCamera)
+                    if (editMode)
                         setPixelAtCursorPosition(paintingPixel);
                 },
                 o -> {
@@ -331,10 +332,10 @@ public class Client extends GameApp {
         input.addInputAction("SwitchEditorMode", new InputAction(o -> {
             if (controlledCharacter == null) {
                 controlledCharacter = primaryCharacter;
-                freeCamera = false;
+                editMode = false;
             } else {
                 controlledCharacter = null;
-                freeCamera = true;
+                editMode = true;
             }
         }, null, null));
         input.getKeyboardHandler().bindKey(GLFW_KEY_E, "SwitchEditorMode");
