@@ -1,6 +1,5 @@
 package game;
 
-import game.NetMessage.FirstSync;
 import game.NetMessage.Hello;
 import game.NetMessage.Messages;
 
@@ -14,7 +13,7 @@ import java.util.ArrayList;
 public class UDPServer implements Runnable {
 
 
-    private int maxPacketSize = 1024;
+    private int maxPacketSize = 1060;
     private byte[] buffer = new byte[maxPacketSize];
 //    private byte[] reserveBuffer;
     private final DatagramSocket socket;
@@ -54,7 +53,7 @@ public class UDPServer implements Runnable {
 
     public void receiveMessage(DatagramPacket packetFromClient) {
         try {
-            Messages.process(ByteBuffer.wrap(packetFromClient.getData()));
+            Messages.processReceivedBinMessage(ByteBuffer.wrap(packetFromClient.getData()));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -65,8 +64,8 @@ public class UDPServer implements Runnable {
             while (!socket.isClosed()) {
                 DatagramPacket packetFromClient = new DatagramPacket(buffer, buffer.length);
                 socket.receive(packetFromClient);
-                System.out.println("Client addr: " + packetFromClient.getAddress().getHostAddress());
-                System.out.println("Client send message: " + packetFromClient.getData()[0]);
+                System.out.println("Received " + + packetFromClient.getData()[0] + " from "
+                        + packetFromClient.getAddress().getHostAddress());
                 Connection userToProcess = new Connection(socket, packetFromClient.getAddress(), packetFromClient.getPort());
                 if(playersList.contains(userToProcess)) {
                     currentConnection = userToProcess; //for messages work
@@ -78,7 +77,6 @@ public class UDPServer implements Runnable {
                         System.out.println("Client Connected");
                         playersList.add(userToProcess);
                         playersList.getLast().startSession();
-                        playersList.getLast().addMessage(FirstSync.makeMessage());
                     }
 
                 }
@@ -87,7 +85,9 @@ public class UDPServer implements Runnable {
                 userToProcess = null;
             }
         }
-        catch (Exception e) {}
+        catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
 //    public void sendToClient(Message message, InetAddress clientAddr, int clientPort) throws IOException {

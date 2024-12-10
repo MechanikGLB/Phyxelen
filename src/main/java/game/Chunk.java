@@ -26,9 +26,18 @@ public class Chunk {
         pixelSolved = new BitSet(area);
     }
 
+    public Chunk(Subworld subworld, Material[] materials, byte[] colors) {
+        this.subworld = subworld;
+        this.materials = materials;
+        this.colors = colors;
+        pixelSolved = new BitSet(area);
+    }
+
     /// game.Chunk side size in pixels
     public static short size() {return size;}
     public static int area() {return area;}
+    public int getXIndex() { return xIndex; }
+    public int getYIndex() { return yIndex; }
 
     static int toRelative(int coordinate) {
         coordinate %= Chunk.size();

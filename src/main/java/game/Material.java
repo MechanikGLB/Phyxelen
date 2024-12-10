@@ -33,6 +33,8 @@ public abstract class Material {
     Hashtable<Integer, MaterialInteraction> interactionsById;
     double density = 0.02f;
 
+    public byte getId() { return id; }
+    public String getName() { return name; }
     public ColorWithAplha[] getColors() { return colors; }
 
     abstract void solvePhysic(Chunk chunk, int i);
@@ -46,11 +48,6 @@ public abstract class Material {
         c1.colors[i1] = c2.colors[i2];
         c2.materials[i2] = materialBuffer;
         c2.colors[i2] = colorBuffer;
-    }
-
-
-    public String getName() {
-        return name;
     }
 
     void swapColors(Chunk c1, int i1, Chunk c2, int i2) {

@@ -5,7 +5,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.io.*;
 
-import game.NetMessage.FirstSync;
+import game.NetMessage.ContentSync;
 import game.NetMessage.Request;
 import org.snakeyaml.engine.v2.api.Dump;
 import org.snakeyaml.engine.v2.api.DumpSettings;
@@ -121,7 +121,7 @@ public class World {
         if (Main.getClient() == null)
             loadContent();
         else
-            Main.getClient().addMessage(new Request(FirstSync.getId()));
+            Main.getClient().addMessage(new Request(ContentSync.getId()));
     }
 
 

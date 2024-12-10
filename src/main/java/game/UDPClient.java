@@ -18,7 +18,7 @@ public class UDPClient implements Runnable {
     private final InetAddress address;
     private final int port;
     private final BlockingQueue<Message> queue = new LinkedBlockingQueue<>();//consumer-producer
-    private final int maxPacketSize = 1024;
+    private final int maxPacketSize = 1060;
     private final byte[] buffer = new byte[maxPacketSize];
     private final int[] timeouts = {11, 29, 73, 277, 997};
     private boolean serverActive = false;
@@ -50,21 +50,21 @@ public class UDPClient implements Runnable {
                 Thread SendHandler = new Thread(this::sender);
                 ReceiveHandler.start();
                 SendHandler.start();
-                queue.add(new Request(FirstSync.getId()));
+                queue.add(new Request(ContentSync.getId()));
             }
             else {
                 System.out.println("Server timed out");
             }
 
         }
-        catch (Exception e) {
-            e.getStackTrace();
+        catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
     protected void sendToServer() throws InterruptedException {
         Message message = queue.take();
-        byte[] dataToSend = message.buildMessage();
+        byte[] dataToSend = message.toBytes();
         System.out.println("Sends " + dataToSend[0]);
         DatagramPacket packetToServer = new DatagramPacket(dataToSend, dataToSend.length,
                 address, port);
@@ -101,15 +101,20 @@ public class UDPClient implements Runnable {
             while (!socket.isClosed())
                 sendToServer();
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException(e);
+//            System.out.println(e.getMessage());
         }
     }
 
-    public void responseReceive() throws IOException {
-        DatagramPacket packetFromServer = new DatagramPacket(buffer, buffer.length);
-        socket.receive(packetFromServer);
-        System.out.println("Received from Server: " + packetFromServer.getData()[0]);
-        Messages.process(ByteBuffer.wrap(packetFromServer.getData()));
+    public void responseReceive() {
+        try {
+            DatagramPacket packetFromServer = new DatagramPacket(buffer, buffer.length);
+            socket.receive(packetFromServer);
+            System.out.println("Received from Server: " + packetFromServer.getData()[0]);
+            Messages.processReceivedBinMessage(ByteBuffer.wrap(packetFromServer.getData()));
+        } catch (IOException e) {
+//            System.out.println("UDPClient::responseReceive " + e.getMessage());
+        }
     }
 
     public void shutdown() {

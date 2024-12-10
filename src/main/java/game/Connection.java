@@ -73,7 +73,7 @@ public class Connection {
 
     public void sendToClient() throws InterruptedException, IOException {
         Message message = messagesQueue.take();
-        byte[] dataToSend = message.buildMessage();
+        byte[] dataToSend = message.toBytes();
         System.out.println("Sends " + dataToSend[0] + " to " + playerAddress.getHostAddress());
         DatagramPacket packetToClient = new DatagramPacket(dataToSend, dataToSend.length,
                 playerAddress, playerPort);

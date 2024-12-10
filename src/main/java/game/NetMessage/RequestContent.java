@@ -3,14 +3,12 @@ package game.NetMessage;
 import game.GameApp;
 import game.Main;
 
-import java.net.InetAddress;
 import java.nio.ByteBuffer;
 
-public class Hello extends Message {
-    static byte id = 0;
-//    static {Messages.addMessage(new Hello());}
-    static InetAddress address;
-    static int port;
+public class RequestContent extends Message {
+    static byte id = 2;
+
+    public RequestContent() {}
 
     public static byte getId() {
         return id;
@@ -25,11 +23,7 @@ public class Hello extends Message {
     @Override
     public void processReceivedBinMessage(ByteBuffer message) {
         GameApp.GameState state = Main.getGame().getGameState();
-        //if handshake with server successful
-        if(state == GameApp.GameState.Client){
-            Main.getClient().setServerActive(true);
-            System.out.println("Connected to server");
-        }
-
+        if (state == GameApp.GameState.Server)
+            Main.getServer().getCurrentConnection().addMessage(ContentSync.makeMessage());
     }
 }

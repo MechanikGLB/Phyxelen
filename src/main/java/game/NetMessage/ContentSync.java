@@ -7,15 +7,15 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
-public class FirstSync extends RequestableMessage {
+public class ContentSync extends RequestableMessage {
 
-    static byte id = Messages.getNextMessageIndex();
-    static {Messages.addMessages(new FirstSync(null));}
+    static byte id = 4;
+//    static {Messages.addMessage(new FirstSync(null));}
 
     private ArrayList<String> materials;
 
 
-    public FirstSync(ArrayList<String> materials) {
+    public ContentSync(ArrayList<String> materials) {
         this.materials = materials;
     }
 
@@ -24,7 +24,7 @@ public class FirstSync extends RequestableMessage {
     }
 
     @Override
-    public byte[] buildMessage() {
+    public byte[] toBytes() {
         int size = 0;
         for (String material : materials) {
             size += (material.getBytes(StandardCharsets.UTF_8).length)+1;
@@ -47,7 +47,7 @@ public class FirstSync extends RequestableMessage {
         for (Material material : materialsByID) {
             materials.add(material.getName());
         }
-        return new FirstSync(materials);
+        return new ContentSync(materials);
     }
 
     @Override
@@ -56,7 +56,7 @@ public class FirstSync extends RequestableMessage {
     }
 
     @Override
-    public void processMessage(ByteBuffer message){
+    public void processReceivedBinMessage(ByteBuffer message){
 
         ArrayList<String> result = new ArrayList<>();
         byte[] bytes = new byte[message.remaining()];
