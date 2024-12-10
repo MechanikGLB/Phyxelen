@@ -64,6 +64,7 @@ public class UDPServer implements Runnable {
             while (!socket.isClosed()) {
                 DatagramPacket packetFromClient = new DatagramPacket(buffer, buffer.length);
                 socket.receive(packetFromClient);
+                System.out.println("___________________________________");
                 System.out.println("Client addr: " + packetFromClient.getAddress().getHostAddress());
                 System.out.println("Client send message: " + packetFromClient.getData()[0]);
                 Connection userToProcess = new Connection(socket, packetFromClient.getAddress(), packetFromClient.getPort());

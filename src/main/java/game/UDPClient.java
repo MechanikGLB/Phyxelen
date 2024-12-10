@@ -57,7 +57,7 @@ public class UDPClient implements Runnable {
             }
 
         }
-        catch (Exception e) {
+        catch (InterruptedException e) {
             e.getStackTrace();
         }
     }
@@ -65,6 +65,7 @@ public class UDPClient implements Runnable {
     protected void sendToServer() throws InterruptedException {
         Message message = queue.take();
         byte[] dataToSend = message.buildMessage();
+        System.out.println("_____________________________________________");
         System.out.println("Sent to Server: " + dataToSend[0]);
         DatagramPacket packetToServer = new DatagramPacket(dataToSend, dataToSend.length,
                 address, port);
@@ -104,11 +105,17 @@ public class UDPClient implements Runnable {
         }
     }
 
-    public void responseReceive() throws IOException {
-        DatagramPacket packetFromServer = new DatagramPacket(buffer, buffer.length);
-        socket.receive(packetFromServer);
-        System.out.println("Received from Server: " + packetFromServer.getData()[0]);
-        Messages.process(ByteBuffer.wrap(packetFromServer.getData()));
+    public void responseReceive() {
+        try {
+            DatagramPacket packetFromServer = new DatagramPacket(buffer, buffer.length);
+            socket.receive(packetFromServer);
+            System.out.println("Received from Server: " + packetFromServer.getData()[0]);
+            System.out.println("__________________________________");
+            Messages.process(ByteBuffer.wrap(packetFromServer.getData()));
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
     }
 
     public void shutdown() {
