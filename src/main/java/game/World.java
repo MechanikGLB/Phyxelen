@@ -6,7 +6,7 @@ import java.util.*;
 import java.io.*;
 
 import game.NetMessage.ContentSync;
-import game.NetMessage.Request;
+import game.NetMessage.RequestContent;
 import org.snakeyaml.engine.v2.api.Dump;
 import org.snakeyaml.engine.v2.api.DumpSettings;
 import org.snakeyaml.engine.v2.api.Load;
@@ -110,6 +110,13 @@ public class World {
     }
 
 
+    public static World createWorldForJoining() {
+        World world = new World();
+        world.startup();
+        return world;
+    }
+
+
     public Subworld loadOrCreateSubworld(String subworldId) {
         Subworld subworld = new Subworld(this, subworldId);
         subworlds.put(subworldId, subworld);
@@ -121,7 +128,7 @@ public class World {
         if (Main.getClient() == null)
             loadContent();
         else
-            Main.getClient().addMessage(new Request(ContentSync.getId()));
+            Main.getClient().addMessage(new RequestContent());
     }
 
 

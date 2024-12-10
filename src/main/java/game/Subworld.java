@@ -1,6 +1,5 @@
 package game;
 
-import game.NetMessage.Request;
 import game.NetMessage.RequestChunk;
 
 import java.util.*;
