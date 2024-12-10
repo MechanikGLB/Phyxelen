@@ -1,10 +1,8 @@
 package game.NetMessage;
 
-import game.Client;
 import game.Main;
 import game.Material;
 
-import javax.lang.model.type.NullType;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -29,7 +27,7 @@ public class FirstSync extends RequestableMessage {
     public byte[] buildMessage() {
         int size = 0;
         for (String material : materials) {
-            size += (material.getBytes().length/2)+1;
+            size += (material.getBytes(StandardCharsets.UTF_8).length)+1;
         }
         ByteBuffer message = ByteBuffer.allocate(1+size);
         message.put(id);
@@ -42,8 +40,7 @@ public class FirstSync extends RequestableMessage {
         return message.array();
     }
 
-    @Override
-    public Message getMessage() {
+    static public Message makeMessage() {
         ArrayList<String> materials = new ArrayList<>();
 
         var materialsByID = Main.getGame().getActiveWorld().getMaterialsById();
@@ -51,6 +48,11 @@ public class FirstSync extends RequestableMessage {
             materials.add(material.getName());
         }
         return new FirstSync(materials);
+    }
+
+    @Override
+    public Message makeMessageByRequest() {
+        return makeMessage();
     }
 
     @Override
@@ -66,6 +68,6 @@ public class FirstSync extends RequestableMessage {
                 index = i + 1;
             }
         }
-        Main.getGame().getActiveWorld().requireContentFromServer(result);
+        Main.getGame().getActiveWorld().receiveContentFromServer(result);
     }
 }

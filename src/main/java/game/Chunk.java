@@ -27,8 +27,8 @@ public class Chunk {
     }
 
     /// game.Chunk side size in pixels
-    static short size() {return size;}
-    static int area() {return area;}
+    public static short size() {return size;}
+    public static int area() {return area;}
 
     static int toRelative(int coordinate) {
         coordinate %= Chunk.size();
@@ -72,14 +72,8 @@ public class Chunk {
 //        assert x < size && y < size;
         return materials[toRelative(x) + toRelative(y) * size];
     }
-
-    public Material getPixelMaterialChecked(int x, int y) {
-//        assert x < size && y < size;
-        int i = toRelative(x) + toRelative(y) * size;
-        if (!pixelSolved.get(i))
-            materials[i].solvePhysic(this, i);
-        return materials[i];
-    }
+    public Material getPixelMaterial(int i) { return materials[i]; }
+    public byte getPixelColor(int i) { return colors[i]; }
 
     public void tick() {
 //        if (solved && (Main.getGame().counter + yIndex) % 8 != 0) return;

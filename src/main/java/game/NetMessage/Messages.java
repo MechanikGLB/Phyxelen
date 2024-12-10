@@ -13,7 +13,7 @@ public class Messages {
     public static void addMessages(Message message) {
         messages.add(message);
     }
-
+    public static Message getMessage(int id) { return messages.get(id); }
 
     public static void process(ByteBuffer message) {
         messages.get(message.get(0)).processMessage(message.slice(1, message.capacity()-1));

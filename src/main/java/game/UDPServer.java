@@ -1,5 +1,6 @@
 package game;
 
+import game.NetMessage.FirstSync;
 import game.NetMessage.Hello;
 import game.NetMessage.Messages;
 
@@ -67,7 +68,7 @@ public class UDPServer implements Runnable {
                 System.out.println("Client addr: " + packetFromClient.getAddress().getHostAddress());
                 System.out.println("Client send message: " + packetFromClient.getData()[0]);
                 Connection userToProcess = new Connection(socket, packetFromClient.getAddress(), packetFromClient.getPort());
-                if(playersList.contains(userToProcess)){
+                if(playersList.contains(userToProcess)) {
                     currentConnection = userToProcess; //for messages work
                 }
                 if (packetFromClient.getData()[0] == Hello.getId()) {
@@ -77,6 +78,7 @@ public class UDPServer implements Runnable {
                         System.out.println("Client Connected");
                         playersList.add(userToProcess);
                         playersList.getLast().startSession();
+                        playersList.getLast().addMessage(FirstSync.makeMessage());
                     }
 
                 }

@@ -65,7 +65,7 @@ public class UDPClient implements Runnable {
     protected void sendToServer() throws InterruptedException {
         Message message = queue.take();
         byte[] dataToSend = message.buildMessage();
-        System.out.println("Sent to Server: " + dataToSend[0]);
+        System.out.println("Sends " + dataToSend[0]);
         DatagramPacket packetToServer = new DatagramPacket(dataToSend, dataToSend.length,
                 address, port);
 
@@ -75,6 +75,7 @@ public class UDPClient implements Runnable {
                 socket.send(packetToServer);
 
                 responseReceive();
+                System.out.println("Sent successfully");
                 break;
             } catch (IOException e) {
                 System.out.println("Server timeout");

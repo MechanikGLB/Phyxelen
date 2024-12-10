@@ -31,6 +31,8 @@ public class Connection {
         return playerPort;
     }
 
+
+
     public void startSession() {
         connected = true;
         messagesQueue.add(new Hello());
@@ -72,6 +74,7 @@ public class Connection {
     public void sendToClient() throws InterruptedException, IOException {
         Message message = messagesQueue.take();
         byte[] dataToSend = message.buildMessage();
+        System.out.println("Sends " + dataToSend[0] + " to " + playerAddress.getHostAddress());
         DatagramPacket packetToClient = new DatagramPacket(dataToSend, dataToSend.length,
                 playerAddress, playerPort);
 

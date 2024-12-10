@@ -38,7 +38,7 @@ public class Request extends Message {
         GameApp.GameState state = Main.getGame().getGameState();
         if (prototype instanceof RequestableMessage) {
             if(state == GameApp.GameState.Server){
-                target.addMessage(((RequestableMessage) prototype).getMessage());
+                target.addMessage(((RequestableMessage) prototype).makeMessageByRequest());
             }
             if(state == GameApp.GameState.Client){
                 Main.getClient().addMessage(prototype);

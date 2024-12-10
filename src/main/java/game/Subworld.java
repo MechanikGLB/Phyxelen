@@ -1,6 +1,7 @@
 package game;
 
 import game.NetMessage.Request;
+import game.NetMessage.RequestChunk;
 
 import java.util.*;
 //import java.
@@ -69,6 +70,7 @@ public class Subworld extends GameObject {
     byte pixelPhysicPhase = 0; // Maybe temporary
     byte pixelPhysicFreezingCountdown = -1; /// -1 -- do not stop, 0 -- stop, n -- stop after "n" steps
     ConcurrentHashMap<VectorI, Chunk> activeChunks = new ConcurrentHashMap<>();
+    ArrayList<VectorI> loadingChunks = new ArrayList<>();
     ChunkTree activeChunkTree = new ChunkTree();
 //    TreeSet<Chunk> activeChunkTree = new TreeSet<>((chunk, t1) -> {
 //        if (chunk.yIndex != t1.yIndex)
@@ -93,6 +95,7 @@ public class Subworld extends GameObject {
         /*TEMP*/ generator = new WorldGenerator(this);
     }
 
+    public Chunk getActiveChunk(VectorI indexes) { return activeChunks.get(indexes); }
 
     public void update(float dt) {
         GameApp.Profiler.startProfile("tick", (byte)0, (byte)100, (byte)100);
@@ -157,14 +160,21 @@ public class Subworld extends GameObject {
     }
 
     public void loadChunk(VectorI indexes) {
-        if (activeChunks.containsKey(indexes)) return;
-        if (Main.getGame().gameState == GameApp.GameState.Client){
-            
+        if (activeChunks.containsKey(indexes) || loadingChunks.contains(indexes))
             return;
-        }; // TODO: multiplayer, require chunk via net
+        loadingChunks.add(indexes);
+        if (Main.getGame().gameState == GameApp.GameState.Client){
+            Main.getClient().addMessage(new RequestChunk(indexes.x, indexes.y));
+            return;
+        };
 
         //if () {} // TODO: load from file. True if found
-        Chunk chunk = generator.generateChunk(indexes);
+        loadedChunk(generator.generateChunk(indexes));
+    }
+
+    public void loadedChunk(Chunk chunk) {
+        var indexes = new VectorI(chunk.xIndex, chunk.yIndex);
+        loadingChunks.remove(indexes);
         activeChunks.put(indexes, chunk);
         activeChunkTree.add(chunk);
     }
