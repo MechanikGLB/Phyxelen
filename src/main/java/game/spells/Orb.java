@@ -21,8 +21,11 @@ public class Orb extends Spell {
                         subworld.removeEntity(self);
                                 subworld.fillPixels(
                                         ((Pixel)o).x() - 2, ((Pixel)o).y() - 2, 4, 4,
-                                        Content.air(), (byte) 0);
+                                        Content.air(), (byte) 0, 10);
                                 return true;
+                    } else if (o instanceof Character) {
+                        ((Character)o).damage(15);
+                        return true;
                     }
                     return false;
                 },

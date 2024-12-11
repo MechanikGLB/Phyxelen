@@ -1,15 +1,14 @@
 package game.spells;
 
 import game.Character;
-//import game.ColorWithAplha;
-//import game.Projectile;
 import game.*;
 
-public class Bullet extends Spell {
-    public Bullet() {
-        name = "Bullet";
-        projectileImage = "bullet.png";
-        image = "bullet_spell.png";
+public class ExplosiveOrb extends Spell {
+
+    public ExplosiveOrb() {
+        name = "Explosive orb";
+        projectileImage = "explosive_orb.png";
+        image = "explosive_orb_spell.png";
     }
 
     @Override
@@ -20,19 +19,20 @@ public class Bullet extends Spell {
                 (self, o) -> {
                     if (o instanceof Pixel && !(((Pixel) o).material() instanceof MaterialAir)) {
                         ((Pixel) o).chunk().setPixel(((Pixel) o).i(), Content.air(), (byte) 0);
+                        subworld.jetPixels(((Pixel)o).x(), ((Pixel)o).y(), 16);
                         return true;
                     } else if (o instanceof Character) {
-                        ((Character)o).damage(5);
+                        ((Character)o).damage(50);
                         return true;
                     }
                     return false;
                 },
-                (float) Math.cos(caster.getLookDirection()) * 200,
-                (float) Math.sin(caster.getLookDirection()) * 200,
-                0f, -9.8f,
-                (short) 3, (short) 1, true, "bullet.png", ColorWithAplha.white());
+                (float) Math.cos(caster.getLookDirection()) * 70,
+                (float) Math.sin(caster.getLookDirection()) * 70,
+                0f, -3f,
+                (short) 6, (short) 6, true, projectileImage, ColorWithAplha.white());
 
         subworld.addEntity(projectile);
-        return 0.3f;
+        return 2f;
     }
 }

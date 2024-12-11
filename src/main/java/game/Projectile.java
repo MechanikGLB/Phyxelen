@@ -60,15 +60,18 @@ public class Projectile extends Entity {
 
     @Override
     void update(float dt) {
-        Pixel castResult = subworld.rayCast(x, y, x + velocityX * dt, y + velocityY * dt);
+        Pixel castResult = subworld.rayCast(x, y, x + velocityX * dt, y + velocityY * dt, 1);
         float newX = castResult == null ? x + velocityX * dt : castResult.x();
         float newY = castResult == null ? y + velocityY * dt : castResult.y();
 
         for (EntityWithCollision entity : subworld.collidableEntities) {
             if (entity.intersectedByRay(x, y, newX, newY)) {
-                subworld.removeEntity(this);
-                onCollide.apply(this, entity);
-                return;
+                if (onCollide.apply(this, entity)) {
+                    subworld.removeEntity(this);
+                    for (var func : onHit)
+                        func.accept(this, entity);
+                    return;
+                }
             }
         }
 

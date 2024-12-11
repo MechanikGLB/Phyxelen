@@ -32,12 +32,13 @@ public class Client extends GameApp {
     protected short viewScale = 8;
     /// Free camera movement speed in screen pixels per second
     protected short cameraSpeed = 150;
-    boolean freeCamera = true;
     Character controlledCharacter;
+    private Player primaryCharacter;
 
-    /*Temp?*/private Character primaryCharacter;
-    /*Temp?*/private int paintingPixel = 1;
-    /*Temp?*/private int paintingSize = 0;
+    // Editor
+    boolean editMode = false;
+    private int paintingPixel = 1;
+    private int paintingSize = 0;
 
     ArrayList<WindowResizeListener> windowResizeListeners = new ArrayList<>();
 
@@ -55,10 +56,10 @@ public class Client extends GameApp {
         gui.init();
         super.run();
         bindKeys();
-        /*TEMP*/
-        primaryCharacter = new Player(0, 10, activeSubworld);
-        activeSubworld.entities.add(primaryCharacter);
-        activeSubworld.collidableEntities.add(primaryCharacter);
+
+        primaryCharacter = new Player(0, 0, activeSubworld);
+//        primaryCharacter.spawn();
+        activeSubworld.addEntity(primaryCharacter);
 
         System.out.println("Loading textures");
         try {
@@ -135,7 +136,7 @@ public class Client extends GameApp {
             }
             lastCycleStartTime = cycleStartTime;
 
-            if (counter % 32 == 0) {
+            if (counter % 8 == 0) {
                 updateChunks();
             }
 //            System.out.println(dt);
@@ -239,23 +240,7 @@ public class Client extends GameApp {
         double[] x = new double[1];
         double[] y = new double[1];
         glfwGetCursorPos(window, x, y);
-        for (int dx = -paintingSize/2; dx <= paintingSize/2; dx++) {
-            for (int dy = paintingSize/2; dy > -paintingSize/2; dy--) {
-                Pixel pixel = activeSubworld.getPixel(
-                        screenXToWorld((int) x[0]) + dx, screenYToWorld((int) y[0]) + dy);
-                Material material = pixel.chunk.materials[pixel.i];
-                if (!(material instanceof MaterialAir) ) {
-                    pixel.chunk.setPixel(pixel.i, activeWorld.pixelIds[0], (byte)0);
-                    double angle = activeSubworld.random.nextDouble(-Math.PI / 3, Math.PI / 3);
-                    activeSubworld.entities.add(new PixelEntity(
-                            screenXToWorld((int) x[0]) + dx, screenYToWorld((int) y[0]) + dy,
-                            activeSubworld, material, pixel.chunk.colors[pixel.i],
-                            (float)Math.sin(angle) * 100.f, (float)Math.cos(angle) * 100.f,
-                            0, -9.8f
-                    ));
-                }
-            }
-        }
+        activeSubworld.jetPixels(screenXToWorld((int) x[0]), screenYToWorld((int) y[0]), paintingSize);
     }
 
 
@@ -269,7 +254,7 @@ public class Client extends GameApp {
                 o -> {
                     if (controlledCharacter != null) {
                         controlledCharacter.go(0, 1);
-                    } else if (freeCamera)
+                    } else if (editMode)
                         cameraPos.y += cameraSpeed / viewScale * fdt;},
                 o -> {
                     if (controlledCharacter != null)
@@ -281,7 +266,7 @@ public class Client extends GameApp {
         input.addInputAction("MoveDown",new InputAction(null, o -> {
             if (controlledCharacter != null)
                 controlledCharacter.go(0, -1);
-            else if (freeCamera)
+            else if (editMode)
                 cameraPos.y -= cameraSpeed / viewScale * fdt;
         }, null));
         input.getKeyboardHandler().bindKey(GLFW_KEY_S, "MoveDown");
@@ -290,7 +275,7 @@ public class Client extends GameApp {
         input.addInputAction("MoveRight",new InputAction(null, o -> {
             if (controlledCharacter != null)
                 controlledCharacter.go(1, 0);
-            else if (freeCamera)
+            else if (editMode)
                 cameraPos.x += cameraSpeed / viewScale * fdt;
         }, null));
         input.getKeyboardHandler().bindKey(GLFW_KEY_D, "MoveRight");
@@ -299,7 +284,7 @@ public class Client extends GameApp {
         input.addInputAction("MoveLeft",new InputAction(null, o -> {
             if (controlledCharacter != null)
                 controlledCharacter.go(-1, 0);
-            else if (freeCamera)
+            else if (editMode)
                 cameraPos.x -= cameraSpeed / viewScale * fdt;
         }, null));
         input.getKeyboardHandler().bindKey(GLFW_KEY_A, "MoveLeft");
@@ -332,7 +317,7 @@ public class Client extends GameApp {
                         controlledCharacter.holdedItem.activate();
                 },
                 o -> {
-                    if (freeCamera)
+                    if (editMode)
                         setPixelAtCursorPosition(paintingPixel);
                 },
                 o -> {
@@ -347,10 +332,10 @@ public class Client extends GameApp {
         input.addInputAction("SwitchEditorMode", new InputAction(o -> {
             if (controlledCharacter == null) {
                 controlledCharacter = primaryCharacter;
-                freeCamera = false;
+                editMode = false;
             } else {
                 controlledCharacter = null;
-                freeCamera = true;
+                editMode = true;
             }
         }, null, null));
         input.getKeyboardHandler().bindKey(GLFW_KEY_E, "SwitchEditorMode");
@@ -434,11 +419,10 @@ public class Client extends GameApp {
             glVertex2i(5 * 60, screenHeight - 3);
             glVertex2i(5 * 120, screenHeight - 3);
             glEnd();
-//            glDisable( GL_BLEND );
-            glBegin(GL_QUADS);
-            glColor4f(1,1,1,0.1f);
-            drawRectAtAbsCoordinates(0,0, Chunk.size(), Chunk.size());
-            glEnd();
+//            glBegin(GL_QUADS);
+//            glColor4f(1,1,1,0.1f);
+//            drawRectAtAbsCoordinates(0,0, Chunk.size(), Chunk.size());
+//            glEnd();
             gui.draw(renderer.screenWidth, renderer.screenHeight);
             glfwSwapBuffers(window);
         }
@@ -483,7 +467,7 @@ public class Client extends GameApp {
             glVertex2f(centerX + w/2, centerY + h/2);
             glTexCoord2f(uv3, uv1);
             glVertex2f(centerX + w/2, centerY - h/2);
-            glTexCoord2f(uv2, uv1);
+            glTexCoord2f(uv2,  uv1);
             glVertex2f(centerX - w/2, centerY - h/2);
             glEnd();
             if (texture > 0)
