@@ -47,9 +47,9 @@ public class ChunkSync extends Message {
         for (int i = 0; i < Chunk.area(); i++) {
             byte pixel = message.get();
             materials[i] = subworld.world().getMaterialById(pixel & 0x1F);
-
+            colors[i] = (byte)(pixel >> 5);
         }
-        Chunk receivedChunk = new Chunk(subworld);
-        subworld.loadedChunk(chunk);
+        Chunk receivedChunk = new Chunk(subworld, materials, colors);
+        subworld.loadedChunk(receivedChunk);
     }
 }

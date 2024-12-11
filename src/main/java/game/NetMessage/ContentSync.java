@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 public class ContentSync extends RequestableMessage {
 
-    static byte id = 4;
+    static byte id = 3;
 //    static {Messages.addMessage(new FirstSync(null));}
 
     private ArrayList<String> materials;
@@ -64,7 +64,9 @@ public class ContentSync extends RequestableMessage {
         int index = 0;
         for (int i = 0; i < bytes.length; i++) {
             if (bytes[i] == 0) {
-                result.add(new String(bytes, index, i - index));
+                result.add(new String(bytes, index, i - index, StandardCharsets.UTF_8));
+                if (i < bytes.length - 1 && bytes[i+1] == 0)
+                    break;
                 index = i + 1;
             }
         }
