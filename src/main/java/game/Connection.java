@@ -69,18 +69,15 @@ public class Connection {
         }
     }
 
-    //    public Message takeMessage() throws InterruptedException {
-//        return messagesQueue.take();
-//    }
     public void addMessage(Message message) {
-        System.out.println("Adds message for " + this + " to " + playerAddress);
+//        System.out.println("Adds message for " + this + " to " + playerAddress);
         messagesQueue.add(message);
     }
 
     public void sendToClient() throws InterruptedException, IOException {
         Message message = messagesQueue.take();
         byte[] dataToSend = message.toBytes();
-        System.out.println("Sends " + dataToSend[0] + " to " + playerAddress.getHostAddress());
+        System.out.println("Sends " + dataToSend[0] + " to " + connectionId + " at " + playerAddress.getHostAddress());
         DatagramPacket packetToClient = new DatagramPacket(dataToSend, dataToSend.length,
                 playerAddress, playerPort);
 

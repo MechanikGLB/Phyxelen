@@ -67,17 +67,13 @@ public class Subworld extends GameObject {
     float pixelPhysicCounter; /// Counter for pixel update rate
     byte pixelPhysicPhase = 0; // Maybe temporary
     byte pixelPhysicFreezingCountdown = -1; /// -1 -- do not stop, 0 -- stop, n -- stop after "n" steps
+
     ConcurrentHashMap<VectorI, Chunk> activeChunks = new ConcurrentHashMap<>();
     ArrayList<VectorI> loadingChunks = new ArrayList<>();
     ChunkTree activeChunkTree = new ChunkTree();
-//    TreeSet<Chunk> activeChunkTree = new TreeSet<>((chunk, t1) -> {
-//        if (chunk.yIndex != t1.yIndex)
-//            return chunk.yIndex - t1.yIndex;
-//        return chunk.xIndex - t1.xIndex;
-//    });
-
-//    ArrayList<game.Chunk> activeChunkArray = new ArrayList<>();
+    Stack<Chunk> chunksToAdd = new Stack<>();
     Hashtable<VectorI, Chunk> passiveChunks = new Hashtable<>();
+
     ArrayList<Entity> entities = new ArrayList<>();
     ArrayList<EntityWithCollision> collidableEntities = new ArrayList<>();
 
@@ -107,6 +103,9 @@ public class Subworld extends GameObject {
 //            } catch (InterruptedException e) {
 //                throw new RuntimeException(e);
 //            }
+        if (!chunksToAdd.isEmpty()) {
+            loadedChunk(chunksToAdd.pop());
+        }
 
         pixelPhysicCounter += dt;
         if (pixelPhysicCounter >= 0.03) {
@@ -175,6 +174,10 @@ public class Subworld extends GameObject {
         loadingChunks.remove(indexes);
         activeChunks.put(indexes, chunk);
         activeChunkTree.add(chunk);
+    }
+
+    public void receivedChunk(Chunk chunk) {
+        chunksToAdd.add(chunk);
     }
 
 

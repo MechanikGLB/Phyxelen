@@ -26,8 +26,10 @@ public class Chunk {
         pixelSolved = new BitSet(area);
     }
 
-    public Chunk(Subworld subworld, Material[] materials, byte[] colors) {
+    public Chunk(Subworld subworld, int xIndex, int yIndex, Material[] materials, byte[] colors) {
         this.subworld = subworld;
+        this.xIndex = xIndex;
+        this.yIndex = yIndex;
         this.materials = materials;
         this.colors = colors;
         pixelSolved = new BitSet(area);

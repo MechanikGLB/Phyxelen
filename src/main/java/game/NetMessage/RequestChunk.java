@@ -22,6 +22,7 @@ public class RequestChunk extends Message {
     }
 
     public byte[] toBytes() {
+        System.out.println("Requests chunk "+x+" ; "+y);
         ByteBuffer message = ByteBuffer.allocate(1 + Integer.BYTES * 2);
         message.put(id);
         message.putInt(x);
@@ -34,7 +35,7 @@ public class RequestChunk extends Message {
         GameApp.GameState state = Main.getGame().getGameState();
         if (state == GameApp.GameState.Server)
             Main.getServer().getCurrentConnection().addMessage(
-                    new ChunkSync(message.getInt(0), message.get(1)));
+                    new ChunkSync(message.getInt(), message.getInt()));
 
     }
 }
