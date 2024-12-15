@@ -28,6 +28,8 @@ public abstract class GameApp {
     public World getActiveWorld() {return activeWorld;}
     public Subworld getActiveSubworld() {return activeSubworld;}
 
+    boolean debug = true;
+
     public void run() {
         checkDirectoryStructure();
         if (gameState == GameState.Client) {

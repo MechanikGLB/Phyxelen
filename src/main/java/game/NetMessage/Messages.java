@@ -15,7 +15,8 @@ public class Messages {
             new RequestContent(),
             new ContentSync(null),
             new RequestChunk(0, 0),
-            new ChunkSync()
+            new ChunkSync(),
+            new PlayerSpawn(0,0, 0)
     );
 
 //    public static void addMessage(Message message) {

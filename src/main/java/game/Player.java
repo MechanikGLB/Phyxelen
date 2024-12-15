@@ -3,6 +3,7 @@ package game;
 import game.spells.*;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import static java.lang.Math.PI;
 import static java.lang.Math.round;
@@ -34,28 +35,6 @@ public class Player extends Character {
         collisionBoxHeight = 8;
         health = 0;
         respawnTimer = 0.3f;
-
-        var wand = new Wand(this);
-        wand.setTexture("wand_1.png");
-        wand.spells.add(new Bullet());
-        inventory.add(wand);
-        holdedItem = wand;
-        wand = new Wand(this);
-        wand.setTexture("wand_2.png");
-        wand.spells.add(new Orb());
-        inventory.add(wand);
-        wand = new Wand(this);
-        wand.setTexture("wand_2.png");
-        wand.spells.add(new WaterOrb());
-        inventory.add(wand);
-        wand = new Wand(this);
-        wand.setTexture("wand_2.png");
-        wand.spells.add(new Sand());
-        inventory.add(wand);
-        wand = new Wand(this);
-        wand.setTexture("wand_3.png");
-        wand.spells.add(new ExplosiveOrb());
-        inventory.add(wand);
     }
 
     public ArrayList<HoldableItem> getInventory() { return inventory; }
@@ -112,7 +91,7 @@ public class Player extends Character {
             respawnTimer -= dt;
             if (respawnTimer <= 0) {
                 respawnTimer = respawnTime;
-                spawn();
+                subworld.spawnPlayer(this);
             }
         }
     }
@@ -171,13 +150,32 @@ public class Player extends Character {
             die();
     }
 
-    public void spawn() {
+    public void spawn(int x, int y, int seed) {
         health = maxHealth;
-        x = subworld.random.nextInt(-200, 200);
-//        y = subworld.rayCast(x, 100, x, -100, 2).y() + collisionBoxHeight;
-        y = 80;
-        subworld.fillPixels((int) x - 8, (int) y - 8, 16, 16, Content.air(), (byte) 0, 50);
-        client.controlledCharacter = this;
+        if (client.getPrimaryCharacter() == this)
+            client.controlledCharacter = this;
+
+        Random random = new Random(seed);
+        Wand wand;
+        int wandCount = random.nextInt(3,6);
+        for (int i = 0; i < wandCount; i++) {
+            wand = new Wand(this);
+            int spellCount = random.nextInt(1, 3);
+            for (int j = 0; j < spellCount; j++) {
+                Spell spell;
+                switch (random.nextInt(5)) {
+                    case 1: spell = new Orb(); break;
+                    case 2: spell = new WaterOrb(); break;
+                    case 3: spell = new Sand(); break;
+                    case 4: spell = new ExplosiveOrb(); break;
+                    default: spell = new Bullet(); break;
+                }
+                wand.spells.add(spell);
+            }
+            wand.setTexture("wand_"+random.nextInt(1,4)+".png");
+            inventory.add(wand);
+            holdedItem = wand;
+        }
     }
 
     public void die() {
@@ -186,5 +184,7 @@ public class Player extends Character {
         subworld.fillPixels(round(x) - 2, round(y) - 5, 4, 9, Content.getMaterial("sand"), (byte) -1, 2);
         subworld.fillPixels(round(x) - 1, round(y) + 4, 2, 1, Content.getMaterial("sand"), (byte) -1, 2);
         levitating = false;
+        holdedItem.deactivate();
+        inventory.clear();
     }
 }

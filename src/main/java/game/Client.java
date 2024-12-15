@@ -43,9 +43,8 @@ public class Client extends GameApp {
     ArrayList<WindowResizeListener> windowResizeListeners = new ArrayList<>();
 
 
-    public Character getControlledCharacter() {
-        return controlledCharacter;
-    }
+    public Character getControlledCharacter() { return controlledCharacter; }
+    public Character getPrimaryCharacter() { return primaryCharacter; }
 
 
     @Override
@@ -59,7 +58,8 @@ public class Client extends GameApp {
 
         primaryCharacter = new Player(0, 0, activeSubworld);
 //        primaryCharacter.spawn();
-        activeSubworld.addEntity(primaryCharacter);
+//        activeSubworld.addEntity(primaryCharacter);
+        activeSubworld.spawnPlayer(primaryCharacter);
 
         System.out.println("Loading textures");
         try {
@@ -201,10 +201,7 @@ public class Client extends GameApp {
 
     private void updateChunks() {
         if (activeSubworld == null) return;
-        int width = renderer.screenWidth / (viewScale * Chunk.size());
-        int height = renderer.screenHeight / (viewScale * Chunk.size());
-        activeSubworld.updateChunksForUser(
-                (int) cameraPos.x / Chunk.size(), (int) cameraPos.y / Chunk.size(), width, height);
+        activeSubworld.updateChunksForUsers();
     }
 
 

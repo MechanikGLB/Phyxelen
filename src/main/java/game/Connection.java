@@ -41,6 +41,8 @@ public class Connection {
     public void startSession() {
         connected = true;
         messagesQueue.add(new Hello(connectionId));
+
+        messagesQueue.add(new Hello(connectionId));
         Thread sender = new Thread(this::sender);
         sender.start();
         System.out.println("Client Handler started");

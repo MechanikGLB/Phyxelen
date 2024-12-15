@@ -83,9 +83,6 @@ public class UDPServer implements Runnable {
 
                 short connectionId;
                 if (receivedBytes.get(0) == 0) {
-//                    if (connections.stream().anyMatch((connection -> )).isPresent()) {
-//                        continue;
-//                    }
                     currentConnection = new Connection(socket, (short) random.nextInt(),
                                     packetFromClient.getAddress(), packetFromClient.getPort());
                     connections.add(currentConnection);
