@@ -2,6 +2,7 @@ package game.NetMessage;
 
 import game.GameApp;
 import game.Main;
+import game.request.ChunkRequest;
 
 import java.nio.ByteBuffer;
 
@@ -34,8 +35,8 @@ public class RequestChunk extends Message {
     public void processReceivedBinMessage(ByteBuffer message) {
         GameApp.GameState state = Main.getGame().getGameState();
         if (state == GameApp.GameState.Server)
-            Main.getServer().getCurrentConnection().addMessage(
-                    new ChunkSync(message.getInt(), message.getInt()));
+            GameApp.getRequests().add(
+                    new ChunkRequest(Main.getServer().getCurrentConnection(), message.getInt(), message.getInt()));
 
     }
 }

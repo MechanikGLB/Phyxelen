@@ -15,11 +15,8 @@ public class ChunkSync extends Message {
 
     ChunkSync() {};
 
-    public ChunkSync(int x, int y) {
-        var indexes = new VectorI(x, y);
-        var subworld = Main.getGame().getActiveSubworld();
-        subworld.loadChunk(indexes);
-        chunk = subworld.getActiveChunk(indexes);
+    public ChunkSync(Chunk chunk) {
+        this.chunk = chunk;
     }
 
     public byte[] toBytes() {

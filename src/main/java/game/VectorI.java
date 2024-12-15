@@ -11,6 +11,9 @@ public class VectorI {
         this.y = y;
     }
 
+    public int x() { return x; }
+    public int y() { return y; }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
