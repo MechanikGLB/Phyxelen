@@ -7,6 +7,7 @@ import java.io.*;
 
 import game.NetMessage.ContentSync;
 import game.NetMessage.RequestContent;
+import game.NetMessage.RequestEntities;
 import game.NetMessage.RequestPlayerSpawn;
 import org.snakeyaml.engine.v2.api.Dump;
 import org.snakeyaml.engine.v2.api.DumpSettings;

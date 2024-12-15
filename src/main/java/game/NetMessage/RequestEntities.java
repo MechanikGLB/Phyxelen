@@ -26,7 +26,6 @@ public class RequestEntities extends Message {
     public void processReceivedBinMessage(ByteBuffer message) {
         GameApp.GameState state = Main.getGame().getGameState();
         if (state == GameApp.GameState.Server)
-            GameApp.getRequests().add(
-                    new EntitiesRequest();
+            GameApp.getRequests().add( new EntitiesRequest(Main.getServer().getCurrentConnection()) );
     }
 }

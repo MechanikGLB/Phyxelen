@@ -347,6 +347,10 @@ public class Subworld extends GameObject {
         entitiesToRemove.add(entity);
     }
 
+    public ArrayList<Entity> getEntities() {
+        return entities;
+    }
+
     public void spawnPlayer(Player player) {
         int x = random.nextInt(-200, 200);
         int y = 0;

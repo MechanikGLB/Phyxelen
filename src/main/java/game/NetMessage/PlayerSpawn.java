@@ -49,6 +49,7 @@ public class PlayerSpawn extends Message {
         playerToSpawn.setLocal(false);
         if(client.getPrimaryCharacter() == null){
             client.setPrimaryCharacter(playerToSpawn);
+            Main.getClient().addMessage(new RequestEntities());
         }
         var players = subworld.getPlayers();
         if (!players.contains(playerToSpawn)) {
