@@ -27,11 +27,29 @@ public class SubworldRenderer implements WindowResizeListener {
         client.windowResizeListeners.add(this);
     }
 
+    private void drawBackgroundLine(float from, float to) {
+        glVertex2i(0, (int)(client.renderer.screenHeight * from));
+        glVertex2i(client.renderer.screenWidth, (int)(client.renderer.screenHeight * from));
+        glVertex2i(client.renderer.screenWidth, (int)(client.renderer.screenHeight * to));
+        glVertex2i(0, (int)(client.renderer.screenHeight * to));
+    }
+
     public void draw(float fdt) {
 //        glEnableVertexAttribArray();
+        float height = client.cameraPos.y;
+        glBegin(GL_QUADS);
+        glColor4f(0.6f, 0.7f, 0.8f, 1f);
+        drawBackgroundLine(0, 0.3f);
+        glColor4f(0.6f, 0.7f, 0.8f, 1f);
+        drawBackgroundLine(0.3f, 0.5f);
+        for (float i = 0; i < 1f; i += 0.03f) {
+            glColor4f(0.5f - i * 0.2f * height/200,
+                    0.7f - i * 0.5f * height/200,
+                    0.8f - i * 0.1f * height/200, 1f);
+            drawBackgroundLine(i, i + 0.03f);
+        }
+        glEnd();
         drawChunks();
-
-
     }
 
     void drawChunks() {
@@ -52,6 +70,8 @@ public class SubworldRenderer implements WindowResizeListener {
                 float drawY = client.worldYToScreen(baseY + i / Chunk.size());
 
                 Material material = chunk.getValue().materials[i];
+                if (material == Content.air())
+                    continue;
                 ColorWithAplha color = material.colors[chunk.getValue().colors[i]]; // chunk.getValue().colors[i]
                 if (drawX < (-1 - (worldPixelSize)) || drawX > client.renderer.screenWidth ||
                         drawY < (-1 - (worldPixelSize)) || drawY > client.renderer.screenHeight

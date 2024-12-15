@@ -14,14 +14,17 @@ import game.NetMessage.*;
 //This Class will be renamed or deleted in future!
 
 public class UDPClient implements Runnable {
+    public short connectionId = 0;
+
     private final DatagramSocket socket;
     private final InetAddress address;
     private final int port;
     private final BlockingQueue<Message> queue = new LinkedBlockingQueue<>();//consumer-producer
-    private final int maxPacketSize = 1024;
+    private final int maxPacketSize = 1060;
     private final byte[] buffer = new byte[maxPacketSize];
     private final int[] timeouts = {11, 29, 73, 277, 997};
     private boolean serverActive = false;
+
 
     public UDPClient(String ip, int port) throws IOException {
         this.address = InetAddress.getByName(ip);//Server addr
@@ -50,7 +53,6 @@ public class UDPClient implements Runnable {
                 Thread SendHandler = new Thread(this::sender);
                 ReceiveHandler.start();
                 SendHandler.start();
-                queue.add(new Request(FirstSync.getId()));
             }
             else {
                 System.out.println("Server timed out");
@@ -58,16 +60,19 @@ public class UDPClient implements Runnable {
 
         }
         catch (InterruptedException e) {
-            e.getStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
     protected void sendToServer() throws InterruptedException {
         Message message = queue.take();
-        byte[] dataToSend = message.buildMessage();
-        System.out.println("_____________________________________________");
-        System.out.println("Sent to Server: " + dataToSend[0]);
-        DatagramPacket packetToServer = new DatagramPacket(dataToSend, dataToSend.length,
+        byte[] messageByteArray = message.toBytes();
+        ByteBuffer dataToSend = ByteBuffer.allocate(messageByteArray.length + Short.BYTES);
+        dataToSend.putShort(connectionId);
+        dataToSend.put(messageByteArray);
+
+        System.out.println("Sends " + dataToSend.get(dataToSend.capacity() < 2 ? 0 : 2));
+        DatagramPacket packetToServer = new DatagramPacket(dataToSend.array(), dataToSend.capacity(),
                 address, port);
 
         for (int timeout : timeouts) {
@@ -101,21 +106,21 @@ public class UDPClient implements Runnable {
             while (!socket.isClosed())
                 sendToServer();
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException(e);
+//            System.out.println(e.getMessage());
         }
     }
 
+    DatagramPacket packetFromServer = new DatagramPacket(buffer, buffer.length);
+
     public void responseReceive() {
         try {
-            DatagramPacket packetFromServer = new DatagramPacket(buffer, buffer.length);
             socket.receive(packetFromServer);
             System.out.println("Received from Server: " + packetFromServer.getData()[0]);
-            System.out.println("__________________________________");
-            Messages.process(ByteBuffer.wrap(packetFromServer.getData()));
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
+            Messages.processReceivedBinMessage(ByteBuffer.wrap(packetFromServer.getData()));
+        } catch (IOException e) {
+//            System.out.println("UDPClient::responseReceive " + e.getMessage());
         }
-
     }
 
     public void shutdown() {

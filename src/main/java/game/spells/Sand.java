@@ -6,7 +6,7 @@ import game.Character;
 public class Sand extends Spell {
     public Sand() {
         name = "Sand";
-        image = "spell_template.png";
+        image = "sand_spell.png";
     }
 
     @Override
@@ -19,7 +19,7 @@ public class Sand extends Spell {
                 wand.getCastX(), wand.getCastY(), subworld,
                 (self, o) -> {
                     if (o instanceof Pixel && !(((Pixel) o).material() instanceof MaterialAir)) {
-                        ((Pixel) o).chunk().setPixel(
+                        subworld.setPixel(
                                 Math.round(self.getX()), Math.round(self.getY()), material, colorId);
                         return true;
                     }
@@ -31,6 +31,6 @@ public class Sand extends Spell {
                 (short) 1, (short) 1, false, null, color);
 
         subworld.addEntity(projectile);
-        return 0.1f;
+        return 0.07f;
     }
 }

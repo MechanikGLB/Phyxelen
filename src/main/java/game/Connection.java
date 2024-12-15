@@ -11,17 +11,22 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class Connection {
+    private short connectionId;
     private final InetAddress playerAddress;
     private final int playerPort;
     private final BlockingQueue<Message> messagesQueue = new LinkedBlockingQueue<>();
     private DatagramSocket socket;
     private boolean connected = false;
 
-    public Connection(DatagramSocket socket, InetAddress playerAddress, int playerPort) {
+    public Connection(DatagramSocket socket, short connectionId, InetAddress playerAddress, int playerPort) {
+        this.connectionId = connectionId;
         this.socket = socket;
         this.playerAddress = playerAddress;
         this.playerPort = playerPort;
     }
+
+    public short getConnectionId() { return connectionId; }
+    public void setConnectionId(short id) { connectionId = id; }
 
     public InetAddress getPlayerAddress() {
         return playerAddress;
@@ -31,9 +36,13 @@ public class Connection {
         return playerPort;
     }
 
+
+
     public void startSession() {
         connected = true;
-        messagesQueue.add(new Hello());
+        messagesQueue.add(new Hello(connectionId));
+
+        messagesQueue.add(new Hello(connectionId));
         Thread sender = new Thread(this::sender);
         sender.start();
         System.out.println("Client Handler started");
@@ -58,21 +67,19 @@ public class Connection {
             while (!socket.isClosed() && connected)
                 sendToClient();
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println("Connection::sender " + e.getMessage());
         }
     }
 
-    //    public Message takeMessage() throws InterruptedException {
-//        return messagesQueue.take();
-//    }
     public void addMessage(Message message) {
+//        System.out.println("Adds message for " + this + " to " + playerAddress);
         messagesQueue.add(message);
     }
 
     public void sendToClient() throws InterruptedException, IOException {
         Message message = messagesQueue.take();
-        byte[] dataToSend = message.buildMessage();
-        System.out.println("Sent to: " + playerAddress.getHostAddress() + "/ Message: " + dataToSend[0]);
+        byte[] dataToSend = message.toBytes();
+        System.out.println("Sends " + dataToSend[0] + " to " + connectionId + " at " + playerAddress.getHostAddress());
         DatagramPacket packetToClient = new DatagramPacket(dataToSend, dataToSend.length,
                 playerAddress, playerPort);
 

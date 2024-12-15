@@ -23,6 +23,7 @@ public class Bullet extends Spell {
                         return true;
                     } else if (o instanceof Character) {
                         ((Character)o).damage(5);
+                        return true;
                     }
                     return false;
                 },

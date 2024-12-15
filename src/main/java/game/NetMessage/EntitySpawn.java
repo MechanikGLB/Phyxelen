@@ -1,7 +1,6 @@
 package game.NetMessage;
 
 import game.Entity;
-import game.Main;
 
 import java.nio.ByteBuffer;
 

@@ -1,14 +1,12 @@
 package game;
 
-import game.NetMessage.Request;
+import game.NetMessage.RequestChunk;
 
+import java.io.File;
 import java.util.*;
-//import java.
-import java.io.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static java.lang.Math.*;
-import static org.lwjgl.opengl.GL21.*;
 
 class HorizontalChunkTree extends TreeSet<Chunk> {
 //    private final Comparator<Chunk> comparator = (o1, o2) -> o2.xIndex - o1.xIndex;
@@ -68,18 +66,16 @@ public class Subworld extends GameObject {
     float pixelPhysicCounter; /// Counter for pixel update rate
     byte pixelPhysicPhase = 0; // Maybe temporary
     byte pixelPhysicFreezingCountdown = -1; /// -1 -- do not stop, 0 -- stop, n -- stop after "n" steps
-    ConcurrentHashMap<VectorI, Chunk> activeChunks = new ConcurrentHashMap<>();
-    ChunkTree activeChunkTree = new ChunkTree();
-//    TreeSet<Chunk> activeChunkTree = new TreeSet<>((chunk, t1) -> {
-//        if (chunk.yIndex != t1.yIndex)
-//            return chunk.yIndex - t1.yIndex;
-//        return chunk.xIndex - t1.xIndex;
-//    });
 
-//    ArrayList<game.Chunk> activeChunkArray = new ArrayList<>();
+    ConcurrentHashMap<VectorI, Chunk> activeChunks = new ConcurrentHashMap<>();
+    ArrayList<VectorI> loadingChunks = new ArrayList<>();
+    ChunkTree activeChunkTree = new ChunkTree();
+    Stack<Chunk> chunksToAdd = new Stack<>();
     Hashtable<VectorI, Chunk> passiveChunks = new Hashtable<>();
+
     ArrayList<Entity> entities = new ArrayList<>();
     ArrayList<EntityWithCollision> collidableEntities = new ArrayList<>();
+    ArrayList<Player> players = new ArrayList<>();
 
     ArrayList<Entity> entitiesToAdd = new ArrayList<>();
     ArrayList<Entity> entitiesToRemove = new ArrayList<>();
@@ -93,6 +89,7 @@ public class Subworld extends GameObject {
         /*TEMP*/ generator = new WorldGenerator(this);
     }
 
+    public Chunk getActiveChunk(VectorI indexes) { return activeChunks.get(indexes); }
 
     public void update(float dt) {
         GameApp.Profiler.startProfile("tick", (byte)0, (byte)100, (byte)100);
@@ -106,6 +103,9 @@ public class Subworld extends GameObject {
 //            } catch (InterruptedException e) {
 //                throw new RuntimeException(e);
 //            }
+        if (!chunksToAdd.isEmpty()) {
+            loadedChunk(chunksToAdd.pop());
+        }
 
         pixelPhysicCounter += dt;
         if (pixelPhysicCounter >= 0.03) {
@@ -156,17 +156,30 @@ public class Subworld extends GameObject {
             entity.draw(fdt);
     }
 
+    /// For host: makes requested chunk available in list of active chunks after function return.
+    /// For joined client: requests chunk from server.
     public void loadChunk(VectorI indexes) {
-        if (activeChunks.containsKey(indexes)) return;
-        if (Main.getGame().gameState == GameApp.GameState.Client){
-            
+        if (activeChunks.containsKey(indexes) || loadingChunks.contains(indexes))
             return;
-        }; // TODO: multiplayer, require chunk via net
+        loadingChunks.add(indexes);
+        if (Main.getGame().gameState == GameApp.GameState.Client){
+            Main.getClient().addMessage(new RequestChunk(indexes.x, indexes.y));
+            return;
+        };
 
         //if () {} // TODO: load from file. True if found
-        Chunk chunk = generator.generateChunk(indexes);
+        loadedChunk(generator.generateChunk(indexes));
+    }
+
+    public void loadedChunk(Chunk chunk) {
+        var indexes = new VectorI(chunk.xIndex, chunk.yIndex);
+        loadingChunks.remove(indexes);
         activeChunks.put(indexes, chunk);
         activeChunkTree.add(chunk);
+    }
+
+    public void receivedChunk(Chunk chunk) {
+        chunksToAdd.add(chunk);
     }
 
 
@@ -174,36 +187,55 @@ public class Subworld extends GameObject {
     public Random random() { return random; }
 
 
-    void unloadChunk(VectorI indexes) {
-        // TODO: write to file
-        activeChunks.remove(indexes);
-    }
-
-
-    public void updateChunksForUser(int centerX, int centerY, int width, int height) {
+    public void updateChunksForUsers() {
         ArrayList<VectorI> toDeactivate = new ArrayList<>();
+        int chunksX = 10;
+        int chunksY = 8;
+
+        // Unload chunks
+
+        int[] startChunkX = new int[players.size()];
+        int[] startChunkY = new int[players.size()];
+        for (int i = 0; i < players.size(); i++) {
+            startChunkX[i] = (int) (players.get(i).x / Chunk.size()) - chunksX / 2;
+            startChunkY[i] = (int) (players.get(i).y / Chunk.size()) - chunksY / 2;
+        }
+
         for (var active : activeChunks.entrySet()) {
-            if (active.getKey().x < centerX - width ||
-                active.getKey().x > centerX + width ||
-                active.getKey().y < centerX - height ||
-                active.getKey().y > centerX + height
-            ) {
-                passiveChunks.put(active.getKey(), active.getValue());
-                toDeactivate.add(active.getKey());
+            boolean seen = false;
+            var chunk = active.getKey();
+            for (int i = 0; i < players.size(); i++) {
+                if (chunk.x > startChunkX[i]
+                        && chunk.x < startChunkX[i] + chunksX
+                        && chunk.y > startChunkY[i]
+                        && chunk.y < startChunkY[i] + chunksY
+                ) {
+                    seen = true;
+                    break;
+                }
             }
+            if (!seen) {
+                passiveChunks.put(chunk, active.getValue());
+                toDeactivate.add(chunk);
+            }
+
         }
         for (var key : toDeactivate) {
             activeChunkTree.remove(activeChunks.get(key));
             activeChunks.remove(key);
         }
 
-        for (int x = -width; x <= width; x++) {
-            for (int y = -height; y <= height; y++) {
-                VectorI indexes = new VectorI(x + centerX, y + centerY);
+        // Load chunks
+        // Only for host, as clients request them themselves
+
+        VectorI indexes = new VectorI(0, 0);
+        for (int x = 0; x < chunksX; x++) {
+            for (int y = 0; y < chunksY; y++) {
+                indexes.x = startChunkX[0] + x;
+                indexes.y = startChunkY[0] + y;
                 Chunk passive = passiveChunks.get(indexes);
                 if (passive != null) {
-                    activeChunks.put(indexes, passive);
-                    activeChunkTree.add(passive);
+                    loadedChunk(passive);
                     passiveChunks.remove(indexes);
                 }
                 else if (!activeChunks.containsKey(indexes)) {
@@ -214,10 +246,15 @@ public class Subworld extends GameObject {
     }
 
 
+    public int worldCoordinateToChunkIndex(int coordinate) {
+        return coordinate >= 0 ? coordinate / Chunk.size() : (coordinate+1) / Chunk.size() - 1;
+    }
+
+
     public Chunk getChunkHavingPixel(int x, int y) {
         return activeChunks.get(new VectorI(
-                x >= 0 ? x / Chunk.size() : (x+1) / Chunk.size() - 1,
-                y >= 0 ? y / Chunk.size() : (y+1) / Chunk.size() - 1));
+                worldCoordinateToChunkIndex(x),
+                worldCoordinateToChunkIndex(y)));
     }
 
 
@@ -251,10 +288,13 @@ public class Subworld extends GameObject {
 
 
     /// Fills area with pixels of `material` with `color`
-    public void fillPixels(int x, int y, int w, int h, Material material, byte color) {
+    public void fillPixels(int x, int y, int w, int h, Material material, byte color, float maxReplaceDensity) {
         for (int dx = 0; dx < w; dx++) {
             for (int dy = 0; dy < h; dy++) {
-                setPixel(x + dx, y + dy, material, color);
+                Pixel pixel = getPixel(x + dx, y + dy);
+                if (pixel.chunk == null || maxReplaceDensity >= 0 && pixel.material().density > maxReplaceDensity)
+                    continue;
+                pixel.chunk.setPixel(pixel.i, material, color);
             }
         }
     }
@@ -263,7 +303,7 @@ public class Subworld extends GameObject {
 //    Pixel vectorCast(float x, float y, float dx, float dy)
 
 
-    Pixel rayCast(float x1, float y1, float x2, float y2) {
+    Pixel rayCast(float x1, float y1, float x2, float y2, float minDensity) {
         int stepCount = round(max(abs(x2-x1), abs(y2-y1)));
         float xStep = (x2-x1)/stepCount;
         float yStep = (y2-y1)/stepCount;
@@ -273,43 +313,12 @@ public class Subworld extends GameObject {
             Pixel pixel = getPixel(x, y);
             if (pixel.chunk == null)
                 break;
-            if (!pixel.isAir())
+            Material material = pixel.material();
+            if (material.density >= minDensity)
                 return pixel;
         }
         return null;
     }
-
-
-//    void swapPixels(game.Pixel pixel1, game.Pixel pixel2) {
-//        int xBuffer = pixel1.x;
-//        int yBuffer = pixel1.y;
-//        pixel1.x = pixel2.x;
-//        pixel1.y = pixel2.y;
-//        pixel2.x = xBuffer;
-//        pixel2.y = yBuffer;
-//        setPixel(pixel1);
-//        setPixel(pixel2);
-//    }
-
-
-//    Material getPixelMaterial(int x, int y) {
-//        Chunk chunk = getChunkHavingPixel(x, y);
-//        if (chunk == null) return null;
-//        return chunk.getPixelMaterialChecked(x, y);
-//    }
-
-
-//    boolean getPixelPhysicSolved(int x, int y) {
-//        game.Chunk chunk = getChunkHavingPixel(x, y);
-//        if (chunk == null) return true;
-//        return chunk.getPixelPhysicSolved(game.Chunk.toRelative(x), game.Chunk.toRelative(y));
-//    }
-
-
-//    game.Material getMaterial(int pixel) {
-//        return world.pixelIds[game.Pixels.getId(pixel)];
-//    }
-//    game.Material getMaterial(int x, int y)
 
 
     public void addEntity(Entity entity) {
@@ -318,5 +327,61 @@ public class Subworld extends GameObject {
 
     public void removeEntity(Entity entity) {
         entitiesToRemove.add(entity);
+    }
+
+    public void spawnPlayer(Player player) {
+        if (!players.contains(player)) {
+            players.add(player);
+            addEntity(player);
+
+        }
+        int x = random.nextInt(-200, 200);
+        int y = 0;
+
+        // find on surface
+        while (true) {
+            boolean found = false;
+            Chunk chunk = getChunkHavingPixel(x, y);
+            if (chunk == null) {
+                loadChunk(new VectorI(worldCoordinateToChunkIndex(x), worldCoordinateToChunkIndex(y)));
+                chunk = getChunkHavingPixel(x, y);
+            }
+            for (int i = 0; i < Chunk.size(); i++) {
+                if (chunk.getPixelMaterial(x, y) == Content.air()) {
+                    y = chunk.yIndex * Chunk.size() + i;
+                    found = true;
+                    break;
+                }
+            }
+            if (found)
+                break;
+            y += Chunk.size();
+            chunk = getChunkHavingPixel(x, y);
+        }
+
+        player.spawn(x, y, random.nextInt());
+    }
+
+    public void jetPixels(int x, int y, int size) {
+        size += 2;
+        for (int dx = -size/2; dx <= size/2; dx++) {
+            for (int dy = size/2; dy > -size/2; dy--) {
+                Pixel pixel = getPixel(
+                        x + dx, y + dy);
+                if (pixel.chunk == null)
+                    return;
+                Material material = pixel.material();
+                if (!(material instanceof MaterialAir) ) {
+                    double angle = random.nextDouble(-Math.PI, Math.PI);
+                    addEntity(new PixelEntity(
+                            x + dx, y + dy,
+                            this, material, pixel.color(),
+                            (float)Math.sin(angle) * 100.f, (float)Math.cos(angle) * 100.f,
+                            0, -9.8f
+                    ));
+                    pixel.chunk.setPixel(pixel.i, Content.airMaterial, (byte) 0);
+                }
+            }
+        }
     }
 }

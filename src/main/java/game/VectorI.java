@@ -6,7 +6,7 @@ public class VectorI {
     int x;
     int y;
 
-    VectorI(int x, int y) {
+    public VectorI(int x, int y) {
         this.x = x;
         this.y = y;
     }

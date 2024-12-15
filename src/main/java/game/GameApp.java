@@ -28,10 +28,12 @@ public abstract class GameApp {
     public World getActiveWorld() {return activeWorld;}
     public Subworld getActiveSubworld() {return activeSubworld;}
 
+    boolean debug = true;
+
     public void run() {
         checkDirectoryStructure();
         if (gameState == GameState.Client) {
-            enterWorld(new World());
+            enterWorld(World.createWorldForJoining());
         } else {
             // temp
             File testWorldDir = new File("worlds" + File.separator + "test");

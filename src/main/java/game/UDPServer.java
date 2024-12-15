@@ -1,5 +1,6 @@
 package game;
 
+import com.sun.source.tree.Tree;
 import game.NetMessage.Hello;
 import game.NetMessage.Messages;
 
@@ -8,18 +9,21 @@ import java.io.IOException;
 import java.net.DatagramSocket;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Random;
+import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 public class UDPServer implements Runnable {
-
-
-    private int maxPacketSize = 1024;
+    private int maxPacketSize = 1060;
     private byte[] buffer = new byte[maxPacketSize];
 //    private byte[] reserveBuffer;
     private final DatagramSocket socket;
     private Connection currentConnection;
-    private ArrayList<Connection> playersList = new ArrayList<Connection>();
-
+    private final TreeSet<Connection> connections = new TreeSet<>(
+            (o1, o2) -> o2.getConnectionId() - o1.getConnectionId());
+    private static final Random random = new Random();
+    private static final byte CONNECTION_ID_BYTES = Short.BYTES;
 
     public UDPServer(int maxPacketSize, int port)throws IOException {
         this.socket = new DatagramSocket(port);
@@ -51,55 +55,55 @@ public class UDPServer implements Runnable {
     }
 
 
-    public void receiveMessage(DatagramPacket packetFromClient) {
+    public void receiveMessage(ByteBuffer bytesFromClient) {
         try {
-            Messages.process(ByteBuffer.wrap(packetFromClient.getData()));
+            Messages.processReceivedBinMessage(bytesFromClient.slice(
+                    CONNECTION_ID_BYTES, bytesFromClient.capacity() - CONNECTION_ID_BYTES));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
+    DatagramPacket packetFromClient = new DatagramPacket(buffer, buffer.length);
+    ByteBuffer receivedBytes;
+    Connection comparingConnection = new Connection(null, (short) 0, null, 0);
+
     public void receiver(){
         try {
             while (!socket.isClosed()) {
-                DatagramPacket packetFromClient = new DatagramPacket(buffer, buffer.length);
                 socket.receive(packetFromClient);
-                System.out.println("___________________________________");
-                System.out.println("Client addr: " + packetFromClient.getAddress().getHostAddress());
-                System.out.println("Client send message: " + packetFromClient.getData()[0]);
-                Connection userToProcess = new Connection(socket, packetFromClient.getAddress(), packetFromClient.getPort());
-                if(playersList.contains(userToProcess)){
-                    currentConnection = userToProcess; //for messages work
-                }
-                if (packetFromClient.getData()[0] == Hello.getId()) {
+                receivedBytes = ByteBuffer.wrap(packetFromClient.getData());
 
-                    if(!playersList.contains(userToProcess))
-                    {
-                        System.out.println("Client Connected");
-                        playersList.add(userToProcess);
-                        playersList.getLast().startSession();
-                    }
+                if (receivedBytes.get(0) == 0)
+                    System.out.println("Received " + + receivedBytes.get(0) + " from "
+                            + packetFromClient.getAddress().getHostAddress());
+                else
+                    System.out.println("Received " + + receivedBytes.get(CONNECTION_ID_BYTES) + " from "
+                            + receivedBytes.getShort(0) + " at " + packetFromClient.getAddress().getHostAddress());
 
+                short connectionId;
+                if (receivedBytes.get(0) == 0) {
+                    currentConnection = new Connection(socket, (short) random.nextInt(),
+                                    packetFromClient.getAddress(), packetFromClient.getPort());
+                    connections.add(currentConnection);
+                    currentConnection.startSession();
+                    connectionId = currentConnection.getConnectionId();
+                    System.out.println("Client " + connectionId + " Connected");
+                } else {
+                    connectionId = receivedBytes.getShort(0);
+                    comparingConnection.setConnectionId(connectionId);
+                    currentConnection = connections.ceiling(comparingConnection);
+                    if (currentConnection == null || currentConnection.getConnectionId() != connectionId)
+                        continue;
                 }
-                receiveMessage(packetFromClient);
+                receiveMessage(receivedBytes);
                 currentConnection = null;
-                userToProcess = null;
             }
         }
-        catch (Exception e) {}
+        catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
-
-//    public void sendToClient(Message message, InetAddress clientAddr, int clientPort) throws IOException {
-//        byte[] dataToSend = message.buildMessage();
-//        DatagramPacket packetToClient = new DatagramPacket(dataToSend, dataToSend.length,
-//                clientAddr, clientPort);
-//
-//                socket.send(packetToClient);
-//        }
-//        byte[] dataBuffer = message.getBytes(); //NOW WE ARE TRUST THAT MESSAGE NOT BIGGER THAN PACKET
-//        DatagramPacket packet = new DatagramPacket(dataBuffer, dataBuffer.length, clientAddr, clientPort);
-//        socket.send(packet); //large packets separates automatically
-//        System.out.println("Server sent message: " + message);
 
 
     public int getLocalPort() {

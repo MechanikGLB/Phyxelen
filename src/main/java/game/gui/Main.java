@@ -66,38 +66,6 @@ public class Main {
         glVertex2i(x2, y2);
         glVertex2i(x1, y2);
         glEnd();
-//        glBindBuffer(GL_ARRAY_BUFFER, rectVertexBuffer);
-//
-//        rectVertexArray[0] = x1; rectVertexArray[1] = y1;
-//        rectVertexArray[2] = x2; rectVertexArray[3] = y1;
-//        rectVertexArray[4] = x2; rectVertexArray[5] = y2;
-//        rectVertexArray[6] = x1; rectVertexArray[7] = y2;
-//
-//        glBufferData(GL_ARRAY_BUFFER, rectVertexArray, GL_DYNAMIC_DRAW);
-//        glVertexPointer(2, GL_INT, 0, 0);
-//
-//        glBindBuffer(GL_ARRAY_BUFFER, rectColorBuffer);
-//
-//        for (int i = 0; i < 12; i += 3) {
-//            rectColorArray[i] = r;
-//            rectColorArray[i + 1] = g;
-//            rectColorArray[i + 2] = b;
-//            rectColorArray[i + 3] = a;
-//        }
-//        var ca = ByteBuffer.allocateDirect(3*4);
-////        var ca = new float[3*4];
-////        var ca = new byte[3*4];
-////        for (int i = 0; i < 3*4; i ++)
-////            ca.put((byte) 180);
-//
-//        for (int i = 0; i < 3*4; i ++)
-//            ca.put((byte) Byte.MAX_VALUE);
-//
-//        glBufferData(GL_ARRAY_BUFFER, ca, GL_DYNAMIC_DRAW);
-////        System.out.println(glGetError());
-//        glColorPointer(4, GL_BYTE, 0, 0);
-//
-//        glDrawArrays(GL_QUADS, 0, 4);
     }
 
     static private void drawRectTextured(int x1, int y1, int x2, int y2, int r, int g, int b, int a, int textureBuffer) {
@@ -105,14 +73,14 @@ public class Main {
         glBindTexture(GL_TEXTURE_2D, textureBuffer);
         glBegin(GL_QUADS);
         glColor4b((byte) (r / 2 - 1), (byte) (g / 2 - 1), (byte) (b / 2 - 1), (byte) (a / 2 - 1));
+        glTexCoord2f(0f,1f);
         glVertex2i(x1, y1);
-        glTexCoord2f(0f,0f);
+        glTexCoord2f(1f,1f);
         glVertex2i(x2, y1);
         glTexCoord2f(1f,0f);
         glVertex2i(x2, y2);
-        glTexCoord2f(1f,1f);
+        glTexCoord2f(0f,0f);
         glVertex2i(x1, y2);
-        glTexCoord2f(0f,1f);
         glEnd();
         glDisable(GL_TEXTURE_2D);
     }

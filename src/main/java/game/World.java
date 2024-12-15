@@ -5,8 +5,8 @@ import java.nio.file.Path;
 import java.util.*;
 import java.io.*;
 
-import game.NetMessage.FirstSync;
-import game.NetMessage.Request;
+import game.NetMessage.ContentSync;
+import game.NetMessage.RequestContent;
 import org.snakeyaml.engine.v2.api.Dump;
 import org.snakeyaml.engine.v2.api.DumpSettings;
 import org.snakeyaml.engine.v2.api.Load;
@@ -110,6 +110,13 @@ public class World {
     }
 
 
+    public static World createWorldForJoining() {
+        World world = new World();
+        world.startup();
+        return world;
+    }
+
+
     public Subworld loadOrCreateSubworld(String subworldId) {
         Subworld subworld = new Subworld(this, subworldId);
         subworlds.put(subworldId, subworld);
@@ -121,7 +128,17 @@ public class World {
         if (Main.getClient() == null)
             loadContent();
         else
-            Main.getClient().addMessage(new Request(FirstSync.getId()));
+            Main.getClient().addMessage(new RequestContent());
+    }
+
+
+    private void addAirMaterial() {
+        pixelIds[0] = new MaterialAir();
+        pixelIds[0].name = "air";
+        pixelIds[0].colors = new ColorWithAplha[1];
+        pixelIds[0].colors[0] = new ColorWithAplha(0.2f, 0.1f, 0.0f, 1f);
+        pixelIds[0].density = 0.01f;
+        Content.airMaterial = pixelIds[0];
     }
 
 
@@ -131,11 +148,7 @@ public class World {
         Content.loadModules(modules);
         //temp
         pixelIds = new Material[Content.materials.size() + 1];
-        pixelIds[0] = new MaterialAir();
-        pixelIds[0].colors = new ColorWithAplha[1];
-        pixelIds[0].colors[0] = new ColorWithAplha(0.2f, 0.1f, 0.0f, 1f);
-        pixelIds[0].density = 0.01f;
-        Content.airMaterial = pixelIds[0];
+        addAirMaterial();
         int i = 1;
         for (var definition : Content.materials.values()) {
             pixelIds[i] = definition;
@@ -145,13 +158,18 @@ public class World {
     }
 
 
-    public void requireContentFromServer(ArrayList<String> materials) {
+    public void receiveContentFromServer(ArrayList<String> materials) {
+        modules = new String[1];
+        modules[0] = "test";
         Content.loadModules(modules);
+        pixelIds = new Material[Content.materials.size() + 1];
+        System.out.println("Received materials from server: ");
         System.out.println(Arrays.toString(materials.toArray()));
-
-        for (byte i = 1; i <= materials.size(); i++) {
-            Content.getMaterial(materials.get(i)).id = i;
+        addAirMaterial();
+        for (byte i = 1; i < materials.size(); i++) {
+            Material definition = Content.getMaterial(materials.get(i));
+            pixelIds[i] = definition;
+            definition.id = i;
         }
-
     }
 }

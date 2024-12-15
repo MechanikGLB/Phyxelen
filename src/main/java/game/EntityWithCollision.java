@@ -1,7 +1,6 @@
 package game;
 
 import static java.lang.Math.*;
-import static org.lwjgl.opengl.GL21.*;
 
 public class EntityWithCollision extends Entity {
     float collisionBoxWidth;
@@ -13,6 +12,7 @@ public class EntityWithCollision extends Entity {
     public float vx = 0;
     public float vy = 0;
     public float gravity = -9.8f;
+    float speedMultiplier = 1;
 
     public EntityWithCollision(float x, float y, Subworld subworld, boolean collidable) {
         super(x, y, subworld);
@@ -29,13 +29,19 @@ public class EntityWithCollision extends Entity {
                     Math.round(x), Math.round(y-collisionBoxHeight/2)-1);
             var rightPixel = subworld.getPixel(
                     Math.round(x+collisionBoxWidth/2), Math.round(y-collisionBoxHeight/2)-1);
-            inAir = middlePixel.chunk != null
-                    && leftPixel.isAir() && rightPixel.isAir() && middlePixel.isAir();
+            inAir = leftPixel.chunk != null && rightPixel.chunk != null
+                    && leftPixel.material().density < 2 && rightPixel.material().density < 2 && middlePixel.material().density < 2;
             if (inAir) {
-                Pixel castResult = subworld.rayCast(x, y - collisionBoxHeight/2, x, y - collisionBoxHeight/2 + vy * dt);
-                if (castResult == null)
+                Pixel castResult = subworld.rayCast(x, y - collisionBoxHeight/2, x, y - collisionBoxHeight/2 + vy * dt, 2);
+                if (castResult == null) {
+                    // Slow down in liquids
+                    if (subworld.getPixel(x, y).material().density >= 1)
+                        vy *= 0.5f;
+                    // Do not go up through solid materials
+                    if (vy > 0 && subworld.getPixel(x, y + collisionBoxHeight / 2 + vy).material().density >= 2)
+                            vy = 0;
                     y += vy * dt;
-                else
+                } else
                     y = castResult.y() + collisionBoxHeight / 2 + 1;
             } else {
                 vy = 0;
@@ -67,13 +73,20 @@ public class EntityWithCollision extends Entity {
                 Math.round(y - collisionBoxHeight/2 + dy) + 2
         );
 
-        if (!aboveFootPixel.isAir())
+        if (footPixel.chunk == null)
+            return;
+
+        if (aboveFootPixel.material().density >= 2)
             dx = 0;
-        else if (!footPixel.isAir()) {
+        else if (footPixel.material().density >= 2) {
             if (dy < 1)
                 dy = 1;
         }
-        x += dx; y += dy;
+        if (aboveFootPixel.material().density > 0.5)
+            speedMultiplier = 0.6f;
+        else
+            speedMultiplier = 1f;
+        x += dx * speedMultiplier; y += dy  *speedMultiplier;
     }
 
     boolean intersectedByRay(float x1, float y1, float x2, float y2) {

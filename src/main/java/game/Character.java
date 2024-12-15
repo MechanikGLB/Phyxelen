@@ -65,7 +65,7 @@ public class Character extends EntityWithCollision {
             Pixel targetPixel = subworld.getPixel(Math.round(x+dx), Math.round(y+dy));
             if (targetPixel.chunk == null)
                 return;
-            if (targetPixel.chunk.materials[targetPixel.i] == subworld.world.pixelIds[0]) {
+            if (targetPixel.material().density < 2) {
                 move(dx, dy);
             }
         }
