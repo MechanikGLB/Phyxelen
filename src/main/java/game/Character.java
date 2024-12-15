@@ -1,6 +1,6 @@
 package game;
 
-public class Character extends EntityWithCollision {
+abstract public class Character extends EntityWithCollision {
     private float lookDirection;
     public boolean canGo = true;
     protected int maxHealth = 100;

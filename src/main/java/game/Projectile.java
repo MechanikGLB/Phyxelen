@@ -1,5 +1,9 @@
 package game;
 
+import game.NetMessage.Message;
+import game.NetMessage.PlayerSpawn;
+import game.NetMessage.ProjectileSpawn;
+
 import java.util.ArrayList;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -93,6 +97,11 @@ public class Projectile extends Entity {
         y = newY;
         velocityX += accelerationX;
         velocityY += accelerationY;
+    }
+
+    @Override
+    public Message getSpawnMessage() {
+        return new ProjectileSpawn();
     }
 
     @Override

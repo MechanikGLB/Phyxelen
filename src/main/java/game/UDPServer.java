@@ -2,6 +2,7 @@ package game;
 
 import com.sun.source.tree.Tree;
 import game.NetMessage.Hello;
+import game.NetMessage.Message;
 import game.NetMessage.Messages;
 
 import java.net.DatagramPacket;
@@ -105,6 +106,11 @@ public class UDPServer implements Runnable {
         }
     }
 
+    public void broadcastMessage(Message message) {
+        for (Connection connection : connections) {
+            connection.addMessage(message);//Send to all sessions
+        }
+    }
 
     public int getLocalPort() {
         return socket.getLocalPort();

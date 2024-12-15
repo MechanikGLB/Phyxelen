@@ -13,11 +13,10 @@ public class ProjectileSpawn extends Message {
     float y;
     int entityId;
 
-    public PlayerSpawn(int x, int y, int id) {
-        this.x = x;
-        this.y = y;
-        this.entityId = id;
+    public ProjectileSpawn() {
+
     }
+
 
     @Override
     public byte[] toBytes() {

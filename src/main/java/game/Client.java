@@ -45,7 +45,7 @@ public class Client extends GameApp {
 
     public Character getControlledCharacter() { return controlledCharacter; }
     public Character getPrimaryCharacter() { return primaryCharacter; }
-
+    public void setPrimaryCharacter(Player character) {primaryCharacter = character;}
 
     @Override
     public void run() {
@@ -56,10 +56,10 @@ public class Client extends GameApp {
         super.run();
         bindKeys();
 
-        primaryCharacter = new Player(0, 0, activeSubworld);
-//        primaryCharacter.spawn();
-//        activeSubworld.addEntity(primaryCharacter);
-        activeSubworld.spawnPlayer(primaryCharacter);
+        if ( gameState != GameState.Client ) {
+            primaryCharacter = new Player(0, 0, activeSubworld);
+            activeSubworld.spawnPlayer(primaryCharacter);
+        }
 
         System.out.println("Loading textures");
         try {
@@ -150,7 +150,7 @@ public class Client extends GameApp {
 
             for (int i = 0; i < 10; i++)
                 if (glfwGetKey(window, GLFW_KEY_0 + i) != 0)
-                    if (controlledCharacter != null && ((Player)controlledCharacter).inventory.size() >= i)
+                    if (controlledCharacter != null && ((Player)controlledCharacter).inventory.size() >= i && i>0)
                         controlledCharacter.holdedItem = ((Player)controlledCharacter).inventory.get(i-1);
                     else
                         paintingPixel = i;

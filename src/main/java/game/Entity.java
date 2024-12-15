@@ -1,5 +1,7 @@
 package game;
 
+import game.NetMessage.Message;
+
 import java.util.Random;
 
 /* game.Entity is object that has position in subworld and can be placed not at world
@@ -10,6 +12,7 @@ public abstract class Entity extends GameObject {
     protected float x;
     protected float y;
     protected Subworld subworld;
+    protected boolean local = true;
     int id;
 
     public Entity(float x, float y, Subworld subworld, int id) {
@@ -24,6 +27,16 @@ public abstract class Entity extends GameObject {
         this.y = y;
         this.subworld = subworld;
         id = idGenerator.nextInt();
+    }
+
+    abstract public Message getSpawnMessage();
+
+    public boolean isLocal() {
+        return local;
+    }
+
+    public void setLocal(boolean local) {
+        this.local = local;
     }
 
     public float getX() { return x; };

@@ -2,7 +2,7 @@ package game;
 
 import static java.lang.Math.*;
 
-public class EntityWithCollision extends Entity {
+abstract public class EntityWithCollision extends Entity {
     float collisionBoxWidth;
     float collisionBoxHeight;
     boolean collideWorld = true;

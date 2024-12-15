@@ -226,6 +226,11 @@ public class Subworld extends GameObject {
         }
 
         // Load chunks
+
+        if (players.isEmpty()) {
+            return;
+        }
+
         // Only for host, as clients request them themselves
 
         VectorI indexes = new VectorI(0, 0);
@@ -322,6 +327,18 @@ public class Subworld extends GameObject {
 
 
     public void addEntity(Entity entity) {
+        if (entity.isLocal()){
+            switch (Main.getGame().getGameState()){
+                case GameApp.GameState.Client:
+                    Main.getClient().addMessage(entity.getSpawnMessage());
+                    break;
+                case GameApp.GameState.Server:
+                    Main.getServer().broadcastMessage(entity.getSpawnMessage());
+                    break;
+                case GameApp.GameState.Local:
+                    break;
+            }
+        }
         entitiesToAdd.add(entity);
     }
 
@@ -330,11 +347,6 @@ public class Subworld extends GameObject {
     }
 
     public void spawnPlayer(Player player) {
-        if (!players.contains(player)) {
-            players.add(player);
-            addEntity(player);
-
-        }
         int x = random.nextInt(-200, 200);
         int y = 0;
 
@@ -353,12 +365,18 @@ public class Subworld extends GameObject {
                     break;
                 }
             }
-            if (found)
+            if (found) {
                 break;
+            }
             y += Chunk.size();
             chunk = getChunkHavingPixel(x, y);
         }
 
+        if (!players.contains(player)) {
+            players.add(player);
+            addEntity(player);
+
+        }
         player.spawn(x, y, random.nextInt());
     }
 

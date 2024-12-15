@@ -1,5 +1,7 @@
 package game;
 
+import game.NetMessage.Message;
+import game.NetMessage.PlayerSpawn;
 import game.spells.*;
 
 import java.util.ArrayList;
@@ -29,8 +31,14 @@ public class Player extends Character {
     private final float respawnTime = 3f;
     private float respawnTimer = respawnTime;
 
+    private short seed;
+
+//    public void setSeed(short seed) {this.seed = seed;}
+//    public short getSeed() {return seed;}
+
     public Player(float x, float y, Subworld subworld) {
         super(x, y, subworld);
+        seed = (short)(subworld.random().nextInt());
         collisionBoxWidth = 4;
         collisionBoxHeight = 8;
         health = 0;
@@ -176,6 +184,11 @@ public class Player extends Character {
             inventory.add(wand);
             holdedItem = wand;
         }
+    }
+
+    @Override
+    public Message getSpawnMessage() {
+        return new PlayerSpawn((int)x,(int)y,id,seed);
     }
 
     public void die() {
