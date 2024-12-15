@@ -1,11 +1,15 @@
 package game;
 
+import game.request.Request;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.concurrent.Semaphore;
 
 public abstract class GameApp {
@@ -16,10 +20,9 @@ public abstract class GameApp {
         Client
     }
     protected GameState gameState;
-//    protected static Content content = new Content();
-
     protected static World activeWorld;
     protected static Subworld activeSubworld;
+    protected static LinkedList<Request> requests = new LinkedList<>();
     /// Counter is used for making some computations more rare
     protected short counter = 0;
 
@@ -29,6 +32,8 @@ public abstract class GameApp {
     public Subworld getActiveSubworld() {return activeSubworld;}
 
     boolean debug = true;
+
+    public static LinkedList<Request> getRequests() { return requests; }
 
     public void run() {
         checkDirectoryStructure();
@@ -47,6 +52,8 @@ public abstract class GameApp {
     protected abstract void loop();
 
     protected void tick(float dt) {
+        if (!requests.isEmpty())
+            requests.pop().process();
         activeWorld.tick(dt);
     }
 
