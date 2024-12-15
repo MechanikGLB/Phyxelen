@@ -32,17 +32,23 @@ public class Player extends Character {
     private float respawnTimer = respawnTime;
 
     private short seed;
+    private Connection connection;
 
-//    public void setSeed(short seed) {this.seed = seed;}
+    public Connection getConnection() {
+        return connection;
+    }
+
+    //    public void setSeed(short seed) {this.seed = seed;}
 //    public short getSeed() {return seed;}
 
-    public Player(float x, float y, Subworld subworld) {
+    public Player(float x, float y, Subworld subworld, Connection connection) {
         super(x, y, subworld);
         seed = (short)(subworld.random().nextInt());
         collisionBoxWidth = 4;
         collisionBoxHeight = 8;
         health = 0;
         respawnTimer = 0.3f;
+        this.connection = connection;
     }
 
     public ArrayList<HoldableItem> getInventory() { return inventory; }

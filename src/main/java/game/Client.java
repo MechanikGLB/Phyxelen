@@ -57,7 +57,7 @@ public class Client extends GameApp {
         bindKeys();
 
         if ( gameState != GameState.Client ) {
-            primaryCharacter = new Player(0, 0, activeSubworld);
+            primaryCharacter = new Player(0, 0, activeSubworld, null);
             activeSubworld.spawnPlayer(primaryCharacter);
         }
 

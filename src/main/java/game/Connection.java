@@ -2,6 +2,7 @@ package game;
 
 import game.NetMessage.Hello;
 import game.NetMessage.Message;
+import game.request.PlayerSpawnRequest;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -42,7 +43,7 @@ public class Connection {
         connected = true;
         messagesQueue.add(new Hello(connectionId));
 
-        messagesQueue.add(new Hello(connectionId));
+//        Main.getGame().addRequest(new PlayerSpawnRequest(this));
         Thread sender = new Thread(this::sender);
         sender.start();
         System.out.println("Client Handler started");

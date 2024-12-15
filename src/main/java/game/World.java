@@ -7,6 +7,7 @@ import java.io.*;
 
 import game.NetMessage.ContentSync;
 import game.NetMessage.RequestContent;
+import game.NetMessage.RequestPlayerSpawn;
 import org.snakeyaml.engine.v2.api.Dump;
 import org.snakeyaml.engine.v2.api.DumpSettings;
 import org.snakeyaml.engine.v2.api.Load;
@@ -171,5 +172,6 @@ public class World {
             pixelIds[i] = definition;
             definition.id = i;
         }
+        Main.getClient().addMessage(new RequestPlayerSpawn());
     }
 }

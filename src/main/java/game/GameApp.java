@@ -1,5 +1,6 @@
 package game;
 
+import game.NetMessage.RequestPlayerSpawn;
 import game.request.Request;
 
 import java.io.File;
@@ -30,6 +31,7 @@ public abstract class GameApp {
 
     public World getActiveWorld() {return activeWorld;}
     public Subworld getActiveSubworld() {return activeSubworld;}
+    public void addRequest(Request request) {requests.add(request);}
 
     boolean debug = true;
 

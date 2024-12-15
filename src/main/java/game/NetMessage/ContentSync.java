@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
-public class ContentSync extends RequestableMessage {
+public class ContentSync extends Message {
 
     static byte id = 3;
 //    static {Messages.addMessage(new FirstSync(null));}
@@ -48,11 +48,6 @@ public class ContentSync extends RequestableMessage {
             materials.add(material.getName());
         }
         return new ContentSync(materials);
-    }
-
-    @Override
-    public Message makeMessageByRequest() {
-        return makeMessage();
     }
 
     @Override

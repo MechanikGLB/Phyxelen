@@ -5,7 +5,7 @@ import game.*;
 import java.nio.ByteBuffer;
 
 public class PlayerSpawn extends Message {
-    static byte id = 6;
+    static byte id = 7;
     int x;
     int y;
     int entityId;
@@ -33,6 +33,9 @@ public class PlayerSpawn extends Message {
 
     @Override
     public void processReceivedBinMessage(ByteBuffer message) {
+//        while (Main.getGame().getActiveSubworld() == null) {
+//            int nothing = 0; //nothing here, just for waiting
+//        }
         Subworld subworld = Main.getGame().getActiveSubworld();
 
         int entityId = message.getInt();
@@ -40,11 +43,17 @@ public class PlayerSpawn extends Message {
         int y = message.getInt();
         boolean isLocal = message.get() == 1;
         short seed = message.getShort();
+        var client = (Client)Main.getGame();
 
-        Player playerToSpawn = new Player(x, y, subworld);
+        Player playerToSpawn = new Player(x, y, subworld, null);
         playerToSpawn.setLocal(false);
-        if(isLocal){
-            ((Client)Main.getGame()).setPrimaryCharacter(playerToSpawn);
+        if(client.getPrimaryCharacter() == null){
+            client.setPrimaryCharacter(playerToSpawn);
+        }
+        var players = subworld.getPlayers();
+        if (!players.contains(playerToSpawn)) {
+            players.add(playerToSpawn);
+            subworld.addEntity(playerToSpawn);
         }
         playerToSpawn.spawn(x,y,seed);
     }

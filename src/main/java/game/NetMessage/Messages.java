@@ -16,7 +16,10 @@ public class Messages {
             new ContentSync(null),
             new RequestChunk(0, 0),
             new ChunkSync(),
-            new PlayerSpawn(0,0, 0,(short) 0)
+            new RequestPlayerSpawn(),
+            new PlayerSpawn(0,0, 0,(short) 0),
+            new ProjectileSpawn()
+
     );
 
 //    public static void addMessage(Message message) {

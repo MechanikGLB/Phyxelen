@@ -8,7 +8,7 @@ import game.Subworld;
 import java.nio.ByteBuffer;
 
 public class ProjectileSpawn extends Message {
-    static byte id = 6;
+    static byte id = 8;
     float x;
     float y;
     int entityId;

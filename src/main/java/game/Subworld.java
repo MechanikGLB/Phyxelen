@@ -90,6 +90,7 @@ public class Subworld extends GameObject {
     }
 
     public Chunk getActiveChunk(VectorI indexes) { return activeChunks.get(indexes); }
+    public ArrayList<Player> getPlayers() { return players; }
 
     public void update(float dt) {
         GameApp.Profiler.startProfile("tick", (byte)0, (byte)100, (byte)100);
