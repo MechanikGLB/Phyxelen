@@ -15,6 +15,7 @@ import game.NetMessage.*;
 public class UDPClient implements Runnable {
     public short connectionId = 0;
 
+    private Client gameClient;
     private final DatagramSocket socket;
     private final InetAddress address;
     private final int port;
@@ -29,6 +30,7 @@ public class UDPClient implements Runnable {
         this.address = InetAddress.getByName(ip);//Server addr
         this.port = port;//Server port
         this.socket = new DatagramSocket();
+        gameClient = (Client) Main.getGame();
     }
 
 //    public UDPClient(String ip, int port, int maxPacketSize) throws IOException {
@@ -43,7 +45,7 @@ public class UDPClient implements Runnable {
         try {
 
             System.out.println("UDP Client started");
-            queue.add(new Hello());//Execute handshake
+            queue.add(new Hello()); // Execute handshake
             sendToServer();
             responseReceive();
             if (serverActive) {
@@ -116,7 +118,8 @@ public class UDPClient implements Runnable {
         try {
             socket.receive(packetFromServer);
             System.out.println("Received from Server: " + packetFromServer.getData()[0]);
-            Messages.processReceivedBinMessage(ByteBuffer.wrap(packetFromServer.getData()));
+
+            gameClient.addMessage(Message.make(ByteBuffer.wrap(packetFromServer.getData())));
         } catch (IOException e) {
 //            System.out.println("UDPClient::responseReceive " + e.getMessage());
         }

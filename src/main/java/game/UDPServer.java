@@ -1,21 +1,20 @@
 package game;
 
-import com.sun.source.tree.Tree;
-import game.NetMessage.Hello;
 import game.NetMessage.Message;
-import game.NetMessage.Messages;
 
 import java.net.DatagramPacket;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Random;
 import java.util.TreeSet;
-import java.util.concurrent.ConcurrentHashMap;
 
 
 public class UDPServer implements Runnable {
+    private static final Random random = new Random();
+    private static final byte CONNECTION_ID_BYTES = Short.BYTES;
+
+    GameApp gameApp;
     private int maxPacketSize = 1060;
     private byte[] buffer = new byte[maxPacketSize];
 //    private byte[] reserveBuffer;
@@ -23,21 +22,21 @@ public class UDPServer implements Runnable {
     private Connection currentConnection;
     private final TreeSet<Connection> connections = new TreeSet<>(
             (o1, o2) -> o2.getConnectionId() - o1.getConnectionId());
-    private static final Random random = new Random();
-    private static final byte CONNECTION_ID_BYTES = Short.BYTES;
 
     public UDPServer(int maxPacketSize, int port)throws IOException {
         this.socket = new DatagramSocket(port);
         this.maxPacketSize = maxPacketSize;
+        gameApp = Main.getGame();
     }
 
     public UDPServer(int maxPacketSize) throws IOException {
-        this.socket = new DatagramSocket();
+        this();
         this.maxPacketSize = maxPacketSize;
     }
 
     public UDPServer() throws IOException {
         this.socket = new DatagramSocket();
+        gameApp = Main.getGame();
     }
 
 
@@ -56,14 +55,14 @@ public class UDPServer implements Runnable {
     }
 
 
-    public void receiveMessage(ByteBuffer bytesFromClient) {
-        try {
-            Messages.processReceivedBinMessage(bytesFromClient.slice(
-                    CONNECTION_ID_BYTES, bytesFromClient.capacity() - CONNECTION_ID_BYTES));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+//    public void receiveMessage(ByteBuffer bytesFromClient) {
+//        try {
+//            Messages.processReceivedBinMessage(bytesFromClient.slice(
+//                    CONNECTION_ID_BYTES, bytesFromClient.capacity() - CONNECTION_ID_BYTES));
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
 
     DatagramPacket packetFromClient = new DatagramPacket(buffer, buffer.length);
     ByteBuffer receivedBytes;
@@ -97,7 +96,9 @@ public class UDPServer implements Runnable {
                     if (currentConnection == null || currentConnection.getConnectionId() != connectionId)
                         continue;
                 }
-                receiveMessage(receivedBytes);
+                gameApp.addMessage(Message.make(receivedBytes.slice(
+                    CONNECTION_ID_BYTES, receivedBytes.capacity() - CONNECTION_ID_BYTES), currentConnection));
+//                receiveMessage(receivedBytes);
                 currentConnection = null;
             }
         }

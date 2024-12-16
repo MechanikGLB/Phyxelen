@@ -1,7 +1,6 @@
 package game;
 
-import game.NetMessage.RequestPlayerSpawn;
-import game.request.Request;
+import game.NetMessage.Message;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,10 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.Semaphore;
 
 public abstract class GameApp {
     public enum GameState {
@@ -24,7 +20,7 @@ public abstract class GameApp {
     protected GameState gameState;
     protected static World activeWorld;
     protected static Subworld activeSubworld;
-    protected static ConcurrentLinkedDeque<Request> requests = new ConcurrentLinkedDeque<>();
+    protected static ConcurrentLinkedDeque<Message> messages = new ConcurrentLinkedDeque<>();
     /// Counter is used for making some computations more rare
     protected short counter = 0;
 
@@ -32,11 +28,11 @@ public abstract class GameApp {
 
     public World getActiveWorld() {return activeWorld;}
     public Subworld getActiveSubworld() {return activeSubworld;}
-    public void addRequest(Request request) {requests.add(request);}
+    public void addMessage(Message message) { messages.add(message); }
 
     boolean debug = true;
 
-    public static ConcurrentLinkedDeque<Request> getRequests() { return requests; }
+    public static ConcurrentLinkedDeque<Message> getMessages() { return messages; }
 
     public void run() {
         checkDirectoryStructure();
@@ -55,8 +51,8 @@ public abstract class GameApp {
     protected abstract void loop();
 
     protected void tick(float dt) {
-        if (!requests.isEmpty())
-            requests.pop().process();
+        if (!messages.isEmpty())
+            messages.pop().process();
         activeWorld.tick(dt);
     }
 

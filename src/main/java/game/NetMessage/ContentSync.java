@@ -19,6 +19,21 @@ public class ContentSync extends Message {
         this.materials = materials;
     }
 
+    public ContentSync(ByteBuffer message) {
+        materials = new ArrayList<>();
+        byte[] bytes = new byte[message.remaining()];
+        message.get(bytes);
+        int index = 0;
+        for (int i = 0; i < bytes.length; i++) {
+            if (bytes[i] == 0) {
+                materials.add(new String(bytes, index, i - index, StandardCharsets.UTF_8));
+                if (i < bytes.length - 1 && bytes[i+1] == 0)
+                    break;
+                index = i + 1;
+            }
+        }
+    }
+
     public static byte getId() {
         return id;
     }
@@ -51,20 +66,7 @@ public class ContentSync extends Message {
     }
 
     @Override
-    public void processReceivedBinMessage(ByteBuffer message){
-
-        ArrayList<String> result = new ArrayList<>();
-        byte[] bytes = new byte[message.remaining()];
-        message.get(bytes);
-        int index = 0;
-        for (int i = 0; i < bytes.length; i++) {
-            if (bytes[i] == 0) {
-                result.add(new String(bytes, index, i - index, StandardCharsets.UTF_8));
-                if (i < bytes.length - 1 && bytes[i+1] == 0)
-                    break;
-                index = i + 1;
-            }
-        }
-        Main.getGame().getActiveWorld().receiveContentFromServer(result);
+    public void process(){
+        Main.getGame().getActiveWorld().receiveContentFromServer(materials);
     }
 }

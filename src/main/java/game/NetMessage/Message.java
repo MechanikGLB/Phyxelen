@@ -1,17 +1,38 @@
 package game.NetMessage;
 
+import game.Connection;
+
 import java.nio.ByteBuffer;
 
 abstract public class Message {
+    public Connection senderConnection; /// Valid on server only
 
     public abstract byte[] toBytes();
-    public abstract void processReceivedBinMessage(ByteBuffer message);
+    public abstract void process();
+
+    /// Makes message for putting into queue in client
+    public static Message make(ByteBuffer bytes) {
+        return make(bytes, null);
+    }
+
+    /// Makes message for putting into queue in server
+    public static Message make(ByteBuffer bytes, Connection sender) {
+        Message newMessage = switch (bytes.get()) {
+            case 0 -> new Hello();
+            case 1 -> new Quit();
+            case 2 ->  new RequestContent();
+            case 3 ->  new ContentSync(bytes);
+            case 4 ->  new RequestChunk(0, 0);
+            case 5 ->  new ChunkSync();
+            case 6 ->  new RequestPlayerSpawn();
+            case 7 ->  new PlayerSpawn(0,0, 0,(short) 0);
+            case 8 ->  new ProjectileSpawn(0);
+            case 9 ->  new RequestEntities();
+            case 10 ->  new PlayerSync(null);
+            case 11 ->  new Initialized();
+            default -> throw new RuntimeException("Unknown message type");
+        };
+//        newMessage.message = bytes; // Buffer pointer == 1 here
+        return newMessage;
+    }
 }
-
-
-//    static final byte Hello = 1;
-//    static final byte Quit = 2;
-//    static final byte SendSubworldParams = 3;
-//    static final byte CreateEntity = 4;
-//    static final byte SendEntityPosition = 5;
-//    static final byte SendChunk = 6;
