@@ -8,7 +8,7 @@ public class Main {
     private static GameApp game;
     private static UDPServer server;
     private static UDPClient client;
-    private static Thread netThread;
+    static Thread netThread;
 
     public static GameApp getGame() { return game; }
     public static UDPServer getServer() { return server; }
@@ -52,9 +52,6 @@ public class Main {
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-//                client.run();
-                netThread = new Thread(() -> client.run());
-                netThread.start();
                 game.run();
                 client.shutdown();
             }

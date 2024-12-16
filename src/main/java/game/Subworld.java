@@ -146,7 +146,7 @@ public class Subworld extends GameObject {
                 collidableEntities.add((EntityWithCollision) entity);
         entitiesToAdd.clear();
 
-        if (Main.getGame().gameState != GameApp.GameState.Local && counter % 4 == 0) {
+        if (Main.getGame().gameState != GameApp.GameState.Local && counter % 8 == 0) {
             for (Player player : players)
                if (Main.getClient() != null)
                    Main.getClient().addMessage(new PlayerSync(player));
@@ -216,9 +216,9 @@ public class Subworld extends GameObject {
             boolean seen = false;
             var chunk = active.getKey();
             for (int i = 0; i < players.size(); i++) {
-                if (chunk.x > startChunkX[i]
+                if (chunk.x >= startChunkX[i]
                         && chunk.x < startChunkX[i] + chunksX
-                        && chunk.y > startChunkY[i]
+                        && chunk.y >= startChunkY[i]
                         && chunk.y < startChunkY[i] + chunksY
                 ) {
                     seen = true;
@@ -244,8 +244,8 @@ public class Subworld extends GameObject {
 
         // Only for host, as clients request them themselves
 
-        for (int x = 1; x < chunksX; x++) {
-            for (int y = 1; y < chunksY; y++) {
+        for (int x = 0; x < chunksX; x++) {
+            for (int y = 0; y < chunksY; y++) {
                 VectorI indexes = new VectorI(startChunkX[0] + x, startChunkY[0] + y);
                 Chunk passive = passiveChunks.get(indexes);
                 if (passive != null) {
@@ -361,7 +361,7 @@ public class Subworld extends GameObject {
 
     public void spawnPlayer(Player player) {
         int x = random.nextInt(-200, 200);
-        int y = 0;
+        int y = 220;
 
         // find on surface
         while (true) {
@@ -385,6 +385,7 @@ public class Subworld extends GameObject {
             chunk = getChunkHavingPixel(x, y);
         }
 
+        y += 10;
         if (!players.contains(player)) {
             players.add(player);
             addEntity(player);

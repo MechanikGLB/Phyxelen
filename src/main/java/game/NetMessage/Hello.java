@@ -46,6 +46,8 @@ public class Hello extends Message {
             client.setServerActive(true);
             client.connectionId = message.getShort();
             System.out.println("Connected to server as " + client.connectionId);
+        } else {
+            Main.getServer().getCurrentConnection().setConnected(true);
         }
     }
 }

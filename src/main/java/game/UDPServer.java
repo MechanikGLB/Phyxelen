@@ -108,7 +108,8 @@ public class UDPServer implements Runnable {
 
     public void broadcastMessage(Message message) {
         for (Connection connection : connections) {
-            connection.addMessage(message);//Send to all sessions
+            if (connection.isInitialized())
+                connection.addMessage(message);//Send to all sessions
         }
     }
 

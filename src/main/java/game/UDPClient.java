@@ -45,8 +45,8 @@ public class UDPClient implements Runnable {
             System.out.println("UDP Client started");
             queue.add(new Hello());//Execute handshake
             sendToServer();
-
-            if(serverActive) {
+            responseReceive();
+            if (serverActive) {
                 Thread ReceiveHandler = new Thread(this::receiver);
                 Thread SendHandler = new Thread(this::sender);
                 ReceiveHandler.start();
@@ -87,6 +87,7 @@ public class UDPClient implements Runnable {
     }
 
     public void addMessage(Message message) {
+        System.out.println("Add message "+message);
         queue.add(message);
     }
 
@@ -95,7 +96,7 @@ public class UDPClient implements Runnable {
             while (!socket.isClosed())
                 responseReceive();
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            throw e;
         }
     }
 

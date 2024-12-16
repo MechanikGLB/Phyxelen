@@ -129,8 +129,11 @@ public class World {
     private void startup() {
         if (Main.getClient() == null)
             loadContent();
-        else
+        else {
+            Main.netThread = new Thread(() -> Main.getClient().run());
+            Main.netThread.start();
             Main.getClient().addMessage(new RequestContent());
+        }
     }
 
 

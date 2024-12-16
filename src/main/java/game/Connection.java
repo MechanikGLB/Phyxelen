@@ -18,6 +18,7 @@ public class Connection {
     private final BlockingQueue<Message> messagesQueue = new LinkedBlockingQueue<>();
     private DatagramSocket socket;
     private boolean connected = false;
+    private boolean initialized = false;
 
     public Connection(DatagramSocket socket, short connectionId, InetAddress playerAddress, int playerPort) {
         this.connectionId = connectionId;
@@ -27,7 +28,12 @@ public class Connection {
     }
 
     public short getConnectionId() { return connectionId; }
+    public boolean isConnected() { return connected; }
+    public boolean isInitialized() { return initialized; }
+
     public void setConnectionId(short id) { connectionId = id; }
+    public void setConnected(boolean connected) { this.connected = connected; }
+    public void setInitialized(boolean initialized) { this.initialized = initialized; }
 
     public InetAddress getPlayerAddress() {
         return playerAddress;
@@ -40,12 +46,12 @@ public class Connection {
 
 
     public void startSession() {
-        connected = true;
         messagesQueue.add(new Hello(connectionId));
 
 //        Main.getGame().addRequest(new PlayerSpawnRequest(this));
         Thread sender = new Thread(this::sender);
         sender.start();
+        connected = true;
         System.out.println("Client Handler started");
     }
 

@@ -36,7 +36,7 @@ public class Player extends Character {
     public Connection getConnection() {
         return connection;
     }
-
+    public short getSeed() { return seed; }
     //    public void setSeed(short seed) {this.seed = seed;}
 //    public short getSeed() {return seed;}
 

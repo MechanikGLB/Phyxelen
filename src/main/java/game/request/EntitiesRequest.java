@@ -16,8 +16,11 @@ public class EntitiesRequest extends Request {
     public void process() {
         var subworld = Main.getGame().getActiveSubworld();
         var entities = subworld.getEntities();
-        
+
+        receiver.setInitialized(true);
+        receiver.addMessage(entities.getFirst().getSpawnMessage());
         for (Entity entity : entities) {
+            System.out.println("Will send entity " + entity.getId());
             receiver.addMessage(entity.getSpawnMessage());
         }
     }

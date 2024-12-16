@@ -17,8 +17,6 @@ public class PlayerSpawnRequest extends Request {
         var subworld = Main.getGame().getActiveSubworld();
         Player player = new Player(0,0,subworld, receiver);
         subworld.spawnPlayer(player);
-//        receiver.addMessage(player.getSpawnMessage());
-
-
+        receiver.addMessage(player.getSpawnMessage());
     }
 }

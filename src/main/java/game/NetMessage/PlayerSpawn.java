@@ -1,6 +1,7 @@
 package game.NetMessage;
 
 import game.*;
+import game.request.ReceivedPlayerRequest;
 
 import java.nio.ByteBuffer;
 
@@ -33,34 +34,15 @@ public class PlayerSpawn extends Message {
 
     @Override
     public void processReceivedBinMessage(ByteBuffer message) {
-//        while (Main.getGame().getActiveSubworld() == null) {
-//            int nothing = 0; //nothing here, just for waiting
-//        }
         Subworld subworld = Main.getGame().getActiveSubworld();
 
         int entityId = message.getInt();
+        System.out.println("Received player "+entityId);
         int x = message.getInt();
         int y = message.getInt();
         boolean isLocal = message.get() == 1;
         short seed = message.getShort();
-        var client = (Client)Main.getGame();
 
-        var players = subworld.getPlayers();
-        for (var player : players)
-            if (player.getId() == entityId)
-                return;
-
-        Player playerToSpawn = new Player(x, y, subworld, null);
-        playerToSpawn.setLocal(false);
-        if(client.getPrimaryCharacter() == null){
-            client.setPrimaryCharacter(playerToSpawn);
-            Main.getClient().addMessage(new RequestEntities());
-        }
-        if (!players.contains(playerToSpawn)) {
-            players.add(playerToSpawn);
-            subworld.addEntity(playerToSpawn);
-        }
-        playerToSpawn.setId(entityId);
-        playerToSpawn.spawn(x,y,seed);
+        Main.getGame().addRequest(new ReceivedPlayerRequest(null, x, y, entityId, seed));
     }
 }
