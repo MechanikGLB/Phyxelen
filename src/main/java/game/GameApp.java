@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.Semaphore;
 
 public abstract class GameApp {
@@ -23,7 +24,7 @@ public abstract class GameApp {
     protected GameState gameState;
     protected static World activeWorld;
     protected static Subworld activeSubworld;
-    protected static LinkedList<Request> requests = new LinkedList<>();
+    protected static ConcurrentLinkedDeque<Request> requests = new ConcurrentLinkedDeque<>();
     /// Counter is used for making some computations more rare
     protected short counter = 0;
 
@@ -35,7 +36,7 @@ public abstract class GameApp {
 
     boolean debug = true;
 
-    public static LinkedList<Request> getRequests() { return requests; }
+    public static ConcurrentLinkedDeque<Request> getRequests() { return requests; }
 
     public void run() {
         checkDirectoryStructure();

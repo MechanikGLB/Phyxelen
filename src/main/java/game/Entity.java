@@ -47,6 +47,7 @@ public abstract class Entity extends GameObject {
 
     public void setX(float x) { this.x = x; }
     public void setY(float y) { this.y = y; }
+    public void setId(int id) { this.id = id; }
 
     void move(float dx, float dy) {
         x += dx; y += dy;

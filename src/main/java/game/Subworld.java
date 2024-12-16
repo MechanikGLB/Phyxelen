@@ -146,7 +146,7 @@ public class Subworld extends GameObject {
                 collidableEntities.add((EntityWithCollision) entity);
         entitiesToAdd.clear();
 
-        if (Main.getGame().gameState != GameApp.GameState.Local && counter % 8 == 0) {
+        if (Main.getGame().gameState != GameApp.GameState.Local && counter % 4 == 0) {
             for (Player player : players)
                if (Main.getClient() != null)
                    Main.getClient().addMessage(new PlayerSync(player));

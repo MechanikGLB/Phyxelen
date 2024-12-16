@@ -8,8 +8,6 @@ import game.Player;
 import game.VectorI;
 
 public class PlayerSpawnRequest extends Request {
-    VectorI indexes;
-
     public  PlayerSpawnRequest(Connection receiver) {
         super(receiver);
     }

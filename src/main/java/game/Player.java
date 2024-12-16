@@ -15,7 +15,6 @@ import static org.lwjgl.opengl.GL21.*;
 public class Player extends Character {
     Client client = (Client)Main.getGame();
     ArrayList<HoldableItem> inventory = new ArrayList<>();
-    boolean levitating = false;
     float levitationTime = 0f;
     float maxLevitationTime = 2f;
 
@@ -68,7 +67,7 @@ public class Player extends Character {
                     x[0] - client.renderer.screenWidth / 2d
             ));
             // Levitation
-            if (levitating) {
+            if (movingY > 0) {
                 if (levitationTime < maxLevitationTime) {
                     vy += vy < 0 ? 20 : 10;
                     levitationTime += dt;
@@ -81,7 +80,7 @@ public class Player extends Character {
             }
 
             if (inAir) {
-                if (levitating && levitationTime < maxLevitationTime)
+                if (movingY > 0 && levitationTime < maxLevitationTime)
                     animation = ANIMATION_JUMP;
                 else if (vy < -40)
                     animation = ANIMATION_FALL;
@@ -148,7 +147,7 @@ public class Player extends Character {
     }
 
     @Override
-    void go(float dx, float dy) {
+    public void go(float dx, float dy) {
         walking = dx != 0;
         if (dy < 0)
             return;
@@ -202,7 +201,8 @@ public class Player extends Character {
         client.controlledCharacter = null;
         subworld.fillPixels(round(x) - 2, round(y) - 5, 4, 9, Content.getMaterial("sand"), (byte) -1, 2);
         subworld.fillPixels(round(x) - 1, round(y) + 4, 2, 1, Content.getMaterial("sand"), (byte) -1, 2);
-        levitating = false;
+        movingX = 0;
+        movingY = 0;
         holdedItem.deactivate();
         inventory.clear();
     }

@@ -1,8 +1,7 @@
 package game.NetMessage;
 
-import game.Main;
-import game.Player;
-import game.Subworld;
+import game.*;
+import game.request.PlayerUpdateRequest;
 
 import java.nio.ByteBuffer;
 
@@ -16,11 +15,13 @@ public class PlayerSync extends Message {
 
     @Override
     public byte[] toBytes() {
-        ByteBuffer message = ByteBuffer.allocate(2 + Integer.BYTES + Float.BYTES * 3);
+        ByteBuffer message = ByteBuffer.allocate(2 + Integer.BYTES + Float.BYTES * 5);
         message.put(id);
         message.putInt(player.getId());
         message.putFloat(player.getX());
         message.putFloat(player.getY());
+        message.putFloat(player.getMovingX());
+        message.putFloat(player.getMovingY());
         message.putFloat(player.getLookDirection());
         var inventory = player.getInventory();
         for (int i = 0; i < inventory.size(); i++) {
@@ -37,6 +38,8 @@ public class PlayerSync extends Message {
         int id = message.getInt();
         float x = message.getFloat();
         float y = message.getFloat();
+        float mx = message.getFloat();
+        float my = message.getFloat();
         float angle = message.getFloat();
         byte item = message.get();
 
@@ -51,11 +54,9 @@ public class PlayerSync extends Message {
                 break;
             }
         if (target == null) {
-//            System.out.println();
+            System.out.println("Not found player");
             return;
         }
-        target.setX(x);
-        target.setY(y);
-        target.setLookDirection(angle);
+        GameApp.getRequests().add(new PlayerUpdateRequest(null, target, x, y, mx, my, angle, item));
     }
 }

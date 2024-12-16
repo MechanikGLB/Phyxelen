@@ -60,6 +60,7 @@ public class PlayerSpawn extends Message {
             players.add(playerToSpawn);
             subworld.addEntity(playerToSpawn);
         }
+        playerToSpawn.setId(entityId);
         playerToSpawn.spawn(x,y,seed);
     }
 }

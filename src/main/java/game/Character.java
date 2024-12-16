@@ -7,6 +7,8 @@ abstract public class Character extends EntityWithCollision {
     protected int health = maxHealth;
     protected boolean clipHealth = false;
     protected HoldableItem holdedItem;
+    float movingX = 0;
+    float movingY = 0;
 
     public Character(float x, float y, Subworld subworld) {
         super(x, y, subworld, true);
@@ -42,6 +44,24 @@ abstract public class Character extends EntityWithCollision {
             health = maxHealth;
     }
 
+    public void setMovingX(float movingX) { this.movingX = movingX; }
+    public float getMovingX() { return movingX; }
+    public void setMovingY(float movingY) { this.movingY = movingY; }
+    public float getMovingY() { return movingY; }
+
+    @Override
+    void update(float dt) {
+        super.update(dt);
+        if (canGo) {
+            Pixel targetPixel = subworld.getPixel(Math.round(x+movingX), Math.round(y+movingY));
+            if (targetPixel.chunk == null)
+                return;
+            if (targetPixel.material().density < 2) {
+                move(movingX, movingY);
+            }
+        }
+    }
+
     public void damage(int damage) {
         this.health -= damage;
         if (clipHealth && health > maxHealth)
@@ -56,18 +76,11 @@ abstract public class Character extends EntityWithCollision {
             health = maxHealth;
     }
 
-    public HoldableItem getHoldedItem() {
-        return holdedItem;
-    }
+    public HoldableItem getHoldedItem() { return holdedItem; }
+    public void setHoldedItem(HoldableItem holdedItem) { this.holdedItem = holdedItem; }
 
     void go(float dx, float dy) {
-        if (canGo) {
-            Pixel targetPixel = subworld.getPixel(Math.round(x+dx), Math.round(y+dy));
-            if (targetPixel.chunk == null)
-                return;
-            if (targetPixel.material().density < 2) {
-                move(dx, dy);
-            }
-        }
+        movingX = dx;
+        movingY = dy;
     }
 }

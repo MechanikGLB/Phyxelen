@@ -245,45 +245,44 @@ public class Client extends GameApp {
         // Movement keys
         input.addInputAction("MoveUp",new InputAction(
                 o -> {
-                    if (controlledCharacter != null)
-                        ((Player) controlledCharacter).levitating = true;
+                    controlledCharacter.movingY += 1;
                 },
                 o -> {
-                    if (controlledCharacter != null) {
-                        controlledCharacter.go(0, 1);
-                    } else if (editMode)
+                    if (editMode)
                         cameraPos.y += cameraSpeed / viewScale * fdt;},
                 o -> {
-                    if (controlledCharacter != null)
-                        ((Player) controlledCharacter).levitating = false;
+                    controlledCharacter.movingY -= 1;
                 }));
         input.getKeyboardHandler().bindKey(GLFW_KEY_W, "MoveUp");
         input.getKeyboardHandler().bindKey(GLFW_KEY_UP, "MoveUp");
 
-        input.addInputAction("MoveDown",new InputAction(null, o -> {
-            if (controlledCharacter != null)
-                controlledCharacter.go(0, -1);
-            else if (editMode)
-                cameraPos.y -= cameraSpeed / viewScale * fdt;
-        }, null));
+        input.addInputAction("MoveDown",new InputAction(
+                o -> controlledCharacter.movingY -= 1,
+                o -> {
+                if (editMode)
+                    cameraPos.y -= cameraSpeed / viewScale * fdt;
+                },
+                o -> controlledCharacter.movingY += 1));
         input.getKeyboardHandler().bindKey(GLFW_KEY_S, "MoveDown");
         input.getKeyboardHandler().bindKey(GLFW_KEY_DOWN, "MoveDown");
 
-        input.addInputAction("MoveRight",new InputAction(null, o -> {
-            if (controlledCharacter != null)
-                controlledCharacter.go(1, 0);
-            else if (editMode)
-                cameraPos.x += cameraSpeed / viewScale * fdt;
-        }, null));
+        input.addInputAction("MoveRight",new InputAction(
+                o -> controlledCharacter.movingX += 1,
+                o -> {
+                    if (editMode)
+                        cameraPos.x += cameraSpeed / viewScale * fdt;
+                },
+                o -> controlledCharacter.movingX -= 1));
         input.getKeyboardHandler().bindKey(GLFW_KEY_D, "MoveRight");
         input.getKeyboardHandler().bindKey(GLFW_KEY_RIGHT, "MoveRight");
 
-        input.addInputAction("MoveLeft",new InputAction(null, o -> {
-            if (controlledCharacter != null)
-                controlledCharacter.go(-1, 0);
-            else if (editMode)
-                cameraPos.x -= cameraSpeed / viewScale * fdt;
-        }, null));
+        input.addInputAction("MoveLeft",new InputAction(
+                o -> controlledCharacter.movingX -= 1,
+                o -> {
+                    if (editMode)
+                        cameraPos.x -= cameraSpeed / viewScale * fdt;
+                },
+                o -> controlledCharacter.movingX += 1));
         input.getKeyboardHandler().bindKey(GLFW_KEY_A, "MoveLeft");
         input.getKeyboardHandler().bindKey(GLFW_KEY_LEFT, "MoveLeft");
         // Temp? TODO: decide what to do with it
