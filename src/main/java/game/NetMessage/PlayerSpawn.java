@@ -45,13 +45,17 @@ public class PlayerSpawn extends Message {
         short seed = message.getShort();
         var client = (Client)Main.getGame();
 
+        var players = subworld.getPlayers();
+        for (var player : players)
+            if (player.getId() == entityId)
+                return;
+
         Player playerToSpawn = new Player(x, y, subworld, null);
         playerToSpawn.setLocal(false);
         if(client.getPrimaryCharacter() == null){
             client.setPrimaryCharacter(playerToSpawn);
             Main.getClient().addMessage(new RequestEntities());
         }
-        var players = subworld.getPlayers();
         if (!players.contains(playerToSpawn)) {
             players.add(playerToSpawn);
             subworld.addEntity(playerToSpawn);

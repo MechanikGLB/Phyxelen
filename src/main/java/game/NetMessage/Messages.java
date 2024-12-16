@@ -19,7 +19,8 @@ public class Messages {
             new RequestPlayerSpawn(),
             new PlayerSpawn(0,0, 0,(short) 0),
             new ProjectileSpawn(),
-            new RequestEntities()
+            new RequestEntities(),
+            new PlayerSync(null)
     );
 
 //    public static void addMessage(Message message) {

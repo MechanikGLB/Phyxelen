@@ -43,6 +43,10 @@ public abstract class Entity extends GameObject {
     public float getY() { return y; };
     public VectorF getPosition() { return new VectorF(x, y); };
     public Subworld getSubworld() { return subworld; };
+    public int getId() { return id; }
+
+    public void setX(float x) { this.x = x; }
+    public void setY(float y) { this.y = y; }
 
     void move(float dx, float dy) {
         x += dx; y += dy;

@@ -1,5 +1,6 @@
 package game;
 
+import game.NetMessage.PlayerSync;
 import game.NetMessage.RequestChunk;
 
 import java.io.File;
@@ -144,6 +145,14 @@ public class Subworld extends GameObject {
             if (entity instanceof EntityWithCollision && ((EntityWithCollision) entity).collidable)
                 collidableEntities.add((EntityWithCollision) entity);
         entitiesToAdd.clear();
+
+        if (Main.getGame().gameState != GameApp.GameState.Local && counter % 8 == 0) {
+            for (Player player : players)
+               if (Main.getClient() != null)
+                   Main.getClient().addMessage(new PlayerSync(player));
+               else
+                   Main.getServer().broadcastMessage(new PlayerSync(player));
+        }
 
         counter++;
         GameApp.Profiler.endProfile("tick");
