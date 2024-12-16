@@ -13,6 +13,9 @@ public class ProjectileSpawn extends Message {
         this.casterID = casterID;
     }
 
+    public ProjectileSpawn() {
+        this.casterID = 0 ;
+    }
 
     @Override
     public byte[] toBytes() {

@@ -18,7 +18,7 @@ public class Messages {
             new ChunkSync(),
             new RequestPlayerSpawn(),
             new PlayerSpawn(0,0, 0,(short) 0),
-            new ProjectileSpawn(),
+            new ProjectileSpawn(0),
             new RequestEntities(),
             new PlayerSync(null)
     );
