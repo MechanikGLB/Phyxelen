@@ -45,7 +45,6 @@ public class UDPClient implements Runnable {
             System.out.println("UDP Client started");
             queue.add(new Hello());//Execute handshake
             sendToServer();
-            responseReceive();
 
             if(serverActive) {
                 Thread ReceiveHandler = new Thread(this::receiver);

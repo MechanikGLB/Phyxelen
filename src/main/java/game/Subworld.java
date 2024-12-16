@@ -174,6 +174,7 @@ public class Subworld extends GameObject {
 
     public void loadedChunk(Chunk chunk) {
         var indexes = new VectorI(chunk.xIndex, chunk.yIndex);
+        System.out.println("Loaded chunk "+chunk.xIndex+" "+chunk.yIndex);
         loadingChunks.remove(indexes);
         activeChunks.put(indexes, chunk);
         activeChunkTree.add(chunk);
@@ -234,11 +235,9 @@ public class Subworld extends GameObject {
 
         // Only for host, as clients request them themselves
 
-        VectorI indexes = new VectorI(0, 0);
-        for (int x = 0; x < chunksX; x++) {
-            for (int y = 0; y < chunksY; y++) {
-                indexes.x = startChunkX[0] + x;
-                indexes.y = startChunkY[0] + y;
+        for (int x = 1; x < chunksX; x++) {
+            for (int y = 1; y < chunksY; y++) {
+                VectorI indexes = new VectorI(startChunkX[0] + x, startChunkY[0] + y);
                 Chunk passive = passiveChunks.get(indexes);
                 if (passive != null) {
                     loadedChunk(passive);

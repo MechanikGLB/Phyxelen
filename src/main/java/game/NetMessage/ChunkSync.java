@@ -20,15 +20,49 @@ public class ChunkSync extends Message {
     }
 
     public byte[] toBytes() {
-        ByteBuffer message = ByteBuffer.allocate(1 + Integer.BYTES * 2 + Chunk.area());
-//        System.out.println("Sends chunk "+chunk.getXIndex()+" ; "+chunk.getYIndex());
+        // Compressing type definition
+        byte type = 0;
+        Material materialA = chunk.getPixelMaterial(0);
+        Material materialB;
+        for (int i = 1; i < Chunk.area(); i++) {
+            materialB = chunk.getPixelMaterial(i);
+            if (materialA != materialB) {
+                type = 2;
+                break;
+            }
+        }
+        if (type == 0 && materialA != Content.air())
+            type = 1;
+
+        // Sending
+        ByteBuffer message = switch (type) {
+            case 0 -> ByteBuffer.allocate(2 + Integer.BYTES * 2);
+            case 1 -> ByteBuffer.allocate(3 + Integer.BYTES * 2 + Chunk.area() / 2);
+            default -> ByteBuffer.allocate(2 + Integer.BYTES * 2 + Chunk.area());
+        };
+        //        System.out.println("Sends chunk "+chunk.getXIndex()+" ; "+chunk.getYIndex());
         message.put(id);
         message.putInt(chunk.getXIndex());
         message.putInt(chunk.getYIndex());
-        for (int i = 0; i < Chunk.area(); i++) {
-            message.put((byte)(
-                    chunk.getPixelMaterial(i).getId() + (chunk.getPixelColor(i) << 5)
-            ));
+
+
+        message.put(type);
+        switch (type) {
+            case 1: {
+                message.put(chunk.getPixelMaterial(0).getId());
+                for (int i = 0; i < Chunk.area(); i += 2) {
+                    message.put((byte)(
+                            chunk.getPixelColor(i) + (chunk.getPixelColor(i + 1) << 4)
+                    ));
+                }
+            } break;
+            case 2: {
+                for (int i = 0; i < Chunk.area(); i++) {
+                    message.put((byte)(
+                            chunk.getPixelMaterial(i).getId() + (chunk.getPixelColor(i) << 5)
+                    ));
+                }
+            } break;
         }
 
         return message.array();
@@ -40,16 +74,38 @@ public class ChunkSync extends Message {
 //        message.get();
         int xIndex = message.getInt();
         int yIndex = message.getInt();
+        byte type = message.get();
         System.out.println("Received chunk "+xIndex+" ; "+yIndex);
         Material[] materials = new Material[Chunk.area()];
         byte[] colors = new byte[Chunk.area()];
-        int air = 0;
-        for (int i = 0; i < Chunk.area(); i++) {
-            byte pixel = message.get();
-            if (pixel == 0) air++;
-            materials[i] = subworld.world().getMaterialById(pixel & 0x1F);
-            colors[i] = (byte)(pixel >> 5);
+
+        switch (type) {
+            case 0: {
+                for (int i = 0; i < Chunk.area(); i++) {
+                    materials[i] = Content.air();
+                    colors[i] = 0;
+                }
+            } break;
+            case 1: {
+                Material material = subworld.world().getMaterialById(message.get());
+                for (int i = 0; i < Chunk.area(); i += 2) {
+                    byte colorsByte = message.get();
+                    materials[i] = material;
+                    colors[i] = (byte)(colorsByte & 0xF);
+                    materials[i+1] = material;
+                    colors[i+1] = (byte)(colorsByte >> 4);
+                }
+
+            } break;
+            case 2: {
+                for (int i = 0; i < Chunk.area(); i++) {
+                    byte pixel = message.get();
+                    materials[i] = subworld.world().getMaterialById(pixel & 0x1F);
+                    colors[i] = (byte)(pixel >> 5);
+                }
+            }
         }
+
         Chunk receivedChunk = new Chunk(subworld, xIndex, yIndex, materials, colors);
         subworld.receivedChunk(receivedChunk);
     }

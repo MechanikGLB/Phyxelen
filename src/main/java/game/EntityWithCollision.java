@@ -29,14 +29,16 @@ abstract public class EntityWithCollision extends Entity {
                     Math.round(x), Math.round(y-collisionBoxHeight/2)-1);
             var rightPixel = subworld.getPixel(
                     Math.round(x+collisionBoxWidth/2), Math.round(y-collisionBoxHeight/2)-1);
-            if (leftPixel.chunk == null || rightPixel.chunk == null){ return;}
+            var centerPixel = subworld.getPixel(x, y);
+            if (leftPixel.chunk == null || rightPixel.chunk == null || centerPixel.chunk == null)
+                return;
 
             inAir = leftPixel.material().density < 2 && rightPixel.material().density < 2 && middlePixel.material().density < 2;
             if (inAir) {
                 Pixel castResult = subworld.rayCast(x, y - collisionBoxHeight/2, x, y - collisionBoxHeight/2 + vy * dt, 2);
                 if (castResult == null) {
                     // Slow down in liquids
-                    if (subworld.getPixel(x, y).material().density >= 1)
+                    if (centerPixel.material().density >= 1)
                         vy *= 0.5f;
                     // Do not go up through solid materials
                     if (vy > 0 && subworld.getPixel(x, y + collisionBoxHeight / 2 + vy).material().density >= 2)
