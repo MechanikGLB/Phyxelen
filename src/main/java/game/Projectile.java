@@ -20,6 +20,7 @@ public class Projectile extends Entity {
     short height = 1;
     boolean rotatable = false;
     float angle = 0;
+    Character casterId = null;
 
     Image image;
     ColorWithAplha color;
@@ -101,7 +102,8 @@ public class Projectile extends Entity {
 
     @Override
     public Message getSpawnMessage() {
-        return new ProjectileSpawn();
+        if (casterId != null) return new ProjectileSpawn(casterId.getId());
+        else return new ProjectileSpawn();
     }
 
     @Override
