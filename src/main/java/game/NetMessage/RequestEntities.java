@@ -1,5 +1,6 @@
 package game.NetMessage;
 
+import game.Entity;
 import game.GameApp;
 import game.Main;
 import game.request.ChunkRequest;
@@ -23,9 +24,18 @@ public class RequestEntities extends Message {
     }
 
     @Override
-    public void processReceivedBinMessage(ByteBuffer message) {
-        GameApp.GameState state = Main.getGame().getGameState();
-        if (state == GameApp.GameState.Server)
-            GameApp.getRequests().add( new EntitiesRequest(Main.getServer().getCurrentConnection()) );
+    public void process() {
+        if (!Main.isServer())
+            return;
+
+        var subworld = Main.getGame().getActiveSubworld();
+        var entities = subworld.getEntities();
+
+        senderConnection.setInitialized(true);
+//        senderConnection.addMessage(entities.getFirst().getSpawnMessage());
+        for (Entity entity : entities) {
+            System.out.println("Will send entity " + entity.getId());
+            senderConnection.addMessage(entity.getSpawnMessage());
+        }
     }
 }

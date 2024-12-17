@@ -14,6 +14,10 @@ public class Main {
     public static UDPServer getServer() { return server; }
     public static UDPClient getClient() { return client; }
 
+    public static boolean isLocal() { return netThread == null; }
+    public static boolean isClient() { return client != null; }
+    public static boolean isServer() { return server != null; }
+
     public static void main(String[] args) {
         game = new Client();
         System.out.println(Arrays.toString(args));

@@ -13,7 +13,7 @@ public class Quit extends Message {
     }
 
     @Override
-    public void processReceivedBinMessage(ByteBuffer message) {
+    public void process() {
 
     }
 }

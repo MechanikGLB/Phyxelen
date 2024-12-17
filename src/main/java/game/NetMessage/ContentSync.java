@@ -55,16 +55,6 @@ public class ContentSync extends Message {
         return message.array();
     }
 
-    static public Message makeMessage() {
-        ArrayList<String> materials = new ArrayList<>();
-
-        var materialsByID = Main.getGame().getActiveWorld().getMaterialsById();
-        for (Material material : materialsByID) {
-            materials.add(material.getName());
-        }
-        return new ContentSync(materials);
-    }
-
     @Override
     public void process(){
         Main.getGame().getActiveWorld().receiveContentFromServer(materials);

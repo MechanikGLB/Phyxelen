@@ -8,7 +8,6 @@ import java.nio.ByteBuffer;
 
 public class RequestChunk extends Message {
     static byte id = 4;
-//    static {Messages.addMessage(new RequestChunk(0, 0));}
 
     int x;
     int y;
@@ -16,6 +15,11 @@ public class RequestChunk extends Message {
     public RequestChunk(int x, int y) {
         this.x = x;
         this.y = y;
+    }
+
+    public RequestChunk(ByteBuffer message) {
+        this.x = message.getInt();
+        this.y = message.getInt();
     }
 
     public static byte getId() {
@@ -33,8 +37,7 @@ public class RequestChunk extends Message {
 
     @Override
     public void process() {
-        GameApp.GameState state = Main.getGame().getGameState();
-        if (state != GameApp.GameState.Server)
+        if (!Main.isServer())
             return;
 
         VectorI indexes = new VectorI(x, y);
@@ -46,6 +49,5 @@ public class RequestChunk extends Message {
         }
         subworld.loadChunk(indexes);
         senderConnection.addMessage(new ChunkSync(subworld.getActiveChunk(indexes)));
-
     }
 }

@@ -1,7 +1,6 @@
 package game.NetMessage;
 
 import game.*;
-import game.request.ReceivedPlayerRequest;
 
 import java.nio.ByteBuffer;
 
@@ -20,6 +19,16 @@ public class PlayerSpawn extends Message {
         this.seed = seed;
     }
 
+    public PlayerSpawn(ByteBuffer message) {
+        this.entityId = message.getInt();
+        System.out.println("Received player "+entityId);
+        this.x = message.getInt();
+        this.y = message.getInt();
+        this.isLocal = message.get() == 1;
+        this.seed = message.getShort();
+
+    }
+
     @Override
     public byte[] toBytes() {
         ByteBuffer message = ByteBuffer.allocate(1 + Integer.BYTES * 3 + 1+ Short.BYTES);
@@ -33,16 +42,29 @@ public class PlayerSpawn extends Message {
     }
 
     @Override
-    public void processReceivedBinMessage(ByteBuffer message) {
-        Subworld subworld = Main.getGame().getActiveSubworld();
+    public void process() {
+        var client = (Client)Main.getGame();
 
-        int entityId = message.getInt();
-        System.out.println("Received player "+entityId);
-        int x = message.getInt();
-        int y = message.getInt();
-        boolean isLocal = message.get() == 1;
-        short seed = message.getShort();
+        var subworld = Main.getGame().getActiveSubworld();
+        var players = subworld.getPlayers();
+        for (var player : players)
+            if (player.getId() == entityId) {
+                System.out.println("Doesn't spawn player "+entityId+" as it already exist");
+                return;
+            }
+        System.out.println("Spawns player "+entityId);
 
-        Main.getGame().addRequest(new ReceivedPlayerRequest(null, x, y, entityId, seed));
+        Player playerToSpawn = new Player(x, y, subworld, null);
+        playerToSpawn.setLocal(false);
+        if(client.getPrimaryCharacter() == null){
+            client.setPrimaryCharacter(playerToSpawn);
+            Main.getClient().addMessage(new Initialized());
+            Main.getClient().addMessage(new RequestEntities());
+        }
+        players.add(playerToSpawn);
+        subworld.addEntity(playerToSpawn);
+
+        playerToSpawn.setId(entityId);
+        playerToSpawn.spawn(x,y,seed);
     }
 }

@@ -24,6 +24,12 @@ public class Hello extends Message {
         this.connectionId = connectionId;
     }
 
+    public Hello(ByteBuffer message) {
+        if (Main.isClient()) {
+            this.connectionId = message.getShort();
+        }
+    }
+
     public byte[] toBytes() {
         if (Main.getGame().getGameState() == GameApp.GameState.Client) {
             ByteBuffer message = ByteBuffer.allocate(1);
@@ -38,16 +44,16 @@ public class Hello extends Message {
     }
 
     @Override
-    public void processReceivedBinMessage(ByteBuffer message) {
+    public void process() {
         GameApp.GameState state = Main.getGame().getGameState();
         //if handshake with server successful
         if (state == GameApp.GameState.Client) {
             var client = Main.getClient();
             client.setServerActive(true);
-            client.connectionId = message.getShort();
+            client.connectionId = connectionId;
             System.out.println("Connected to server as " + client.connectionId);
         } else {
-            Main.getServer().getCurrentConnection().setConnected(true);
+            senderConnection.setConnected(true);
         }
     }
 }

@@ -1,16 +1,32 @@
 package game.NetMessage;
 
 import game.*;
-import game.request.PlayerUpdateRequest;
 
 import java.nio.ByteBuffer;
 
 public class PlayerSync extends Message {
     static byte id = 10;
     Player player;
+    int entityId;
+    float x;
+    float y;
+    float mx;
+    float my;
+    float angle;
+    byte item;
 
     public PlayerSync(Player player) {
         this.player = player;
+    }
+
+    public PlayerSync(ByteBuffer message) {
+        this.entityId = message.getInt();
+        this.x = message.getFloat();
+        this.y = message.getFloat();
+        this.mx = message.getFloat();
+        this.my = message.getFloat();
+        this.angle = message.getFloat();
+        this.item = message.get();
     }
 
     @Override
@@ -34,14 +50,8 @@ public class PlayerSync extends Message {
     }
 
     @Override
-    public void processReceivedBinMessage(ByteBuffer message) {
-        int id = message.getInt();
-        float x = message.getFloat();
-        float y = message.getFloat();
-        float mx = message.getFloat();
-        float my = message.getFloat();
-        float angle = message.getFloat();
-        byte item = message.get();
+    public void process() {
+
 
         Player target = null;
         Subworld subworld = Main.getGame().getActiveSubworld();
@@ -49,7 +59,7 @@ public class PlayerSync extends Message {
             return;
         var players = subworld.getPlayers();
         for (Player p : players)
-            if (p.getId() == id) {
+            if (p.getId() == entityId) {
                 target = p;
                 break;
             }
@@ -57,6 +67,11 @@ public class PlayerSync extends Message {
             System.out.println("Not found player");
             return;
         }
-        GameApp.getRequests().add(new PlayerUpdateRequest(null, target, x, y, mx, my, angle, item));
+        if (target.getId() != ((Client) Main.getGame()).getPrimaryCharacter().getId()) {
+            target.setX(x);
+            target.setY(y);
+            target.go(mx, my);
+        }
+        target.setLookDirection(angle);
     }
 }

@@ -19,9 +19,9 @@ public class Initialized extends Message {
 
     public Initialized() {};
 
-    public Initialized(short connectionId) {
-        this.connectionId = connectionId;
-    }
+//    public Initialized(short connectionId) {
+//        this.connectionId = connectionId;
+//    }
 
     public byte[] toBytes() {
         ByteBuffer message = ByteBuffer.allocate(1);
@@ -30,7 +30,7 @@ public class Initialized extends Message {
     }
 
     @Override
-    public void processReceivedBinMessage(ByteBuffer message) {
+    public void process() {
         GameApp.GameState state = Main.getGame().getGameState();
         //if handshake with server successful
         Main.getServer().getCurrentConnection().setInitialized(true);

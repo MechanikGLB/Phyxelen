@@ -146,13 +146,13 @@ public class Subworld extends GameObject {
                 collidableEntities.add((EntityWithCollision) entity);
         entitiesToAdd.clear();
 
-        if (Main.getGame().gameState != GameApp.GameState.Local && counter % 8 == 0) {
-            for (Player player : players)
-               if (Main.getClient() != null)
-                   Main.getClient().addMessage(new PlayerSync(player));
-               else
-                   Main.getServer().broadcastMessage(new PlayerSync(player));
-        }
+//        if (Main.getGame().gameState != GameApp.GameState.Local && counter % 8 == 0) {
+//            for (Player player : players)
+//               if (Main.getClient() != null)
+//                   Main.getClient().addMessage(new PlayerSync(player));
+//               else
+//                   Main.getServer().broadcastMessage(new PlayerSync(player));
+//        }
 
         counter++;
         GameApp.Profiler.endProfile("tick");

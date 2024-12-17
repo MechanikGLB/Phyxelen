@@ -2,6 +2,7 @@ package game.NetMessage;
 
 import game.GameApp;
 import game.Main;
+import game.Player;
 import game.request.ChunkRequest;
 import game.request.PlayerSpawnRequest;
 
@@ -23,10 +24,13 @@ public class RequestPlayerSpawn extends Message {
     }
 
     @Override
-    public void processReceivedBinMessage(ByteBuffer message) {
-        GameApp.GameState state = Main.getGame().getGameState();
-        if (state == GameApp.GameState.Server)
-            GameApp.getRequests().add(
-                    new PlayerSpawnRequest(Main.getServer().getCurrentConnection()));
+    public void process() {
+        if (!Main.isServer())
+            return;
+
+        var subworld = Main.getGame().getActiveSubworld();
+        Player player = new Player(0,0,subworld, senderConnection);
+        subworld.spawnPlayer(player);
+        senderConnection.addMessage(player.getSpawnMessage());
     }
 }

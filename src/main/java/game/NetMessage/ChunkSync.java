@@ -6,18 +6,56 @@ import java.nio.ByteBuffer;
 
 public class ChunkSync extends Message {
     static byte id = 5;
-//    static {Messages.addMessage(new ChunkSync());}
+
     Chunk chunk;
 
     public static byte getId() {
         return id;
     }
 
-    ChunkSync() {};
-
     public ChunkSync(Chunk chunk) {
         this.chunk = chunk;
     }
+
+    public ChunkSync(ByteBuffer message) {
+        var subworld = Main.getGame().getActiveSubworld();
+        int xIndex = message.getInt();
+        int yIndex = message.getInt();
+        byte type = message.get();
+        System.out.println("Received chunk "+xIndex+" ; "+yIndex);
+        Material[] materials = new Material[Chunk.area()];
+        byte[] colors = new byte[Chunk.area()];
+
+        switch (type) {
+            case 0: {
+                for (int i = 0; i < Chunk.area(); i++) {
+                    materials[i] = Content.air();
+                    colors[i] = 0;
+                }
+            } break;
+            case 1: {
+                Material material = subworld.world().getMaterialById(message.get());
+                for (int i = 0; i < Chunk.area(); i += 2) {
+                    byte colorsByte = message.get();
+                    materials[i] = material;
+                    colors[i] = (byte)(colorsByte & 0xF);
+                    materials[i+1] = material;
+                    colors[i+1] = (byte)(colorsByte >> 4);
+                }
+
+            } break;
+            case 2: {
+                for (int i = 0; i < Chunk.area(); i++) {
+                    byte pixel = message.get();
+                    materials[i] = subworld.world().getMaterialById(pixel & 0x1F);
+                    colors[i] = (byte)(pixel >> 5);
+                }
+            }
+        }
+
+        chunk = new Chunk(subworld, xIndex, yIndex, materials, colors);
+
+    };
 
     public byte[] toBytes() {
         // Compressing type definition
@@ -69,44 +107,8 @@ public class ChunkSync extends Message {
     }
 
     @Override
-    public void processReceivedBinMessage(ByteBuffer message) {
+    public void process() {
         var subworld = Main.getGame().getActiveSubworld();
-//        message.get();
-        int xIndex = message.getInt();
-        int yIndex = message.getInt();
-        byte type = message.get();
-        System.out.println("Received chunk "+xIndex+" ; "+yIndex);
-        Material[] materials = new Material[Chunk.area()];
-        byte[] colors = new byte[Chunk.area()];
-
-        switch (type) {
-            case 0: {
-                for (int i = 0; i < Chunk.area(); i++) {
-                    materials[i] = Content.air();
-                    colors[i] = 0;
-                }
-            } break;
-            case 1: {
-                Material material = subworld.world().getMaterialById(message.get());
-                for (int i = 0; i < Chunk.area(); i += 2) {
-                    byte colorsByte = message.get();
-                    materials[i] = material;
-                    colors[i] = (byte)(colorsByte & 0xF);
-                    materials[i+1] = material;
-                    colors[i+1] = (byte)(colorsByte >> 4);
-                }
-
-            } break;
-            case 2: {
-                for (int i = 0; i < Chunk.area(); i++) {
-                    byte pixel = message.get();
-                    materials[i] = subworld.world().getMaterialById(pixel & 0x1F);
-                    colors[i] = (byte)(pixel >> 5);
-                }
-            }
-        }
-
-        Chunk receivedChunk = new Chunk(subworld, xIndex, yIndex, materials, colors);
-        subworld.receivedChunk(receivedChunk);
+        subworld.receivedChunk(chunk);
     }
 }

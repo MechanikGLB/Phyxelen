@@ -13,6 +13,11 @@ public class ProjectileSpawn extends Message {
         this.casterID = casterID;
     }
 
+    public ProjectileSpawn(ByteBuffer message) {
+        this.casterID = message.getInt();
+    }
+
+
     public ProjectileSpawn() {
         this.casterID = 0 ;
     }
@@ -26,9 +31,9 @@ public class ProjectileSpawn extends Message {
     }
 
     @Override
-    public void processReceivedBinMessage(ByteBuffer message) {
-        //TODO:continue after sync
-        int caster = message.getInt();
+    public void process() {
+        if (!Main.isServer())
+            return;
 
         Player target = null;
         var players = Main.getGame().getActiveSubworld().getPlayers();
@@ -40,9 +45,11 @@ public class ProjectileSpawn extends Message {
         if (target == null)
             return;
 
+//        if (target == ((Client) Main.getGame()).getPrimaryCharacter())
+
         ((Wand)target.getHoldedItem()).cast();
 
         if (Main.getGame().getGameState() == GameApp.GameState.Server)
-            Main.getServer().broadcastMessage(new ProjectileSpawn(caster));
+            Main.getServer().broadcastMessage(new ProjectileSpawn(casterID));
     }
 }
