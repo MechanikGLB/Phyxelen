@@ -1,47 +1,43 @@
 package game.NetMessage;
 
-import game.*;
+import game.Client;
+import game.Main;
+import game.Player;
+import game.Subworld;
 
 import java.nio.ByteBuffer;
 
-public class PlayerSync extends Message {
-    static byte id = 10;
+public class PlayerHeldItemSync extends Message {
+    static byte id = 11;
     Player player;
     int entityId;
     float x;
     float y;
     float mx;
     float my;
+    float vy;
     float angle;
     byte item;
 
-    public PlayerSync(Player player) {
+    public PlayerHeldItemSync(Player player) {
         this.player = player;
     }
 
-    public PlayerSync(ByteBuffer message) {
+    public PlayerHeldItemSync(ByteBuffer message) {
         this.entityId = message.getInt();
-        this.x = message.getFloat();
-        this.y = message.getFloat();
-        this.mx = message.getFloat();
-        this.my = message.getFloat();
         this.angle = message.getFloat();
         this.item = message.get();
     }
 
     @Override
     public byte[] toBytes() {
-        ByteBuffer message = ByteBuffer.allocate(2 + Integer.BYTES + Float.BYTES * 5);
+        ByteBuffer message = ByteBuffer.allocate(2 + Integer.BYTES + Float.BYTES * 6);
         message.put(id);
         message.putInt(player.getId());
-        message.putFloat(player.getX());
-        message.putFloat(player.getY());
-        message.putFloat(player.getMovingX());
-        message.putFloat(player.getMovingY());
         message.putFloat(player.getLookDirection());
         var inventory = player.getInventory();
         for (int i = 0; i < inventory.size(); i++) {
-            if (player.getHoldedItem() == inventory.get(i)) {
+            if (player.getHeldItem() == inventory.get(i)) {
                 message.put((byte) i);
                 break;
             }
@@ -68,10 +64,8 @@ public class PlayerSync extends Message {
             return;
         }
         if (target.getId() != ((Client) Main.getGame()).getPrimaryCharacter().getId()) {
-            target.setX(x);
-            target.setY(y);
-            target.go(mx, my);
+            target.setHeldItem(target.getInventory().get(item));
+            target.setLookDirection(angle);
         }
-        target.setLookDirection(angle);
     }
 }

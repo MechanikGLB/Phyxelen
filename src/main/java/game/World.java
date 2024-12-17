@@ -127,12 +127,12 @@ public class World {
 
 
     private void startup() {
-        if (Main.getClient() == null)
+        if (!Main.isClient())
             loadContent();
         else {
             Main.netThread = new Thread(() -> Main.getClient().run());
             Main.netThread.start();
-            Main.getClient().addMessage(new RequestContent());
+//            Main.getClient().addMessage(new RequestContent());
         }
     }
 
@@ -176,6 +176,5 @@ public class World {
             pixelIds[i] = definition;
             definition.id = i;
         }
-        Main.getClient().addMessage(new RequestPlayerSpawn());
     }
 }

@@ -31,6 +31,7 @@ public class PlayerSpawn extends Message {
 
     @Override
     public byte[] toBytes() {
+        System.out.println("Will spawn player "+entityId+" with seed "+seed);
         ByteBuffer message = ByteBuffer.allocate(1 + Integer.BYTES * 3 + 1+ Short.BYTES);
         message.put(id);
         message.putInt(entityId);
@@ -52,19 +53,22 @@ public class PlayerSpawn extends Message {
                 System.out.println("Doesn't spawn player "+entityId+" as it already exist");
                 return;
             }
-        System.out.println("Spawns player "+entityId);
+        System.out.println("Spawns player "+entityId+" with seed "+seed);
 
         Player playerToSpawn = new Player(x, y, subworld, null);
         playerToSpawn.setLocal(false);
-        if(client.getPrimaryCharacter() == null){
-            client.setPrimaryCharacter(playerToSpawn);
-            Main.getClient().addMessage(new Initialized());
-            Main.getClient().addMessage(new RequestEntities());
-        }
+
         players.add(playerToSpawn);
         subworld.addEntity(playerToSpawn);
 
         playerToSpawn.setId(entityId);
         playerToSpawn.spawn(x,y,seed);
+
+        if (client.getPrimaryCharacter() == null) {
+            client.setPrimaryCharacter(playerToSpawn);
+            client.setControlledCharacter(playerToSpawn);
+            Main.getClient().addMessage(new Initialized());
+            Main.getClient().addMessage(new RequestEntities());
+        }
     }
 }

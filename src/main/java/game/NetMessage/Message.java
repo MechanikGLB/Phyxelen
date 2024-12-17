@@ -18,7 +18,7 @@ abstract public class Message {
     /// Makes message for putting into queue in server
     public static Message make(ByteBuffer bytes, Connection sender) {
         Message newMessage = switch (bytes.get()) {
-            case 0 -> new Hello();
+            case 0 -> new Hello(bytes);
             case 1 -> new Quit();
             case 2 ->  new RequestContent();
             case 3 ->  new ContentSync(bytes);
@@ -28,8 +28,9 @@ abstract public class Message {
             case 7 ->  new PlayerSpawn(bytes);
 //            case 8 ->  new ProjectileSpawn(0);
             case 9 ->  new RequestEntities();
-//            case 10 ->  new PlayerSync(null);
-            case 11 ->  new Initialized();
+            case 10 ->  new PlayerMovementSync(bytes);
+            case 11 ->  new PlayerHeldItemSync(bytes);
+            case 12 ->  new Initialized();
             default -> throw new RuntimeException("Unknown message type: "+bytes.get(0));
         };
         newMessage.senderConnection = sender;

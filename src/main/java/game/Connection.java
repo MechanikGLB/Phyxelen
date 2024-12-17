@@ -2,7 +2,6 @@ package game;
 
 import game.NetMessage.Hello;
 import game.NetMessage.Message;
-import game.request.PlayerSpawnRequest;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -17,6 +16,7 @@ public class Connection {
     private final int playerPort;
     private final BlockingQueue<Message> messagesQueue = new LinkedBlockingQueue<>();
     private DatagramSocket socket;
+    private Thread sendingThread;
     private boolean connected = false;
     private boolean initialized = false;
 
@@ -49,8 +49,8 @@ public class Connection {
         messagesQueue.add(new Hello(connectionId));
 
 //        Main.getGame().addRequest(new PlayerSpawnRequest(this));
-        Thread sender = new Thread(this::sender);
-        sender.start();
+        sendingThread = new Thread(this::sender);
+        sendingThread.start();
         connected = true;
         System.out.println("Client Handler started");
     }
@@ -93,4 +93,8 @@ public class Connection {
         socket.send(packetToClient);
     }
 
+    public void shutdown() {
+        socket.close();
+        sendingThread.interrupt();
+    }
 }

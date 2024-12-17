@@ -66,39 +66,41 @@ public class Player extends Character {
                     y[0] - client.renderer.screenHeight / 2d,
                     x[0] - client.renderer.screenWidth / 2d
             ));
-            // Levitation
-            if (movingY > 0) {
-                if (levitationTime < maxLevitationTime) {
-                    vy += vy < 0 ? 20 : 10;
-                    levitationTime += dt;
-                }
-            } else if (levitationTime > 0) {
-                if (inAir)
-                    levitationTime -= dt * 0.5f;
-                else
-                    levitationTime -= dt;
-            }
-
-            if (inAir) {
-                if (movingY > 0 && levitationTime < maxLevitationTime)
-                    animation = ANIMATION_JUMP;
-                else if (vy < -40)
-                    animation = ANIMATION_FALL;
-            } else {
-                if (walking)
-                    animation = ANIMATION_WALK;
-                else
-                    animation = ANIMATION_IDLE;
-            }
         }
+
+        // Levitation
+        if (movingY > 0) {
+            if (levitationTime < maxLevitationTime) {
+                vy += vy < 0 ? 20 : 10;
+                levitationTime += dt;
+            }
+        } else if (levitationTime > 0) {
+            if (inAir)
+                levitationTime -= dt * 0.5f;
+            else
+                levitationTime -= dt;
+        }
+
+        if (inAir) {
+            if (movingY > 0 && levitationTime < maxLevitationTime)
+                animation = ANIMATION_JUMP;
+            else if (vy < -40)
+                animation = ANIMATION_FALL;
+        } else {
+            if (walking)
+                animation = ANIMATION_WALK;
+            else
+                animation = ANIMATION_IDLE;
+        }
+
         animationTime += dt;
         if (animationTime >= 0.6) {
             animationTime = 0;
             animationFrame = (byte)((animationFrame + 1) % 2);
         }
 //        System.out.println(getLookDirection());
-        if (holdedItem != null)
-            holdedItem.update(dt);
+        if (heldItem != null)
+            heldItem.update(dt);
 
         if (health <= 0) {
             respawnTimer -= dt;
@@ -142,8 +144,8 @@ public class Player extends Character {
                 0, 1, (animation * 2 + animationFrame) * 10/80f, (animation * 2 + 1 + animationFrame) * 10/80f);
         if (walking)
             walking = false;
-        if (holdedItem != null)
-            holdedItem.draw(fdt);
+        if (heldItem != null)
+            heldItem.draw(fdt);
     }
 
     @Override
@@ -163,7 +165,8 @@ public class Player extends Character {
             die();
     }
 
-    public void spawn(int x, int y, int seed) {
+    public void spawn(int x, int y, short seed) {
+        this.seed = seed;
         health = maxHealth;
         if (client.getPrimaryCharacter() == this)
             client.controlledCharacter = this;
@@ -187,8 +190,8 @@ public class Player extends Character {
             }
             wand.setTexture("wand_"+random.nextInt(1,4)+".png");
             inventory.add(wand);
-            holdedItem = wand;
         }
+        heldItem = inventory.getFirst();
     }
 
     @Override
@@ -203,7 +206,7 @@ public class Player extends Character {
         subworld.fillPixels(round(x) - 1, round(y) + 4, 2, 1, Content.getMaterial("sand"), (byte) -1, 2);
         movingX = 0;
         movingY = 0;
-        holdedItem.deactivate();
+        heldItem.deactivate();
         inventory.clear();
     }
 }

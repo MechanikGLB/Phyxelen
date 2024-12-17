@@ -19,6 +19,9 @@ abstract public class EntityWithCollision extends Entity {
         this.collidable = collidable;
     }
 
+    public float getVy() { return vy; }
+    public void setVy(float vy) { this.vy = vy; }
+
     @Override
     void update(float dt) {
         if (gravity != 0) {

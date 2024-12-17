@@ -3,7 +3,6 @@ package game.NetMessage;
 import game.*;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 
 public class ProjectileSpawn extends Message {
     static byte id = 8;
@@ -47,7 +46,7 @@ public class ProjectileSpawn extends Message {
 
 //        if (target == ((Client) Main.getGame()).getPrimaryCharacter())
 
-        ((Wand)target.getHoldedItem()).cast();
+        ((Wand)target.getHeldItem()).cast();
 
         if (Main.getGame().getGameState() == GameApp.GameState.Server)
             Main.getServer().broadcastMessage(new ProjectileSpawn(casterID));

@@ -1,10 +1,7 @@
 package game.NetMessage;
 
-import game.GameApp;
 import game.Main;
 import game.Player;
-import game.request.ChunkRequest;
-import game.request.PlayerSpawnRequest;
 
 import java.nio.ByteBuffer;
 

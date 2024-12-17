@@ -6,7 +6,7 @@ abstract public class Character extends EntityWithCollision {
     protected int maxHealth = 100;
     protected int health = maxHealth;
     protected boolean clipHealth = false;
-    protected HoldableItem holdedItem;
+    protected HoldableItem heldItem;
     float movingX = 0;
     float movingY = 0;
 
@@ -76,8 +76,8 @@ abstract public class Character extends EntityWithCollision {
             health = maxHealth;
     }
 
-    public HoldableItem getHoldedItem() { return holdedItem; }
-    public void setHoldedItem(HoldableItem holdedItem) { this.holdedItem = holdedItem; }
+    public HoldableItem getHeldItem() { return heldItem; }
+    public void setHeldItem(HoldableItem heldItem) { this.heldItem = heldItem; }
 
     void go(float dx, float dy) {
         movingX = dx;

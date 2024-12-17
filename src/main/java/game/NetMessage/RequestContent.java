@@ -33,6 +33,6 @@ public class RequestContent extends Message {
         for (Material material : materialsByID) {
             materials.add(material.getName());
         }
-        Main.getServer().getCurrentConnection().addMessage(new ContentSync(materials));
+        senderConnection.addMessage(new ContentSync(materials));
     }
 }

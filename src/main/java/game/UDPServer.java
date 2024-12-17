@@ -125,7 +125,9 @@ public class UDPServer implements Runnable {
     public void shutdown() {
         System.out.println("Server stopped");
         socket.close();
-//        Thread.currentThread().interrupt();
+        for (var connection : connections)
+            connection.shutdown();
+        Thread.currentThread().interrupt();
     }
 }
 

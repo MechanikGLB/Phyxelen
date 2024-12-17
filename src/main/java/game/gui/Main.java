@@ -3,7 +3,6 @@ package game.gui;
 import game.*;
 import game.spells.Spell;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 import static org.lwjgl.opengl.GL21.*;
@@ -33,15 +32,15 @@ public class Main {
             return;
         ArrayList<HoldableItem> inventory = player.getInventory();
         for (int i = 0; i < inventory.size(); i++) {
-            if (player.getHoldedItem() == inventory.get(i))
+            if (player.getHeldItem() == inventory.get(i))
                 drawRect(10+100*i, 10, 90+100*i, 90, 200, 255, 200, 255);
             else
                 drawRect(10+100*i, 10, 90+100*i, 90, 100, 155, 100, 255);
             drawRect(16+100*i, 16, 84+100*i, 84, 80, 100, 80, 255);
             drawRectTextured(10+100*i, 50-20, 80+100*i, 50+20, 255, 255, 255, 255, inventory.get(i).getImage().getTextureBuffer());
         }
-        if (player.getHoldedItem() instanceof Wand) {
-            var wand = (Wand) player.getHoldedItem();
+        if (player.getHeldItem() instanceof Wand) {
+            var wand = (Wand) player.getHeldItem();
             ArrayList<Spell> spells = wand.getSpells();
             drawRect(10, 100, 90+100*(spells.size()-1), 180, 80, 100, 80, 255);
             for (int i = 0; i < spells.size(); i++) {

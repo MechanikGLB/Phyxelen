@@ -1,6 +1,5 @@
 package game;
 
-import game.NetMessage.PlayerSync;
 import game.NetMessage.RequestChunk;
 
 import java.io.File;
@@ -146,6 +145,9 @@ public class Subworld extends GameObject {
                 collidableEntities.add((EntityWithCollision) entity);
         entitiesToAdd.clear();
 
+        if (Main.getGame().gameState != GameApp.GameState.Local && counter % 8 == 0) {
+
+        }
 //        if (Main.getGame().gameState != GameApp.GameState.Local && counter % 8 == 0) {
 //            for (Player player : players)
 //               if (Main.getClient() != null)
@@ -391,7 +393,7 @@ public class Subworld extends GameObject {
             addEntity(player);
 
         }
-        player.spawn(x, y, random.nextInt());
+        player.spawn(x, y, (short) random.nextInt());
     }
 
     public void jetPixels(int x, int y, int size) {

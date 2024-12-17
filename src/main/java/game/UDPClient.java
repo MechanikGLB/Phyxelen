@@ -5,7 +5,6 @@ import java.net.*;
 import java.nio.ByteBuffer;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeoutException;
 
 import game.NetMessage.*;
 
@@ -43,28 +42,39 @@ public class UDPClient implements Runnable {
     @Override
     public void run(){
         try {
-
             System.out.println("UDP Client started");
             queue.add(new Hello()); // Execute handshake
-            sendToServer();
-            responseReceive();
-            if (serverActive) {
-                Thread ReceiveHandler = new Thread(this::receiver);
-                Thread SendHandler = new Thread(this::sender);
-                ReceiveHandler.start();
-                SendHandler.start();
-            }
-            else {
-                System.out.println("Server timed out");
-            }
-
+            send();
+            receive();
         }
         catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
 
-    protected void sendToServer() throws InterruptedException {
+    public void connected() {
+//        if (!serverActive) {
+////                System.out.println("Server timed out");
+//            throw new RuntimeException("Handshake with server failed: server timed out");
+//        }
+        try {
+            queue.add(new RequestContent());
+            send();
+            receive();
+            queue.add(new RequestPlayerSpawn());
+            send();
+            receive();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        Thread ReceiveHandler = new Thread(this::receiver);
+        Thread SendHandler = new Thread(this::sender);
+        ReceiveHandler.start();
+        SendHandler.start();
+    }
+
+    protected void send() throws InterruptedException {
         Message message = queue.take();
         byte[] messageByteArray = message.toBytes();
         ByteBuffer dataToSend = ByteBuffer.allocate(messageByteArray.length + Short.BYTES);
@@ -80,7 +90,7 @@ public class UDPClient implements Runnable {
                 socket.setSoTimeout(timeout);
                 socket.send(packetToServer);
 
-                responseReceive();
+                receive();
                 break;
             } catch (IOException e) {
                 System.out.println("Server timeout");
@@ -96,7 +106,7 @@ public class UDPClient implements Runnable {
     public void receiver(){
         try {
             while (!socket.isClosed())
-                responseReceive();
+                receive();
         } catch (Exception e) {
             throw e;
         }
@@ -105,7 +115,7 @@ public class UDPClient implements Runnable {
     public void sender(){
         try {
             while (!socket.isClosed())
-                sendToServer();
+                send();
         } catch (Exception e) {
             throw new RuntimeException(e);
 //            System.out.println(e.getMessage());
@@ -114,7 +124,7 @@ public class UDPClient implements Runnable {
 
     DatagramPacket packetFromServer = new DatagramPacket(buffer, buffer.length);
 
-    public void responseReceive() {
+    public void receive() {
         try {
             socket.receive(packetFromServer);
             System.out.println("Received from Server: " + packetFromServer.getData()[0]);

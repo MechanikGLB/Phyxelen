@@ -3,8 +3,6 @@ package game.NetMessage;
 import game.Entity;
 import game.GameApp;
 import game.Main;
-import game.request.ChunkRequest;
-import game.request.EntitiesRequest;
 
 import java.nio.ByteBuffer;
 

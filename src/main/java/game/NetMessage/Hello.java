@@ -49,8 +49,9 @@ public class Hello extends Message {
         //if handshake with server successful
         if (state == GameApp.GameState.Client) {
             var client = Main.getClient();
-            client.setServerActive(true);
+//            client.setServerActive(true);
             client.connectionId = connectionId;
+            client.connected();
             System.out.println("Connected to server as " + client.connectionId);
         } else {
             senderConnection.setConnected(true);

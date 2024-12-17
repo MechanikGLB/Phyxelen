@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
 import java.util.Random;
 
 public class Initialized extends Message {
-    static byte id = 11;
+    static byte id = 12 ;
     static Random random = new Random();
     short connectionId;
 
@@ -33,14 +33,17 @@ public class Initialized extends Message {
     public void process() {
         GameApp.GameState state = Main.getGame().getGameState();
         //if handshake with server successful
-        Main.getServer().getCurrentConnection().setInitialized(true);
+        senderConnection.setInitialized(true);
         var players = Main.getGame().getActiveSubworld().getPlayers();
+
+        // Send character to all connected clients except just connected one
         for (Player player : players) {
-            Main.getServer().getCurrentConnection().addMessage(new PlayerSpawn(
-                    (int) player.getX(),
-                    (int) player.getY(),
-                    player.getId(),
-                    player.getSeed()
+            if (player.getConnection() != senderConnection)
+                senderConnection.addMessage(new PlayerSpawn(
+                        (int) player.getX(),
+                        (int) player.getY(),
+                        player.getId(),
+                        player.getSeed()
             ));
         }
     }

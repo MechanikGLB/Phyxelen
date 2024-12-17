@@ -1,5 +1,7 @@
 package game;
 
+import game.NetMessage.PlayerHeldItemSync;
+import game.NetMessage.PlayerMovementSync;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 
@@ -29,10 +31,10 @@ public class Client extends GameApp {
 
     protected VectorF cameraPos = new VectorF(0, 0);
     /// Length of world pixel side in real screen pixels
-    protected short viewScale = 8;
+    protected short viewScale = 7;
     /// Free camera movement speed in screen pixels per second
     protected short cameraSpeed = 150;
-    Character controlledCharacter;
+    Player controlledCharacter;
     private Player primaryCharacter;
 
     // Editor
@@ -45,6 +47,7 @@ public class Client extends GameApp {
 
     public Character getControlledCharacter() { return controlledCharacter; }
     public Character getPrimaryCharacter() { return primaryCharacter; }
+    public void setControlledCharacter(Player controlledCharacter) { this.controlledCharacter = controlledCharacter; }
     public void setPrimaryCharacter(Player character) {primaryCharacter = character;}
 
     @Override
@@ -151,7 +154,7 @@ public class Client extends GameApp {
             for (int i = 0; i < 10; i++)
                 if (glfwGetKey(window, GLFW_KEY_0 + i) != 0)
                     if (controlledCharacter != null && ((Player)controlledCharacter).inventory.size() >= i && i>0)
-                        controlledCharacter.holdedItem = ((Player)controlledCharacter).inventory.get(i-1);
+                        controlledCharacter.heldItem = ((Player)controlledCharacter).inventory.get(i-1);
                     else
                         paintingPixel = i;
             if (glfwGetKey(window, GLFW_KEY_LEFT_BRACKET) != 0 && paintingSize > 1)
@@ -171,6 +174,17 @@ public class Client extends GameApp {
 //        }
     }
 
+
+    @Override
+    protected void tick(float dt) {
+        super.tick(dt);
+        if (gameState != GameState.Local && counter % 4 == 0 && controlledCharacter != null) {
+            if (Main.getClient() != null)
+                Main.getClient().addMessage(new PlayerHeldItemSync(controlledCharacter));
+            else
+                Main.getServer().broadcastMessage(new PlayerHeldItemSync(controlledCharacter));
+        }
+    }
 
     @Override
     public void enterSubworld(Subworld subworld) {
@@ -239,67 +253,94 @@ public class Client extends GameApp {
         glfwGetCursorPos(window, x, y);
         activeSubworld.jetPixels(screenXToWorld((int) x[0]), screenYToWorld((int) y[0]), paintingSize);
     }
+    
+    
+    void syncPlayer() {
+        if (Main.isClient())
+            Main.getClient().addMessage(new PlayerMovementSync(controlledCharacter));
+        else if (Main.isServer())
+            Main.getServer().broadcastMessage(new PlayerMovementSync(controlledCharacter));
+            
+    }
 
 
     void bindKeys() {
         // Movement keys
         input.addInputAction("MoveUp",new InputAction(
                 o -> {
-                    controlledCharacter.movingY += 1;
+                    if (controlledCharacter != null) {
+                        controlledCharacter.movingY += 1;
+                        syncPlayer();
+                    }
                 },
                 o -> {
                     if (editMode)
                         cameraPos.y += cameraSpeed / viewScale * fdt;},
                 o -> {
-                    controlledCharacter.movingY -= 1;
+                    if (controlledCharacter != null) {
+                        controlledCharacter.movingY -= 1;
+                        syncPlayer();
+                    }
                 }));
         input.getKeyboardHandler().bindKey(GLFW_KEY_W, "MoveUp");
         input.getKeyboardHandler().bindKey(GLFW_KEY_UP, "MoveUp");
 
         input.addInputAction("MoveDown",new InputAction(
                 o -> {
-                    if (controlledCharacter != null)
+                    if (controlledCharacter != null) {
                         controlledCharacter.movingY -= 1;
+                        syncPlayer();
+                    }
                 },
                 o -> {
                 if (editMode)
                     cameraPos.y -= cameraSpeed / viewScale * fdt;
                 },
                 o -> {
-                    if (controlledCharacter != null)
+                    if (controlledCharacter != null) {
                         controlledCharacter.movingY += 1;
+                        syncPlayer();
+                    }
                 }));
         input.getKeyboardHandler().bindKey(GLFW_KEY_S, "MoveDown");
         input.getKeyboardHandler().bindKey(GLFW_KEY_DOWN, "MoveDown");
 
         input.addInputAction("MoveRight",new InputAction(
                 o -> {
-                    if (controlledCharacter != null)
+                    if (controlledCharacter != null) {
                         controlledCharacter.movingX += 1;
+                        syncPlayer();
+                    }
                 },
                 o -> {
                     if (editMode)
                         cameraPos.x += cameraSpeed / viewScale * fdt;
                 },
                 o -> {
-                    if (controlledCharacter != null)
+                    if (controlledCharacter != null) {
                         controlledCharacter.movingX -= 1;
+                        syncPlayer();
+                    }
                 }));
         input.getKeyboardHandler().bindKey(GLFW_KEY_D, "MoveRight");
         input.getKeyboardHandler().bindKey(GLFW_KEY_RIGHT, "MoveRight");
 
         input.addInputAction("MoveLeft",new InputAction(
                 o -> {
-                    if (controlledCharacter != null)
+                    if (controlledCharacter != null) {
                         controlledCharacter.movingX -= 1;
+                        syncPlayer();
+                    }
                 },
                 o -> {
                     if (editMode)
                         cameraPos.x -= cameraSpeed / viewScale * fdt;
                 },
                 o -> {
-                    if (controlledCharacter != null)
+                    if (controlledCharacter != null) {
                         controlledCharacter.movingX += 1;
+                        syncPlayer();
+                    }
                 }));
         input.getKeyboardHandler().bindKey(GLFW_KEY_A, "MoveLeft");
         input.getKeyboardHandler().bindKey(GLFW_KEY_LEFT, "MoveLeft");
@@ -327,8 +368,8 @@ public class Client extends GameApp {
         input.addInputAction("PrimaryAction", new InputAction(
                 o -> {
                     if (controlledCharacter != null &&
-                            controlledCharacter.holdedItem != null)
-                        controlledCharacter.holdedItem.activate();
+                            controlledCharacter.heldItem != null)
+                        controlledCharacter.heldItem.activate();
                 },
                 o -> {
                     if (editMode)
@@ -336,8 +377,8 @@ public class Client extends GameApp {
                 },
                 o -> {
                     if (controlledCharacter != null &&
-                            controlledCharacter.holdedItem != null)
-                        controlledCharacter.holdedItem.deactivate();
+                            controlledCharacter.heldItem != null)
+                        controlledCharacter.heldItem.deactivate();
                 }
         ));
         input.getMouseHandler().bindKey(GLFW_MOUSE_BUTTON_1, "PrimaryAction");
