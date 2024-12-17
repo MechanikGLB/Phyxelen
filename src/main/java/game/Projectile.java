@@ -20,7 +20,7 @@ public class Projectile extends Entity {
     short height = 1;
     boolean rotatable = false;
     float angle = 0;
-    Character casterId = null;
+    Character caster = null;
 
     Image image;
     ColorWithAplha color;
@@ -48,7 +48,8 @@ public class Projectile extends Entity {
         this.accelerationY = accelerationY;
     }
 
-    public Projectile(float x, float y, Subworld subworld, BiFunction<Projectile, Object, Boolean> onCollide,
+    public Projectile(float x, float y, Subworld subworld, Character caster,
+                      BiFunction<Projectile, Object, Boolean> onCollide,
                       float velocityX, float velocityY, float accelerationX, float accelerationY,
                       short width, short height, boolean rotatable, String image, ColorWithAplha color
     ) {
@@ -61,6 +62,7 @@ public class Projectile extends Entity {
         if (image != null)
             this.image = Content.getImage(image);
         this.color = color;
+        this.caster = caster;
     }
 
     @Override
@@ -102,7 +104,7 @@ public class Projectile extends Entity {
 
     @Override
     public Message getSpawnMessage() {
-        if (casterId != null) return new ProjectileSpawn(casterId.getId());
+        if (caster != null) return new ProjectileSpawn(caster.getId());
         else return new ProjectileSpawn();
     }
 

@@ -15,7 +15,7 @@ public class Orb extends Spell {
     public float cast(Character caster, Wand wand) {
         var subworld = caster.getSubworld();
         Projectile projectile = new Projectile(
-                wand.getCastX(), wand.getCastY(), subworld,
+                wand.getCastX(), wand.getCastY(), subworld, caster,
                 (self, o) -> {
                     if (o instanceof Pixel && !(((Pixel) o).material() instanceof MaterialAir)) {
                         subworld.removeEntity(self);

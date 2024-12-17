@@ -106,7 +106,8 @@ public class Player extends Character {
             respawnTimer -= dt;
             if (respawnTimer <= 0) {
                 respawnTimer = respawnTime;
-                subworld.spawnPlayer(this);
+                if (!Main.isClient())
+                    subworld.spawnPlayer(this);
             }
         }
     }

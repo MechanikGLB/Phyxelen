@@ -31,24 +31,26 @@ public class ProjectileSpawn extends Message {
 
     @Override
     public void process() {
-        if (!Main.isServer())
-            return;
+//        if (!Main.isServer())
+//            return;
+        System.out.println("ProjectileSpawn by "+casterID);
 
         Player target = null;
         var players = Main.getGame().getActiveSubworld().getPlayers();
         for (Player p : players)
-            if (p.getId() == id) {
+            if (p.getId() == casterID) {
                 target = p;
                 break;
             }
-        if (target == null)
+        if (target == null) {
+            System.out.println("ProjectileSpawn target "+casterID+" not found");
             return;
+        }
 
-//        if (target == ((Client) Main.getGame()).getPrimaryCharacter())
+        if (target != ((Client) Main.getGame()).getPrimaryCharacter())
+            ((Wand)target.getHeldItem()).cast();
 
-        ((Wand)target.getHeldItem()).cast();
-
-        if (Main.getGame().getGameState() == GameApp.GameState.Server)
-            Main.getServer().broadcastMessage(new ProjectileSpawn(casterID));
+//        if (Main.isServer())
+//            Main.getServer().broadcastMessage(new ProjectileSpawn(casterID));
     }
 }

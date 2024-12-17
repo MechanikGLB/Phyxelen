@@ -26,7 +26,7 @@ abstract public class Message {
             case 5 ->  new ChunkSync(bytes);
             case 6 ->  new RequestPlayerSpawn();
             case 7 ->  new PlayerSpawn(bytes);
-//            case 8 ->  new ProjectileSpawn(0);
+            case 8 ->  new ProjectileSpawn(bytes);
             case 9 ->  new RequestEntities();
             case 10 ->  new PlayerMovementSync(bytes);
             case 11 ->  new PlayerHeldItemSync(bytes);

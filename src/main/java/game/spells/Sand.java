@@ -16,7 +16,7 @@ public class Sand extends Spell {
         var colorId = (byte) subworld.random().nextInt(material.getColors().length);
         var color = material.getColors()[colorId];
         Projectile projectile = new Projectile(
-                wand.getCastX(), wand.getCastY(), subworld,
+                wand.getCastX(), wand.getCastY(), subworld, caster,
                 (self, o) -> {
                     if (o instanceof Pixel && !(((Pixel) o).material() instanceof MaterialAir)) {
                         subworld.setPixel(
