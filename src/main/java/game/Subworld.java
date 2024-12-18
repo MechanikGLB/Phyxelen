@@ -353,6 +353,14 @@ public class Subworld extends GameObject {
         entitiesToAdd.add(entity);
     }
 
+    public void addEntity(Entity entity,boolean isJet) {
+        if (entity.isLocal() && !isJet){
+            addEntity(entity);
+            return;
+        }
+        entitiesToAdd.add(entity);
+    }
+
     public void removeEntity(Entity entity) {
         entitiesToRemove.add(entity);
     }
@@ -412,7 +420,7 @@ public class Subworld extends GameObject {
                             this, material, pixel.color(),
                             (float)Math.sin(angle) * 100.f, (float)Math.cos(angle) * 100.f,
                             0, -9.8f
-                    ));
+                    ),true);
                     pixel.chunk.setPixel(pixel.i, Content.airMaterial, (byte) 0);
                 }
             }
