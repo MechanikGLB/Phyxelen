@@ -31,6 +31,8 @@ abstract public class Message {
             case 10 ->  new PlayerMovementSync(bytes);
             case 11 ->  new PlayerHeldItemSync(bytes);
             case 12 ->  new Initialized();
+            case 13 ->  new PlayerHealthSync(bytes);
+            case 14 ->  new PlayerRespawnSync(bytes);
             default -> throw new RuntimeException("Unknown message type: "+bytes.get(0));
         };
         newMessage.senderConnection = sender;

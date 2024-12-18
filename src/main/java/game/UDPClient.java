@@ -2,6 +2,7 @@ package game;
 
 import java.io.IOException;
 import java.net.*;
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -99,8 +100,12 @@ public class UDPClient implements Runnable {
     }
 
     public void addMessage(Message message) {
-        System.out.println("Add message "+message);
-        queue.add(message);
+        try {
+            System.out.println("Add message " + message);
+            queue.add(message);
+        } catch (BufferOverflowException e) {
+            garbageCollector();
+        }
     }
 
     public void receiver(){
@@ -108,6 +113,7 @@ public class UDPClient implements Runnable {
             while (!socket.isClosed())
                 receive();
         } catch (Exception e) {
+            System.out.println("Some issues in receiver");
             throw e;
         }
     }
@@ -117,9 +123,15 @@ public class UDPClient implements Runnable {
             while (!socket.isClosed())
                 send();
         } catch (Exception e) {
+            garbageCollector();
             throw new RuntimeException(e);
-//            System.out.println(e.getMessage());
         }
+    }
+
+    public void garbageCollector(){
+        queue.clear();
+        System.out.println("_________________________");
+        System.out.println("[ Garbage collector used ]");
     }
 
     DatagramPacket packetFromServer = new DatagramPacket(buffer, buffer.length);

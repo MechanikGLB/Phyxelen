@@ -75,12 +75,19 @@ public class Connection {
                 sendToClient();
         } catch (Exception e) {
             System.out.println("Connection::sender " + e.getMessage());
+            garbageCollector();
         }
     }
 
     public void addMessage(Message message) {
 //        System.out.println("Adds message for " + this + " to " + playerAddress);
         messagesQueue.add(message);
+    }
+
+    public void garbageCollector(){
+        messagesQueue.clear();
+        System.out.println("__________________________________________________");
+        System.out.println("[ Garbage collector used ]" + "[IN " + connectionId +" connection]");
     }
 
     public void sendToClient() throws InterruptedException, IOException {

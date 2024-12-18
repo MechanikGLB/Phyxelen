@@ -1,6 +1,7 @@
 package game;
 
 import game.NetMessage.Message;
+import game.NetMessage.PlayerHealthSync;
 import game.NetMessage.PlayerSpawn;
 import game.spells.*;
 
@@ -164,6 +165,13 @@ public class Player extends Character {
         super.damage(damage);
         if (health <= 0)
             die();
+
+        if (Main.getGame().getGameState() == GameApp.GameState.Client){
+            Main.getClient().addMessage(new PlayerHealthSync(id,health));
+        } else if (Main.getGame().getGameState() == GameApp.GameState.Server) {
+            Main.getServer().broadcastMessage(new PlayerHealthSync(id,health));
+        }
+
     }
 
     public void spawn(int x, int y, short seed) {

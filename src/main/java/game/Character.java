@@ -49,6 +49,7 @@ abstract public class Character extends EntityWithCollision {
     public void setMovingY(float movingY) { this.movingY = movingY; }
     public float getMovingY() { return movingY; }
 
+
     @Override
     void update(float dt) {
         super.update(dt);
