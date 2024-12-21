@@ -2,6 +2,7 @@ package game;
 
 import game.NetMessage.Message;
 import game.NetMessage.PlayerHealthSync;
+import game.NetMessage.PlayerRespawnSync;
 import game.NetMessage.PlayerSpawn;
 import game.spells.*;
 
@@ -47,7 +48,7 @@ public class Player extends Character {
         collisionBoxWidth = 4;
         collisionBoxHeight = 8;
         health = 0;
-        respawnTimer = 0.3f;
+//        respawnTimer = 0.3f;
         this.connection = connection;
     }
 
@@ -107,8 +108,11 @@ public class Player extends Character {
             respawnTimer -= dt;
             if (respawnTimer <= 0) {
                 respawnTimer = respawnTime;
-                if (!Main.isClient())
-                    subworld.spawnPlayer(this);
+                if (Main.isClient())
+                    return;
+                subworld.spawnPlayer(this);
+                if (Main.isServer())
+                    Main.getServer().broadcastMessage(new PlayerRespawnSync(this));
             }
         }
     }

@@ -178,7 +178,11 @@ public class Client extends GameApp {
     @Override
     protected void tick(float dt) {
         super.tick(dt);
-        if (gameState != GameState.Local && counter % 4 == 0 && controlledCharacter != null) {
+        if (gameState != GameState.Local
+                && counter % 4 == 0
+                && controlledCharacter != null
+                && controlledCharacter.health > 0
+        ) {
             if (Main.getClient() != null)
                 Main.getClient().addMessage(new PlayerHeldItemSync(controlledCharacter));
             else

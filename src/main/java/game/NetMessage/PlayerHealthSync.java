@@ -32,30 +32,30 @@ public class PlayerHealthSync extends Message {
 
     @Override
     public void process() {
-        var state = Main.getGame().getGameState();
-        var players = Main.getGame().getActiveSubworld().getPlayers();
-        if (state == GameApp.GameState.Server){
-            Connection playerToConfirm = Main.getServer().getCurrentConnection();
-            for (var player : players)
-                if (player.getId() == entityId) {
+//        var state = Main.getGame().getGameState();
+//        var players = Main.getGame().getActiveSubworld().getPlayers();
+//        if (state == GameApp.GameState.Server){
+//            Connection playerToConfirm = Main.getServer().getCurrentConnection();
+//            for (var player : players)
+//                if (player.getId() == entityId) {
+////                    if (player.getHealth() != health) {
+//                    System.out.println("[SERVER] Player [ " + entityId + "][" + player.getHealth() +" ] health to sync: " + health );
+//                    Main.getServer().broadcastMessage(new PlayerHealthSync(entityId, player.getHealth()));
+////                    } else {
+////                        System.out.println("[SERVER] Player [ " + entityId + " ] health already synced");
+////                        Main.getServer().broadcastMessage(new PlayerHealthSync(entityId, ))
+////                    }
+////
+//                }
+//        } else {
+//            for (var player : players)
+//                if (player.getId() == entityId) {
 //                    if (player.getHealth() != health) {
-                    System.out.println("[SERVER] Player [ " + entityId + "][" + player.getHealth() +" ] health to sync: " + health );
-                    Main.getServer().broadcastMessage(new PlayerHealthSync(entityId, player.getHealth()));
-//                    } else {
-//                        System.out.println("[SERVER] Player [ " + entityId + " ] health already synced");
-//                        Main.getServer().broadcastMessage(new PlayerHealthSync(entityId, ))
-//                    }
-//
-                }
-        } else {
-            for (var player : players)
-                if (player.getId() == entityId) {
-                    if (player.getHealth() != health) {
-                        player.setHealth(health);
-                        System.out.println("Unsynced Player [ " + entityId + " ] health synced");
-                    } else { System.out.println("Player [ " + entityId + " ] health already synced");}
-                }
-        }
+//                        player.setHealth(health);
+//                        System.out.println("Unsynced Player [ " + entityId + " ] health synced");
+//                    } else { System.out.println("Player [ " + entityId + " ] health already synced");}
+//                }
+//        }
     }
 
 }

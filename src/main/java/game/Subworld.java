@@ -202,7 +202,7 @@ public class Subworld extends GameObject {
 
     public void updateChunksForUsers() {
         ArrayList<VectorI> toDeactivate = new ArrayList<>();
-        int chunksX = 10;
+        int chunksX = 12;
         int chunksY = 8;
 
         // Unload chunks

@@ -38,14 +38,21 @@ abstract public class EntityWithCollision extends Entity {
 
             inAir = leftPixel.material().density < 2 && rightPixel.material().density < 2 && middlePixel.material().density < 2;
             if (inAir) {
+
+                // Do not go up through solid materials
+                if (vy > 0) {
+                    var topPixel = subworld.getPixel(x, y + collisionBoxHeight / 2 + vy);
+                    if (topPixel.chunk == null)
+                        return;
+                    if (topPixel.material().density >= 2)
+                        vy = 0;
+                }
+
                 Pixel castResult = subworld.rayCast(x, y - collisionBoxHeight/2, x, y - collisionBoxHeight/2 + vy * dt, 2);
                 if (castResult == null) {
                     // Slow down in liquids
                     if (centerPixel.material().density >= 1)
                         vy *= 0.5f;
-                    // Do not go up through solid materials
-                    if (vy > 0 && subworld.getPixel(x, y + collisionBoxHeight / 2 + vy).material().density >= 2)
-                            vy = 0;
                     y += vy * dt;
                 } else
                     y = castResult.y() + collisionBoxHeight / 2 + 1;
