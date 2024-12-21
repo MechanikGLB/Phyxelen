@@ -33,6 +33,7 @@ abstract public class Message {
             case 12 ->  new Initialized();
             case 13 ->  new PlayerHealthSync(bytes);
             case 14 ->  new PlayerRespawnSync(bytes);
+            case 15 ->  new WandCast(bytes);
             default -> throw new RuntimeException("Unknown message type: "+bytes.get(0));
         };
         newMessage.senderConnection = sender;

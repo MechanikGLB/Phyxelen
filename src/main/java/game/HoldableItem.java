@@ -1,5 +1,7 @@
 package game;
 
+import game.NetMessage.WandCast;
+
 import static org.lwjgl.opengl.GL21.*;
 
 public abstract class HoldableItem extends GameObject {
@@ -39,11 +41,11 @@ public abstract class HoldableItem extends GameObject {
         );
     }
 
-    void activate() {
+    public void activate() {
         active = true;
     }
 
-    void deactivate() {
+    public void deactivate() {
         active = false;
     }
 }

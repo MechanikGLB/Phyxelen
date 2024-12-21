@@ -100,6 +100,8 @@ public class UDPClient implements Runnable {
     }
 
     public void addMessage(Message message) {
+        if (message == null)
+            return;
         try {
             System.out.println("Add message " + message);
             queue.add(message);

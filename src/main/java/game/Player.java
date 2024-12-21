@@ -201,6 +201,9 @@ public class Player extends Character {
             inventory.add(wand);
         }
         heldItem = inventory.getFirst();
+
+        if (client.getPrimaryCharacter() == this)
+            client.setControlledCharacter(this);
     }
 
     @Override
@@ -209,8 +212,9 @@ public class Player extends Character {
     }
 
     public void die() {
+        if (client.controlledCharacter == this)
+            client.controlledCharacter = null;
         health = 0;
-        client.controlledCharacter = null;
         subworld.fillPixels(round(x) - 2, round(y) - 5, 4, 9, Content.getMaterial("sand"), (byte) -1, 2);
         subworld.fillPixels(round(x) - 1, round(y) + 4, 2, 1, Content.getMaterial("sand"), (byte) -1, 2);
         movingX = 0;

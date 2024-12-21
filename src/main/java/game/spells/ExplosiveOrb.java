@@ -3,6 +3,8 @@ package game.spells;
 import game.Character;
 import game.*;
 
+import java.util.Random;
+
 public class ExplosiveOrb extends Spell {
 
     public ExplosiveOrb() {
@@ -19,7 +21,7 @@ public class ExplosiveOrb extends Spell {
                 (self, o) -> {
                     if (o instanceof Pixel && !(((Pixel) o).material() instanceof MaterialAir)) {
                         ((Pixel) o).chunk().setPixel(((Pixel) o).i(), Content.air(), (byte) 0);
-                        subworld.jetPixels(((Pixel)o).x(), ((Pixel)o).y(), 16);
+                        subworld.jetPixels(((Pixel)o).x(), ((Pixel)o).y(), 16, new Random(((Pixel)o).x()));
                         return true;
                     } else if (o instanceof Character) {
                         ((Character)o).damage(50);

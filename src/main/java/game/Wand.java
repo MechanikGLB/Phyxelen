@@ -1,5 +1,6 @@
 package game;
 
+import game.NetMessage.WandCast;
 import game.spells.Spell;
 
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ public class Wand extends HoldableItem {
     public ArrayList<Spell> getSpells() { return spells; }
 
     @Override
-    void activate() {
+    public void activate() {
         super.activate();
         if (cooldown <= 0)
             cast();
@@ -45,6 +46,10 @@ public class Wand extends HoldableItem {
     }
 
     public void cast() {
+        if (Main.isClient())
+            Main.getClient().addMessage(new WandCast(holder));
+        else if (Main.isServer())
+            Main.getServer().broadcastMessage(new WandCast(holder));
         for (var spell : spells)
             cooldown += spell.cast(holder, this);
     }

@@ -64,7 +64,8 @@ public class PlayerHeldItemSync extends Message {
             return;
         }
         if (target.getId() != ((Client) Main.getGame()).getPrimaryCharacter().getId()) {
-            target.setHeldItem(target.getInventory().get(item));
+            if (target.getInventory().size() > item)
+                target.setHeldItem(target.getInventory().get(item));
             target.setLookDirection(angle);
         }
     }

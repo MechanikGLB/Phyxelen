@@ -1,44 +1,41 @@
 package game.NetMessage;
 
 import game.*;
+import game.Character;
 
 import java.nio.ByteBuffer;
 
-public class ProjectileSpawn extends Message {
-    static byte id = 8;
+public class WandCast extends Message {
+    static byte id = 15;
     int casterID;
-    int projectileID;
     float casterX;
     float casterY;
     float casterAngle;
 
-    public ProjectileSpawn(int casterID, int projectileID, float casterX, float casterY, float casterAngle) {
-        this.casterID = casterID;
-        this.projectileID = projectileID;
-        this.casterX = casterX;
-        this.casterY = casterY;
-        this.casterAngle = casterAngle;
+    public WandCast(Character caster) {
+        this.casterID = caster.getId();
+        this.casterX = caster.getX();
+        this.casterY = caster.getY();
+        this.casterAngle = caster.getLookDirection();
     }
 
-    public ProjectileSpawn(ByteBuffer message) {
+    public WandCast(ByteBuffer message) {
         this.casterID = message.getInt();
-        this.projectileID = message.getInt();
         this.casterX = message.getFloat();
         this.casterY = message.getFloat();
         this.casterAngle = message.getFloat();
     }
 
 
-    public ProjectileSpawn() {
+    public WandCast() {
         this.casterID = 0 ;
     }
 
     @Override
     public byte[] toBytes() {
-        ByteBuffer message = ByteBuffer.allocate(1 + Integer.BYTES * 2 + Float.BYTES * 3);
+        ByteBuffer message = ByteBuffer.allocate(1 + Integer.BYTES + Float.BYTES * 3);
         message.put(id);
         message.putInt(casterID);
-        message.putInt(projectileID);
         message.putFloat(casterX);
         message.putFloat(casterY);
         message.putFloat(casterAngle);
@@ -49,11 +46,8 @@ public class ProjectileSpawn extends Message {
     public void process() {
 //        if (!Main.isServer())
 //            return;
-        System.out.println("ProjectileSpawn by "+casterID);
+//        System.out.println("WandCast by "+casterID);
 
-        for (Entity e : Main.getGame().getActiveSubworld().getEntities())
-            if (e.getId() == projectileID)
-                return;
 
         Player target = null;
         var players = Main.getGame().getActiveSubworld().getPlayers();
@@ -63,7 +57,7 @@ public class ProjectileSpawn extends Message {
                 break;
             }
         if (target == null) {
-            System.out.println("ProjectileSpawn target "+casterID+" not found");
+            System.out.println("WandCast target "+casterID+" not found");
             return;
         }
 

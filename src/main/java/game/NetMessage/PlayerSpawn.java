@@ -61,14 +61,14 @@ public class PlayerSpawn extends Message {
         players.add(playerToSpawn);
         subworld.addEntity(playerToSpawn);
 
-        playerToSpawn.setId(entityId);
-        playerToSpawn.spawn(x,y,seed);
-
         if (client.getPrimaryCharacter() == null) {
             client.setPrimaryCharacter(playerToSpawn);
             client.setControlledCharacter(playerToSpawn);
             Main.getClient().addMessage(new Initialized());
             Main.getClient().addMessage(new RequestEntities());
         }
+
+        playerToSpawn.setId(entityId);
+        playerToSpawn.spawn(x,y,seed);
     }
 }

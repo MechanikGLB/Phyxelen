@@ -336,9 +336,12 @@ public class Subworld extends GameObject {
         return null;
     }
 
-
     public void addEntity(Entity entity) {
-        if (entity.isLocal()){
+        addEntity(entity, false);
+    }
+
+    public void addEntity(Entity entity, boolean silent) {
+        if (entity.isLocal() && !silent){
             switch (Main.getGame().getGameState()){
                 case GameApp.GameState.Client:
                     Main.getClient().addMessage(entity.getSpawnMessage());
@@ -349,14 +352,6 @@ public class Subworld extends GameObject {
                 case GameApp.GameState.Local:
                     break;
             }
-        }
-        entitiesToAdd.add(entity);
-    }
-
-    public void addEntity(Entity entity,boolean isJet) {
-        if (entity.isLocal() && !isJet){
-            addEntity(entity);
-            return;
         }
         entitiesToAdd.add(entity);
     }
@@ -403,8 +398,11 @@ public class Subworld extends GameObject {
         }
         player.spawn(x, y, (short) random.nextInt());
     }
-
     public void jetPixels(int x, int y, int size) {
+        jetPixels(x, y, size, random);
+    }
+
+    public void jetPixels(int x, int y, int size, Random random) {
         size += 2;
         for (int dx = -size/2; dx <= size/2; dx++) {
             for (int dy = size/2; dy > -size/2; dy--) {

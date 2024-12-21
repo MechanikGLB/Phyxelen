@@ -253,14 +253,13 @@ public class Client extends GameApp {
         glfwGetCursorPos(window, x, y);
         activeSubworld.jetPixels(screenXToWorld((int) x[0]), screenYToWorld((int) y[0]), paintingSize);
     }
-    
-    
+
+
     void syncPlayer() {
         if (Main.isClient())
             Main.getClient().addMessage(new PlayerMovementSync(controlledCharacter));
         else if (Main.isServer())
             Main.getServer().broadcastMessage(new PlayerMovementSync(controlledCharacter));
-            
     }
 
 

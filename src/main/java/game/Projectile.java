@@ -104,7 +104,8 @@ public class Projectile extends Entity {
 
     @Override
     public Message getSpawnMessage() {
-        if (caster != null) return new ProjectileSpawn(caster.getId());
+//        if (caster != null) return new ProjectileSpawn(caster.getId(), getId(), caster.x, caster.y, caster.getLookDirection());
+        if (caster != null) return null;
         else return new ProjectileSpawn();
     }
 

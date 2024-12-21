@@ -81,6 +81,8 @@ public class Connection {
 
     public void addMessage(Message message) {
 //        System.out.println("Adds message for " + this + " to " + playerAddress);
+        if (message == null)
+            return;
         messagesQueue.add(message);
     }
 
